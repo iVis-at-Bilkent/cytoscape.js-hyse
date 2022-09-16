@@ -1,0 +1,48 @@
+{
+  "name": "cytoscape-hyse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/cytoscape-hyse.cjs.js",
+  "module": "dist/cytoscape-hyse.esm.js",
+  "browser": "dist/cytoscape-hyse.js",
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-typescript": "^8.3.1",
+    "cypress": "^9.5.1",
+    "rollup": "^2.70.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-node": "^10.7.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.6.2"
+  },
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
+  "peerDependencies": {
+    "cytoscape": "^2.7.0 || ^3.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c --environment NODE_ENV:production",
+    "build-dev": "rollup -c",
+    "dev": "rollup -c -w",
+    "demo": "rollup -c demo.config.js -w -m",
+    "test": "ts-node test/unit/test.ts",
+    "pretest": "npm run build",
+    "cy": "cypress open --project ./test",
+    "e2e": "cypress run --project ./test -b chrome > e2e-test-results.txt"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "graphlib": "^2.1.8",
+    "layout-base": "github:iVis-at-Bilkent/layout-base#unstable",
+    "lodash": "4.17.21"
+  }
+}
