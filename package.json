@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "graphlib": "^2.1.8",
-    "layout-base": "github:iVis-at-Bilkent/layout-base#unstable",
+    "cose-base": "github:iVis-at-Bilkent/cose-base#unstable",
     "lodash": "4.17.21"
   }
 }
