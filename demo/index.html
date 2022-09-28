@@ -3,23 +3,295 @@
 
 <head>
     <meta charset="utf-8">
-    <title>My First Web Page</title>
+    <title>Cytoscape - HySE</title>
+    <link rel="stylesheet" href="./style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js" integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="../dist/cytoscape-hyse.js"> </script>
+    <script src="./sampleGraph.js"></script>
     <script src="./index.js"></script>
-    <style>
-        #cy {
-            width: 70vh;
-            height: 70vh;
-            border: 2px solid rgb(151, 39, 39);
-        }
-    </style>
+    
 </head>
 
 <body>
-    <h1>My First Web Page</h1>
-    <p>My first paragraph.</p>
+    <h1>Cytoscape - HySE</h1>
     <button onclick="addNode()">Add Node</button>
     <button onclick="runLayout()">Run Layout</button>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#dagreOptionsPanel" aria-expanded="false" aria-controls="dagreOptionsPanel">
+            Dagre Options
+          </button>
+        </h2>
+        <div hidden id="dagreOptionsPanel" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
+          <table class="table table-borderless table-hover table-sm align-middle">
+            <tbody>
+              <tr>
+                <td><label class="form-label" for="nodeSep">nodeSep</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="nodeSep" value="20"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="edgeSep">edgeSep</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="edgeSep" value="20"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="rankSep">rankSep</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="rankSep" value="20"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="rankDir">rankDir</label></td>
+                <td>
+                  <select class="form-select form-select-sm" id="rankDir">
+                    <option value="TB" selected>TB</option>
+                    <option value="LR">LR</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="align">align</label></td>
+                <td>
+                  <select class="form-select form-select-sm" id="align">
+                    <option value="UL" selected>UL</option>
+                    <option value="UR">UR</option>
+                    <option value="DL">DL</option>
+                    <option value="DR">DR</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="acyclicer">acyclicer</label></td>
+                <td>
+                  <select class="form-select form-select-sm" id="acyclicer">
+                    <option value="DFS" selected>DFS</option>
+                    <option value="greedy">greedy</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="ranker">ranker</label></td>
+                <td>
+                  <select class="form-select form-select-sm" id="ranker">
+                    <option value="network-simplex" selected>network-simplex</option>
+                    <option value="tight-tree">tight-tree</option>
+                    <option value="longest-path">longest-path</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="animate">animate</label></td>
+                <td><input class="form-check-input" type="checkbox" value="true" id="animate" checked></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="animationDuration">animationDuration</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="animationDuration"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="animationEasing">animationEasing</label></td>
+                <td><input type="text" class="form-control form-control-sm" id="animationEasing"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="zoom">zoom</label></td>
+                <td><input class="form-check-input" type="checkbox" value="true" id="zoom" checked></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="fit">fit</label></td>
+                <td><input class="form-check-input" type="checkbox" value="true" id="fit" checked></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="padding">padding</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="padding"></td>
+              </tr>
+              <tr>
+                <td><label class="form-label" for="spacingFactor">spacingFactor</label></td>
+                <td><input type="number" class="form-control form-control-sm" id="spacingFactor"></td>
+              </tr>
+              <tr>
+                <td>
+                  <label class="form-label" for="nodeDimensionsIncludeLabels">nodeDimensionsIncludeLabels</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" value="false" id="nodeDimensionsIncludeLabels">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+    <div hidden class="accordion-item">
+      <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hiseOptionsPanel"
+          aria-expanded="false" aria-controls="hiseOptionsPanel">
+          HiSE Options
+        </button>
+      </h2>
+      <div id="hiseOptionsPanel" class="accordion-collapse collapse show"
+        aria-labelledby="panelsStayOpen-headingOne">
+        <table class="table table-borderless table-hover table-sm align-middle">
+          <tbody>
+            <tr>
+              <td><label class="form-label" for="ticksPerFrame">ticksPerFrame</label></td>
+              <td><input type="number" class="form-control form-control-sm" id="ticksPerFrame" value="30"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="coolingCoefficient">coolingCoefficient</label></td>
+              <td><input type="number" class="form-control form-control-sm" id="coolingCoefficient" value="1.5">
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label class="form-label" for="isFastCooling">isFastCooling</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" id="isFastCooling" checked>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label class="form-label" for="uniformNodeDimensions">uniformNodeDimensions</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" id="uniformNodeDimensions" checked>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label class="form-label" for="isManuelRankAndOrder">isManuelRankAndOrder</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" id="isManuelRankAndOrder" checked>
+              </td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="tickDelay">tickDelay (ms)</label></td>
+              <td><input type="number" class="form-control form-control-sm" id="tickDelay" value="100"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="fullyCalcRep4Ticks"> fullyCalcRep4Ticks </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="fullyCalcRep4Ticks" value="0.001">
+              </td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="nodeRepulsionCalculationWidth"> nodeRepulsionCalculationWidth
+                </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsionCalculationWidth"
+                  value="10"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="idealEdgeLength"> idealEdgeLength </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="idealEdgeLength" value="30"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="edgeElasticity"> edgeElasticity </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="edgeElasticity" value="0.45">
+              </td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="nodeRepulsion"> nodeRepulsion </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion" value="500"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="swapForceLimit"> swapForceLimit </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="swapForceLimit" value="100"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="swapPeriod"> swapPeriod </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="swapPeriod" value="10"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="minPairSwapPeriod"> minPairSwapPeriod </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="minPairSwapPeriod" value="5"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="orderFlipPeriod"> orderFlipPeriod </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="orderFlipPeriod" value="5"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="orderGap"> orderGap </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="orderGap" value="80"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="rankGap"> rankGap </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="rankGap" value="80"></td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="maxNodeDisplacement"> maxNodeDisplacement </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="maxNodeDisplacement" value="300">
+              </td>
+            </tr>
+            <tr>
+              <td><label class="form-label" for="maxNodeDisplacement"> expansionCoefficient </label></td>
+              <td><input type="number" class="form-control form-control-sm" id="expansionCoefficient" value="12">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="break"></div>
+
+        <div class="accordion-body d-flex flex-wrap justify-content-center">
+          <button id="runLayvo" type="button" class="btn btn-secondary m-1">Layvo</button>
+          <button id="runLayout" type="button" class="btn btn-secondary m-1">Dagre</button>
+          <button id="runForceDirected" type="button" class="btn btn-secondary m-1"> Dagre w/ FD ordering &
+            positioning
+          </button>
+          <button id="runForceDirectedRelayering" type="button" class="btn btn-secondary m-1"> Dagre w/ FD
+            ordering
+          </button>
+          <button id="runPlainForceDirected" type="button" class="btn btn-secondary m-1">FD w/ specified layers
+          </button>
+          <button id="runPlainForceDirectedTickByTick" type="button" class="btn btn-secondary m-1">FD w/ specified
+            layers animated
+          </button>
+          <button id="randomPositions" type="button" class="btn btn-secondary m-1"> Random Position </button>
+          <button id="hierPositions" type="button" class="btn btn-secondary m-1"> Hierarchial Position </button>
+          <button id="manuelRankAndOrder" type="button" class="btn btn-secondary m-1"> Manuel Rank & Order </button>
+          <button id="exp1" type="button" class="btn btn-secondary m-1"> Dagre VS FD </button>
+          <button id="exp2" type="button" class="btn btn-secondary m-1"> Dagre VS FD on small graphs</button>
+          <button id="exp3" type="button" class="btn btn-secondary m-1"> Dagre VS FD on 10-50 graphs</button>
+          <button id="exp4" type="button" class="btn btn-secondary m-1"> Extremely dense graphs</button>
+          <div class="dropdown m-1">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Dagre VS FD with tuning
+            </button>
+            <span>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="isOn10_50"
+                  value="option1">
+                <label class="form-check-label" for="isOn10_50">10-50 graphs</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="isOnSmallGraphs"
+                  value="option2" checked>
+                <label class="form-check-label" for="isOnSmallGraphs">Small Graphs</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="isOnBigs"
+                  value="option3">
+                <label class="form-check-label" for="isOnBigs"> Big Graphs</label>
+              </div>
+            </span>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" id="tuning-coolingCoefficient" href="#" onclick="">coolingCoefficient</a>
+              </li>
+              <li><a class="dropdown-item" id="tuning-fullyCalcRep4Ticks" href="#" onclick="">fullyCalcRep4Ticks</a>
+              </li>
+              <li><a class="dropdown-item" id="tuning-nodeRepulsionCalculationWidth" href="#"
+                  onclick="">nodeRepulsionCalculationWidth</a></li>
+              <li><a class="dropdown-item" id="tuning-idealEdgeLength" href="#" onclick="">idealEdgeLength</a></li>
+              <li><a class="dropdown-item" id="tuning-edgeElasticity" href="#" onclick="">edgeElasticity</a></li>
+              <li><a class="dropdown-item" id="tuning-nodeRepulsion" href="#" onclick="">nodeRepulsion</a></li>
+              <li><a class="dropdown-item" id="tuning-swapForceLimit" href="#" onclick="">swapForceLimit</a></li>
+              <li><a class="dropdown-item" id="tuning-swapPeriod" href="#" onclick="">swapPeriod</a></li>
+              <li><a class="dropdown-item" id="tuning-minPairSwapPeriod" href="#" onclick="">minPairSwapPeriod</a>
+              </li>
+              <li><a class="dropdown-item" id="tuning-orderFlipPeriod" href="#" onclick="">orderFlipPeriod</a></li>
+              <li><a class="dropdown-item" id="tuning-maxNodeDisplacement" href="#" onclick="">maxNodeDisplacement</a></li>
+            </ul>
+          </div>
+          <div id="layout-props"></div>
+        </div>
+      </div>
+    </div>
     <div id="cy"></div>
 </body>
 

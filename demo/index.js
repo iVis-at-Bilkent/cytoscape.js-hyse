@@ -1,19 +1,9 @@
 document.addEventListener("DOMContentLoaded", pageLoaded);
 function pageLoaded() {
     //initialize cytoscapes
-    const cy = cytoscape({
+    const cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
-        elements: [
-            { data: { id: 'a' } },
-            { data: { id: 'b' } },
-            { data: { id: 'c' } },
-            { data: { id: 'd' } },
-            { data: { id: 'e' } },
-            { data: { id: 'ab', source: 'a', target: 'b' } },
-            { data: { id: 'ac', source: 'a', target: 'c' } },
-            { data: { id: 'cd', source: 'c', target: 'd' } },
-            { data: { id: 'be', source: 'b', target: 'e' } }
-        ],
+        elements: graphElements,
         style: [
             {
                 selector: 'node',
@@ -34,50 +24,109 @@ function pageLoaded() {
         ]
     });
     //run cytoscapes cose layout
-    cy.layout({
-        name: 'cose',
-        animate: true,
-        animationDuration: 1000,
-        animationEasing: undefined,
-        fit: true,
-        padding: 30,
-        randomize: false,
-        ready: undefined,
-        stop: undefined
-    }).run();
-    window.cy = cy;
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
+    //window.cy = cy;
 
 };
 
 function runLayout() {
     //run cytoscapes cose layout
-    cy.layout({
-        name: 'cose',
-        animate: true,
-        animationDuration: 1000,
-        animationEasing: undefined,
-        fit: true,
-        padding: 30,
-        randomize: false,
-        ready: undefined,
-        stop: undefined
-    }).run();
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
 }
 
 function addNode(){
     //get a random number between 0 and 1000
     var random = Math.floor(Math.random() * 1000);
+    //get a random number between 0 and 5
+    var randomParent = Math.floor(Math.random() * 4);
     //get random positions for the new node
     var x = Math.floor(Math.random() * 1000);
     var y = Math.floor(Math.random() * 1000);
     //add the new node to the graph with data and position
+    var parents = {
+        0: 'a',
+        1: 'b',
+        2: 'c',
+        3: 'd',
+        4: 'e'
+    }
     cy.add({
         group: "nodes",
-        data: { id: random },
+        data: { id: random,isDirected:false },
         position: { x: x, y: y }
     });
     cy.add({
-        data:{id:'a-'+random,source:'a',target:random}
+        data:{id:parents[randomParent]+'-'+random,source:parents[randomParent],target:random}
     });
     
 }
+
+function getOptions() {
+    let opts = [
+      "nodeSep",
+      "edgeSep",
+      "rankSep",
+      "rankDir",
+      "align",
+      "acyclicer",
+      "ranker",
+      "animate",
+      "animationDuration",
+      "animationEasing",
+      "zoom",
+      "fit",
+      "padding",
+      "spacingFactor",
+      "nodeDimensionsIncludeLabels",
+      "ticksPerFrame",
+      "isManuelRankAndOrder",
+      "tickDelay",
+      "idealEdgeLength",
+      "swapForceLimit",
+      "swapPeriod",
+      "minPairSwapPeriod",
+      "rankGap",
+      "orderGap",
+      "edgeElasticity",
+      "nodeRepulsion",
+      "isFastCooling",
+      "coolingCoefficient",
+      "orderFlipPeriod",
+      "nodeRepulsionCalculationWidth",
+      "fullyCalcRep4Ticks",
+      "uniformNodeDimensions",
+      "maxNodeDisplacement",
+      "expansionCoefficient",
+    ];
+    const o = { name: "hyse" };
+    for (let i = 0; i < opts.length; i++) {
+      const el = document.getElementById(opts[i]);
+      if(el!=null){
+        o[opts[i]] = el.value;
+        if (el.type === "checkbox") {
+            o[opts[i]] = el.checked;
+        }
+      }
+      
+    }
+    for (let k in o) {
+      if (o[k] === "") {
+        o[k] = undefined;
+      } else if (o[k] === "true") {
+        o[k] = true;
+      } else if (o[k] === "false") {
+        o[k] = false;
+      } else if (isNumber(o[k])) {
+        o[k] = Number(o[k]);
+      }
+    }
+    return o;
+  }
+
+  function isNumber(value) {
+    return value != null && !isNaN(Number(value.toString()));
+  }
