@@ -56,7 +56,7 @@ function addNode(){
     }
     cy.add({
         group: "nodes",
-        data: { id: random,isDirected:false },
+        data: { id: random,isDirected:false, parent: parents[randomParent] },
         position: { x: x, y: y }
     });
     cy.add({

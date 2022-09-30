@@ -14,9 +14,9 @@
 
 <body>
     <h1>Cytoscape - HySE</h1>
-    <button onclick="addNode()">Add Node</button>
+    <button hidden onclick="addNode()">Add Node</button>
     <button onclick="runLayout()">Run Layout</button>
-    <div class="accordion-item">
+    <div hidden class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
             data-bs-target="#dagreOptionsPanel" aria-expanded="false" aria-controls="dagreOptionsPanel">
@@ -220,7 +220,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="maxNodeDisplacement"> expansionCoefficient </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="expansionCoefficient" value="12">
+              <td><input type="number" class="form-control form-control-sm" id="expansionCoefficient" value="6">
               </td>
             </tr>
           </tbody>

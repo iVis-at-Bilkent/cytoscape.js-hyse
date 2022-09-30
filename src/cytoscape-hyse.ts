@@ -32,7 +32,7 @@ export class DagreAndSpringEmbedderLayout {
 
     let gObj = {};
     let setGObj = function (name, val) {
-      if (val != null) {
+      if (val != null) { 
         gObj[name] = val;
       }
     };
@@ -51,19 +51,27 @@ export class DagreAndSpringEmbedderLayout {
     g.setDefaultNodeLabel(function () { return {}; });
 
     // add nodes to dagre
-    let nodes = eles.nodes();
+    //only add those nodes which are in the heirachical layout
+    //meaning only those nodes which are not in the compound nodes
+    //also the compound nodes themselves are not added
+
+    let nodes = eles.nodes().filter(function (ele) {
+        return !ele.isParent() && !ele.isChild() && ele.data("parent") == null;
+    });
+
+    //let nodes = eles.nodes();
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
       let nbb = node.layoutDimensions(options);
 
       console.log("node", node.data());
+
       g.setNode(node.id(), {
         width: nbb.w,
         height: nbb.h,
         name: node.id(),
         isDirected:node.data("isDirected"),
-      });
-
+    });
     //   console.log( g.node(node.id()) );
     }
 
@@ -107,6 +115,7 @@ export class DagreAndSpringEmbedderLayout {
     if (options.boundingBox) {
       dagreBB = { x1: Infinity, x2: -Infinity, y1: Infinity, y2: -Infinity };
       nodes.forEach(function (node) {
+        console.log("1");
         let dModel = node.scratch().dagre;
 
         dagreBB.x1 = Math.min(dagreBB.x1, dModel.x);
@@ -138,13 +147,17 @@ export class DagreAndSpringEmbedderLayout {
 
     if (options.isForceDirected && !options.isRelayer) {
       nodes.layoutPositions(this, options, function (ele) {
-        ele = typeof ele === "object" ? ele : this;
-        let dModel = ele.scratch('force_directed_pos');
-
-        return {
-          x: dModel.x,
-          y: dModel.y
-        };
+        ele = typeof ele === "object" && ele.data("parent")==null ? ele : this;
+        
+        if(ele != undefined){
+            let dModel = ele.scratch('force_directed_pos');
+        
+            return {
+            x: dModel.x,
+            y: dModel.y
+            };
+        }
+        
       });
     } else {
       nodes.layoutPositions(this, options, function (ele) {
