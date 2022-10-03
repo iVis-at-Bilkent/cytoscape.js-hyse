@@ -56,15 +56,28 @@ export class DagreAndSpringEmbedderLayout {
     //also the compound nodes themselves are not added
 
     let nodes = eles.nodes().filter(function (ele) {
-        return !ele.isParent() && !ele.isChild() && ele.data("parent") == null;
+        return  !ele.isParent();
     });
 
+    let allEdges = eles.edges();
+    let dummyEdgesList = [];
     //let nodes = eles.nodes();
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
+      if(node.isChild()){
+         let edgeToCopy = allEdges.stdFilter(x=>x.data('target')===node.parent().id())[0];
+         dummyEdgesList.push(
+            {
+                id: edgeToCopy.source().id() + "_dummy_" + node.id(),
+                source: edgeToCopy.source().id(),
+                target: node.id()
+            }
+         );
+         console.log("added dummy edge");
+      }
       let nbb = node.layoutDimensions(options);
 
-      console.log("node", node.data());
+      console.log("dimensions of node " + node.id() + " are ", nbb);
 
       g.setNode(node.id(), {
         width: nbb.w,
@@ -76,18 +89,22 @@ export class DagreAndSpringEmbedderLayout {
     }
 
     // set compound parents
-    for (let i = 0; i < nodes.length; i++) {
-      let node = nodes[i];
-
-      if (node.isChild()) {
-        g.setParent(node.id(), node.parent().id());
-      }
-    }
-
+    // for (let i = 0; i < nodes.length; i++) {
+    //   let node = nodes[i];
+        
+    //   if (node.isChild()) {
+    //     console.log("setting cpmppsdfpsdafpsadfpsadpfpasd");
+    //     g.setParent(node.id(), node.parent().id());
+    //   }
+    // }
+    console.log("edges before adding dummy edges", eles.edges());
     // add edges to dagre
     let edges = eles.edges().stdFilter(function (edge) {
-      return !edge.source().isParent() && !edge.target().isParent(); // dagre can't handle edges on compound nodes
+        //TODO: check if this is correct
+        //try to include those edges as well which are from seed nodes to compound nodes
+      return !edge.target().isParent() && !edge.source().isParent() ; // dagre can't handle edges on compound nodes
     });
+    console.log("edges are ", edges);
     for (let i = 0; i < edges.length; i++) {
       let edge = edges[i];
 
@@ -100,13 +117,21 @@ export class DagreAndSpringEmbedderLayout {
       // console.log( g.edge(edge.source().id(), edge.target().id(), edge.id()) );
     }
 
+    for(let i=0;i<dummyEdgesList.length;i++){
+        let edge = dummyEdgesList[i];
+        g.setEdge(edge.source, edge.target, {
+            minlen: 1,
+            weight: 1,
+            name: edge.id
+            }, edge.id);
+    }
+
     layout(g, options, cy);
 
     let gNodeIds = g.nodes();
     for (let i = 0; i < gNodeIds.length; i++) {
       let id = gNodeIds[i];
       let n = g.node(id);
-        console.log("node after", n);
       cy.getElementById(id).scratch().dagre = n;
     }
 
@@ -115,7 +140,6 @@ export class DagreAndSpringEmbedderLayout {
     if (options.boundingBox) {
       dagreBB = { x1: Infinity, x2: -Infinity, y1: Infinity, y2: -Infinity };
       nodes.forEach(function (node) {
-        console.log("1");
         let dModel = node.scratch().dagre;
 
         dagreBB.x1 = Math.min(dagreBB.x1, dModel.x);
@@ -144,22 +168,26 @@ export class DagreAndSpringEmbedderLayout {
         return p;
       }
     };
-
+    let counter = 0;
     if (options.isForceDirected && !options.isRelayer) {
       nodes.layoutPositions(this, options, function (ele) {
-        ele = typeof ele === "object" && ele.data("parent")==null ? ele : this;
-        
+        counter++;
+        ele = typeof ele === "object" ? ele : this;
         if(ele != undefined){
             let dModel = ele.scratch('force_directed_pos');
-        
-            return {
-            x: dModel.x,
-            y: dModel.y
-            };
+            console.log("found force directed position for node " + ele.id() + " as ", dModel);
+            console.log(counter);
+            if(dModel != undefined){
+                return {
+                x: dModel.x,
+                y: dModel.y
+                };
+            }
         }
         
       });
     } else {
+        console.log("not force directed");
       nodes.layoutPositions(this, options, function (ele) {
         ele = typeof ele === "object" ? ele : this;
         let dModel = ele.scratch().dagre;
@@ -170,7 +198,7 @@ export class DagreAndSpringEmbedderLayout {
         });
       });
     }
-
+    console.log(counter);
 
     return this; // chaining
   }

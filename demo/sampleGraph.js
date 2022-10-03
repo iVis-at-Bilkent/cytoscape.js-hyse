@@ -71,13 +71,13 @@ window.graphElements = {
       {
         data: {
           id: "p_1",
-          isDirected:0
+          isDirected:1
         },
       },
       {
         data: {
           id: "p_2",
-          isDirected:0
+          isDirected:1
         },
       },
       {
