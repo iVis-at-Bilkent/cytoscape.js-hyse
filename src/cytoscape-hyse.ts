@@ -52,32 +52,16 @@ export class DagreAndSpringEmbedderLayout {
 
     // add nodes to dagre
     //only add those nodes which are in the heirachical layout
-    //meaning only those nodes which are not in the compound nodes
-    //also the compound nodes themselves are not added
 
     let nodes = eles.nodes().filter(function (ele) {
-        return  !ele.isParent();
+        return  ele.data("isDirected") === 1;
     });
 
-    let allEdges = eles.edges();
-    let dummyEdgesList = [];
     //let nodes = eles.nodes();
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
-      if(node.isChild()){
-         let edgeToCopy = allEdges.stdFilter(x=>x.data('target')===node.parent().id())[0];
-         dummyEdgesList.push(
-            {
-                id: edgeToCopy.source().id() + "_dummy_" + node.id(),
-                source: edgeToCopy.source().id(),
-                target: node.id()
-            }
-         );
-         console.log("added dummy edge");
-      }
+      
       let nbb = node.layoutDimensions(options);
-
-      console.log("dimensions of node " + node.id() + " are ", nbb);
 
       g.setNode(node.id(), {
         width: nbb.w,
@@ -85,26 +69,14 @@ export class DagreAndSpringEmbedderLayout {
         name: node.id(),
         isDirected:node.data("isDirected"),
     });
-    //   console.log( g.node(node.id()) );
+    // console.log( g.node(node.id()) );
     }
 
-    // set compound parents
-    // for (let i = 0; i < nodes.length; i++) {
-    //   let node = nodes[i];
-        
-    //   if (node.isChild()) {
-    //     console.log("setting cpmppsdfpsdafpsadfpsadpfpasd");
-    //     g.setParent(node.id(), node.parent().id());
-    //   }
-    // }
-    console.log("edges before adding dummy edges", eles.edges());
     // add edges to dagre
     let edges = eles.edges().stdFilter(function (edge) {
-        //TODO: check if this is correct
-        //try to include those edges as well which are from seed nodes to compound nodes
-      return !edge.target().isParent() && !edge.source().isParent() ; // dagre can't handle edges on compound nodes
+        
+      return edge.source().data("isDirected")==1 && edge.target().data("isDirected")==1;
     });
-    console.log("edges are ", edges);
     for (let i = 0; i < edges.length; i++) {
       let edge = edges[i];
 
@@ -117,20 +89,13 @@ export class DagreAndSpringEmbedderLayout {
       // console.log( g.edge(edge.source().id(), edge.target().id(), edge.id()) );
     }
 
-    for(let i=0;i<dummyEdgesList.length;i++){
-        let edge = dummyEdgesList[i];
-        g.setEdge(edge.source, edge.target, {
-            minlen: 1,
-            weight: 1,
-            name: edge.id
-            }, edge.id);
-    }
 
     layout(g, options, cy);
 
     let gNodeIds = g.nodes();
     for (let i = 0; i < gNodeIds.length; i++) {
       let id = gNodeIds[i];
+      console.log("id", id);
       let n = g.node(id);
       cy.getElementById(id).scratch().dagre = n;
     }

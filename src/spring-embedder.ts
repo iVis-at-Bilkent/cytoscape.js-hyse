@@ -32,9 +32,11 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   processNodes(g, gm.addRoot(), l, opts);
   processEdges(g, gm, opts);
   l.runLayout();
+  console.log("setting positions");
   for (let i = 0; i < gm.allNodes.length; i++) {
     const n = gm.allNodes[i];
     if (!opts.isRelayer) {
+      console.log("setting position of "+n.id+" to "+n.rect.x+","+n.rect.y);
       window['cy'].nodes('#' + n.id).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
     }
   }
@@ -75,9 +77,8 @@ function processNodes(g, parent, layout, opts) {
     const n = g.node(nodes[i]);
     const hyseNode = new HySENode(layout.graphManager, new layoutBase.PointD(n.x, n.y), new layoutBase.DimensionD(n.width, n.height), null, nodes[i], n.rank);
     hyseNode.nodeRepulsion = opts.nodeRepulsion;
-
-    hyseNode.isDirected = n.isDirected;
-    console.log(hyseNode);
+    hyseNode.isDirected = opts.eles.nodes('#' + nodes[i]).data('isDirected');
+    hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
     const lNode = parent.add(hyseNode);
     id2LNode[nodes[i]] = lNode;
   }

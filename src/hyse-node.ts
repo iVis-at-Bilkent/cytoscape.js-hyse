@@ -3,7 +3,7 @@ import { CoSENode , layoutBase } from "cose-base";
 export class HySENode extends CoSENode  {
 
   isDirected: number;
-  parentId: number;
+  parentId: string;
 
 
   rank: number;
@@ -15,12 +15,11 @@ export class HySENode extends CoSENode  {
   constructor(gm, loc, size, vNode, id: string, rank: number) {
     super(gm, loc, size, vNode);
     this.isDirected = 0;
-    this.parentId = -1;
 
     this.id = id;
     this.rank = rank;
     this.noOfChildren = 1;
-
+    this.parentId = "";
   }
 
 

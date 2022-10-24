@@ -54,6 +54,7 @@ export class HySELayout extends CoSELayout {
         const nodes = this.graphManager.allNodes;
         for (let i = 0; i < nodes.length; i++) {
           this.id2LNode[nodes[i].id] = nodes[i];
+          console.log("node: ", nodes[i].id);
         }
         this.prepareOrderedLayers();
     
@@ -128,7 +129,6 @@ export class HySELayout extends CoSELayout {
     
       tick() {
         this.totalIterations++; // defined inside parent class
-        //FDLayoutConstants.CONVERGENCE_CHECK_PERIOD is replaced with a constant here
         if (this.totalIterations % CoSEConstants.CONVERGENCE_CHECK_PERIOD == 0) {
           // console.log("totalDisplacement: ", this.totalDisplacement, " coolingFactor: ", this.coolingFactor);
           if (super.isConverged()) {
@@ -398,6 +398,12 @@ export class HySELayout extends CoSELayout {
             const currLayer = this.orderedLayers[i];
             for (let j = 0; j < currLayer.length; j++) {
               for (let k = j + 1; k < currLayer.length; k++) {
+                const n1 = currLayer[j];
+                const n2 = currLayer[k];
+                //if any of these is child then don't calculate repulsion
+                if (n1.isChild || n2.isChild) {
+                    continue;
+                }
                 this.calcRepulsionForce(currLayer[j], currLayer[k]);
               }
             }
@@ -406,9 +412,18 @@ export class HySELayout extends CoSELayout {
           for (let i = 0; i < this.orderedLayers.length; i++) {
             const currLayer = this.orderedLayers[i];
             for (let j = 0; j < currLayer.length - 1; j++) {
+                let n1 = currLayer[j];
+                let n2 = currLayer[j + 1];
+                if (n1.isChild || n2.isChild) {
+                    continue;
+                }
               this.calcRepulsionForce(currLayer[j], currLayer[j + 1]);
               for (let skip = 2; skip <= this.nodeRepulsionCalculationWidth; skip++) {
                 if (j < currLayer.length - skip) {
+                    let n3 = currLayer[j + skip];
+                    if (n3.isChild) {
+                        continue;
+                    }
                   this.calcRepulsionForce(currLayer[j], currLayer[j + skip]);
                 }
               }
@@ -663,6 +678,7 @@ export class HySELayout extends CoSELayout {
       private prepareOrderedLayers() {
         const mapperFn = typeof this.layering[0][0] === 'string' ? x => this.id2LNode[x] : x => this.id2LNode[x.id()];
         this.orderedLayers = [];
+        console.log(this.layering);
         for (let i = 0; i < this.layering.length; i++) {
           const currLayer = this.layering[i].map(mapperFn).sort((a, b) => a.rect.x - b.rect.x);
           for (let j = 0; j < currLayer.length; j++) {
