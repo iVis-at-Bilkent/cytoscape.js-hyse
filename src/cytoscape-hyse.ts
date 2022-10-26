@@ -100,17 +100,11 @@ export class DagreAndSpringEmbedderLayout {
         groups[group]=[];
       }
       groups[group].push(node);
-      console.log(eles.edges());
-      console.log(node);
-      let edges = eles.edges().filter(x=>x.source().id() == node.id() || x.target().id() == node.id());
-      console.log(edges);
       let children = node.neighborhood().nodes().filter(x=>x.data("isDirected")==0);
-      
       for (let i = 0; i < children.length; i++) {
         dfs(children[i],group);
       }
     };
-    
     
     //get all blue nodes i-e non-heirachical nodes
     let nodesToVisit = eles.nodes().filter(function (ele) {
