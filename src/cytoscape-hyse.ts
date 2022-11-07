@@ -87,49 +87,6 @@ export class DagreAndSpringEmbedderLayout {
       }, edge.id());
 
     }
-
-    //run the depth first search to get the group of nodes
-    let groups = {};
-    let visited = new Set();
-    let dfs = function (node,group) {
-      if (visited.has(node)) {
-        return;
-      }
-      visited.add(node);
-      if(groups[group]===undefined){
-        groups[group]=[];
-      }
-      groups[group].push(node);
-      console.log(eles.edges());
-      console.log(node);
-      let edges = eles.edges().filter(x=>x.source().id() == node.id() || x.target().id() == node.id());
-      console.log(edges);
-      let children = node.neighborhood().nodes().filter(x=>x.data("isDirected")==0);
-      
-      for (let i = 0; i < children.length; i++) {
-        dfs(children[i],group);
-      }
-    };
-    
-    
-    //get all blue nodes i-e non-heirachical nodes
-    let nodesToVisit = eles.nodes().filter(function (ele) {
-      return ele.data("isDirected") === 0;
-    });
-    //run dfs on each node
-    for (let i = 0; i < nodesToVisit.length; i++) {
-      let node = nodesToVisit[i];
-      dfs(node,i);
-    }
-    
-    console.log(groups);
-
-    //display ids of nodes in each group
-    for (let i = 0; i < Object.keys(groups).length; i++) {
-      console.log("group",i);
-      groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id()));
-      
-    }
     
     layout(g, options, cy);
 

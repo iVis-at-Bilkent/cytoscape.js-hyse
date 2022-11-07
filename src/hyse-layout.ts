@@ -56,11 +56,87 @@ export class HySELayout extends CoSELayout {
           this.id2LNode[nodes[i].id] = nodes[i];
           console.log("node: ", nodes[i].id);
         }
+        //get all nodes from cytoscape.js
+        const cyNodes = this.cy.nodes();
+        //print node ids
+        cyNodes.forEach((node) => {
+          console.log("node: ", node.id());
+        });
+
+        this.prepareCoumpoundNodes(this.cy);
+        
         this.prepareOrderedLayers();
     
-        this.cy.nodes().css('border-color', '');
-        this.cy.nodes().css('border-width', '0');
+        this.cy.nodes().css('border-color', 'blue');
+        this.cy.nodes().css('border-width', '10px');
       }
+
+
+      prepareCoumpoundNodes(cy) {
+        //run the depth first search to get the group of nodes
+        let groups = {};
+        let visited = new Set();
+        let dfs = function (node,group) {
+          if (visited.has(node)) {
+            return;
+          }
+          visited.add(node);
+          if(groups[group]===undefined){
+            groups[group]=[];
+          }
+          groups[group].push(node);
+          console.log(cy.edges());
+          console.log(node);
+          let edges = cy.edges().filter(x=>x.source().id() == node.id() || x.target().id() == node.id());
+          console.log(edges);
+          let children = node.neighborhood().nodes().filter(x=>x.data("isDirected")==0);
+          
+          for (let i = 0; i < children.length; i++) {
+            dfs(children[i],group);
+          }
+        };
+        
+        
+        //get all blue nodes i-e non-heirachical nodes
+        //excluding the ones with no children
+        let nodesToVisit = cy.nodes().filter(function (ele) {
+          return ele.data("isDirected") === 0 && ele.neighborhood().nodes().length>0;
+        });
+        //run dfs on each node
+        for (let i = 0; i < nodesToVisit.length; i++) {
+          let node = nodesToVisit[i];
+          dfs(node,i);
+        }
+        
+        console.log(groups);
+
+        //display ids of nodes in each group
+        for (let i = 0; i < Object.keys(groups).length; i++) {
+          console.log("group",i);
+          groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id()));
+          
+        }
+
+        //create a compound node for each group
+        for (let i = 0; i < Object.keys(groups).length; i++) {
+          let group = groups[Object.keys(groups)[i]];
+          let compoundNode = cy.add({
+            group: "nodes",
+            data: {
+              id: "compoundNode"+i,
+              isDirected: 1,
+              name: "compoundNode"+i
+            }
+          });
+          for (let j = 0; j < group.length; j++) {
+            console.log("adding",group[j].id(),"to",compoundNode.id());
+            console.log(compoundNode);
+            group[j].move({parent: compoundNode.id()});
+          }
+        }
+
+      }
+
     
       //DEBUG CODE
       //compare the order of nodes in the same layer before and after the expansion
