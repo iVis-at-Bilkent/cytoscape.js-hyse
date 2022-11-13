@@ -21,28 +21,36 @@ export function layout(g, opts, cy) {
       return buildLayoutGraph(g);
     });
     time("  runLayout", function () {
+      console.log("%c" + "run layout dagre", "color:" + "red" + ";font-weight:bold;");
       runLayout(layoutGraph, time, opts, cy);
     });
-    time("  updateInputGraph", function () {
-      updateInputGraph(g, layoutGraph);
-    });
+    // time("  updateInputGraph", function () {
+    //   updateInputGraph(g, layoutGraph);
+    // });
   });
 }
 
 function runLayout(g, time, opts, cy) {
   time("    makeSpaceForEdgeLabels", function () {
+    console.log("%c" + "makeSpaceForEdgeLabels", "color:" + "red" + ";font-weight:bold;");
     makeSpaceForEdgeLabels(g);
   });
   time("    removeSelfEdges", function () {
+    console.log("%c" + "removeSelfEdges", "color:" + "red" + ";font-weight:bold;");
     removeSelfEdges(g);
   });
   time("    acyclic", function () {
+    console.log("%c" + "acyclic", "color:" + "red" + ";font-weight:bold;");
     acyclic.run(g);
   });
   time("    nestingGraph.run", function () {
+    console.log("%c" + "nestingGraph.run", "color:" + "red" + ";font-weight:bold;");
+
     nestingGraph.run(g);
   });
   time("    rank", function () {
+    console.log("%c" + "rank", "color:" + "red" + ";font-weight:bold;");
+
     rank(util.asNonCompoundGraph(g));
   });
   time("    injectEdgeLabelProxies", function () {
@@ -74,44 +82,56 @@ function runLayout(g, time, opts, cy) {
   });
   time("    order", function () {
     // order(g);
+    console.log("%c" + "order", "color:" + "red" + ";font-weight:bold;");
+
     order(g, opts, cy);
   });
-  time("    insertSelfEdges", function () {
-    insertSelfEdges(g);
-  });
-  time("    adjustCoordinateSystem", function () {
-    coordinateSystem.adjust(g);
-  });
-  time("    position", function () {
-    position(g);
-  });
-  time("    positionSelfEdges", function () {
-    positionSelfEdges(g);
-  });
-  time("    removeBorderNodes", function () {
-    removeBorderNodes(g);
-  });
-  time("    normalize.undo", function () {
-    normalize.undo(g);
-  });
-  time("    fixupEdgeLabelCoords", function () {
-    fixupEdgeLabelCoords(g);
-  });
-  time("    undoCoordinateSystem", function () {
-    coordinateSystem.undo(g);
-  });
-  time("    translateGraph", function () {
-    translateGraph(g);
-  });
-  time("    assignNodeIntersects", function () {
-    assignNodeIntersects(g);
-  });
-  time("    reversePoints", function () {
-    reversePointsForReversedEdges(g);
-  });
-  time("    acyclic.undo", function () {
-    acyclic.undo(g);
-  });
+  // time("    insertSelfEdges", function () {
+  //   console.log("%c" + "insertSelfEdges", "color:" + "red" + ";font-weight:bold;");
+
+  //   insertSelfEdges(g);
+  // });
+  // time("    adjustCoordinateSystem", function () {
+  //   console.log("%c" + "adjustCoordinateSystem", "color:" + "red" + ";font-weight:bold;");
+
+  //   coordinateSystem.adjust(g);
+  // });
+  // time("    position", function () {
+  //   console.log("%c" + "position", "color:" + "red" + ";font-weight:bold;");
+
+  //   position(g);
+  // });
+  // time("    positionSelfEdges", function () {
+  //   console.log("%c" + "positionSelfEdges", "color:" + "red" + ";font-weight:bold;");
+
+  //   positionSelfEdges(g);
+  // });
+  // time("    removeBorderNodes", function () {
+  //   console.log("%c" + "removeBorderNodes", "color:" + "red" + ";font-weight:bold;");
+
+  //   removeBorderNodes(g);
+  // });
+  // time("    normalize.undo", function () {
+  //   normalize.undo(g);
+  // });
+  // time("    fixupEdgeLabelCoords", function () {
+  //   fixupEdgeLabelCoords(g);
+  // });
+  // time("    undoCoordinateSystem", function () {
+  //   coordinateSystem.undo(g);
+  // });
+  // time("    translateGraph", function () {
+  //   translateGraph(g);
+  // });
+  // time("    assignNodeIntersects", function () {
+  //   assignNodeIntersects(g);
+  // });
+  // time("    reversePoints", function () {
+  //   reversePointsForReversedEdges(g);
+  // });
+  // time("    acyclic.undo", function () {
+  //   acyclic.undo(g);
+  // });
 }
 
 /*

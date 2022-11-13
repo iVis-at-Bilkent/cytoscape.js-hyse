@@ -38,6 +38,7 @@ export function order(g, opts, cy) {
   assignOrder(g, layering);
 
   if (opts.isForceDirected) {
+    console.log("calling spring embedder");
     const newLayering = runSpringEmbedder(g, layering, opts, cy);
     if (opts.isRelayer) {
       assignOrder(g, newLayering);

@@ -79,7 +79,7 @@ export class DagreAndSpringEmbedderLayout {
     });
     for (let i = 0; i < edges.length; i++) {
       let edge = edges[i];
-
+      console.log(edge);
       g.setEdge(edge.source().id(), edge.target().id(), {
         minlen: getVal(edge, options.minLen),
         weight: getVal(edge, options.edgeWeight),

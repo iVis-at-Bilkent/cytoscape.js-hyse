@@ -30,6 +30,7 @@ export class HySELayout extends CoSELayout {
 
     [x: string]: any;
     constructor(layering, cy) {
+      console.trace();
         super();
         super.initParameters();
         this.layering = layering;
@@ -38,6 +39,7 @@ export class HySELayout extends CoSELayout {
         console.log("min, max layer sizes: ", Math.min(...layerSizes), Math.max(...layerSizes));
         this.cy = cy;
     }
+    
 
     newGraphManager() {
         return super.newGraphManager();
@@ -53,30 +55,52 @@ export class HySELayout extends CoSELayout {
         this.useFRGridVariant = false;
         const nodes = this.graphManager.allNodes;
         for (let i = 0; i < nodes.length; i++) {
-          this.id2LNode[nodes[i].id] = nodes[i];
-          console.log("node: ", nodes[i].id);
+          this.id2LNode[nodes[i].id.id()] = nodes[i];
         }
+        console.log("id2LNode: ", this.id2LNode);
         //get all nodes from cytoscape.js
-        const cyNodes = this.cy.nodes();
+        //const cyNodes = this.cy.nodes();
         //print node ids
-        cyNodes.forEach((node) => {
-          console.log("node: ", node.id());
-        });
+        // cyNodes.forEach((node) => {
+        //   console.log("node: ", node.id());
+        // });
 
-        this.prepareCoumpoundNodes(this.cy);
+        //get all nodes from cytoscape.js and add them to the graph manager nodes list if they are not already there
+        // cyNodes.forEach((node) => {
+        //   if (!this.id2LNode[node.id()]) {
+        //     const lNode = new HySENode(this.graphManager, node.id());
+        //     this.graphManager.addNode(lNode);
+        //     this.id2LNode[node.id()] = lNode;
+        //   }
+        // });
+
+        //get all edges from cytoscape.js and add them to the graph manager edges list if they are not already there
+        // const cyEdges = this.cy.edges();
+        // cyEdges.forEach((edge) => {
+        //   const source = edge.source().id();
+        //   const target = edge.target().id();
+        //   const edgeId = source + "-" + target;
+        //   if (!this.graphManager.getEdge(edgeId)) {
+        //     const lEdge = new HySEEdge(edgeId, this.graphManager, this.id2LNode[source], this.id2LNode[target]);
+        //     this.graphManager.addEdge(lEdge);
+        //   }
+        // });
+
+        this.prepareCoumpoundNodes(this.graphManager);
         
         this.prepareOrderedLayers();
     
         this.cy.nodes().css('border-color', 'blue');
-        this.cy.nodes().css('border-width', '10px');
+        this.cy.nodes().css('border-width', '1px');
       }
 
 
-      prepareCoumpoundNodes(cy) {
+      prepareCoumpoundNodes(graphManager) {
         //run the depth first search to get the group of nodes
+        console.log("prepareCoumpoundNodes",graphManager);
         let groups = {};
         let visited = new Set();
-        let dfs = function (node,group) {
+        let dfs = function (node:HySENode,group) {
           if (visited.has(node)) {
             return;
           }
@@ -85,22 +109,27 @@ export class HySELayout extends CoSELayout {
             groups[group]=[];
           }
           groups[group].push(node);
-          console.log(cy.edges());
+          //console.log(graphManager.allEdges);
           console.log(node);
-          let edges = cy.edges().filter(x=>x.source().id() == node.id() || x.target().id() == node.id());
-          console.log(edges);
-          let children = node.neighborhood().nodes().filter(x=>x.data("isDirected")==0);
+          //let edges = graphManager.rootGraph.edges.filter(x=>x.source.id == node.id || x.target.id == node.id);
+          //console.log(node);
+          //loop over the edges and find the other nodes
+          node.edges.filter(x=>x.source.isDirected == 0 && x.target.isDirected == 0).forEach((edge) => {
+            let otherNode = edge.source.id == node.id ? edge.target : edge.source;
+            dfs(otherNode,group);
+          });
+          // let children = node.id.neighborhood().nodes().filter(x=>x.data("isDirected")==0);
           
-          for (let i = 0; i < children.length; i++) {
-            dfs(children[i],group);
-          }
+          // for (let i = 0; i < children.length; i++) {
+          //   dfs(children[i],group);
+          // }
         };
         
         
         //get all blue nodes i-e non-heirachical nodes
         //excluding the ones with no children
-        let nodesToVisit = cy.nodes().filter(function (ele) {
-          return ele.data("isDirected") === 0 && ele.neighborhood().nodes().length>0;
+        let nodesToVisit = graphManager.allNodes.filter(function (ele) {
+          return ele.isDirected === 0;
         });
         //run dfs on each node
         for (let i = 0; i < nodesToVisit.length; i++) {
@@ -113,27 +142,28 @@ export class HySELayout extends CoSELayout {
         //display ids of nodes in each group
         for (let i = 0; i < Object.keys(groups).length; i++) {
           console.log("group",i);
-          groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id()));
+          groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id));
           
         }
 
         //create a compound node for each group
-        for (let i = 0; i < Object.keys(groups).length; i++) {
-          let group = groups[Object.keys(groups)[i]];
-          let compoundNode = cy.add({
-            group: "nodes",
-            data: {
-              id: "compoundNode"+i,
-              isDirected: 1,
-              name: "compoundNode"+i
-            }
-          });
-          for (let j = 0; j < group.length; j++) {
-            console.log("adding",group[j].id(),"to",compoundNode.id());
-            console.log(compoundNode);
-            group[j].move({parent: compoundNode.id()});
-          }
-        }
+        // for (let i = 0; i < Object.keys(groups).length; i++) {
+        //   let group = groups[Object.keys(groups)[i]];
+        //   let compoundNode = graphManager.addNode(graphManager,{
+        //     group: "nodes",
+        //     data: {
+        //       id: "compoundNode"+i,
+        //       isDirected: 1,
+        //       name: "compoundNode"+i
+        //     }
+        //   });
+        //   for (let j = 0; j < group.length; j++) {
+        //     console.log("adding",group[j].id,"to",compoundNode.id);
+        //     console.log(compoundNode);
+        //     group[j].move({parent: compoundNode.id});
+        //     compoundNode.shift({x: 100, y: -100});
+        //   }
+        // }
 
       }
 
@@ -205,6 +235,9 @@ export class HySELayout extends CoSELayout {
     
       tick() {
         this.totalIterations++; // defined inside parent class
+        // if (this.totalIterations > 500) {
+        //   return true;
+        // }
         if (this.totalIterations % CoSEConstants.CONVERGENCE_CHECK_PERIOD == 0) {
           // console.log("totalDisplacement: ", this.totalDisplacement, " coolingFactor: ", this.coolingFactor);
           if (super.isConverged()) {
@@ -305,6 +338,9 @@ export class HySELayout extends CoSELayout {
       swapAndFlip() {
         // prepare data for swapping
         for (let id in this.id2LNode) {
+          if(this.id2LNode[id].isDirected !== 1){
+            continue;
+          }
           if (this.id2TotalForceX[id] == undefined || this.id2TotalForceX[id] == null) {
             this.id2TotalForceX[id] = 0;
           }
@@ -511,6 +547,9 @@ export class HySELayout extends CoSELayout {
       moveNodes(isPostProcess = false) {
         const nodes = this.graphManager.allNodes as HySENode[];
         for (let i = 0; i < nodes.length; i++) {
+          if(nodes[i].isDirected !== 1){
+            continue;
+          }
           nodes[i].calculateDisplacement(isPostProcess);
           nodes[i].move();
           this.maintainLayers(nodes[i]);
@@ -752,9 +791,8 @@ export class HySELayout extends CoSELayout {
       /** keep layers info
       */
       private prepareOrderedLayers() {
-        const mapperFn = typeof this.layering[0][0] === 'string' ? x => this.id2LNode[x] : x => this.id2LNode[x.id()];
+        const mapperFn = typeof this.layering[0][0] === 'string' ? x => this.id2LNode[x] : x => this.id2LNode[x.id()] ;
         this.orderedLayers = [];
-        console.log(this.layering);
         for (let i = 0; i < this.layering.length; i++) {
           const currLayer = this.layering[i].map(mapperFn).sort((a, b) => a.rect.x - b.rect.x);
           for (let j = 0; j < currLayer.length; j++) {
