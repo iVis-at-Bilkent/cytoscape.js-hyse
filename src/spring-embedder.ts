@@ -33,12 +33,19 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   processEdges(g, gm, opts);
   l.runLayout();
   console.log("setting positions");
-  for (let i = 0; i < gm.allNodes.length; i++) {
-    const n = gm.allNodes[i];
-    console.log(n);
+  let counter = 0;
+  for (let i = 0; i < gm.getAllNodes().length; i++) {
+    const n = gm.getAllNodes()[i];
+    console.log(counter++);
     if (!opts.isRelayer) {
-      console.log("setting position of "+n.id+" to "+n.rect.x+","+n.rect.y);
-      window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+      console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
+      if(n.id instanceof Object){
+        window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+      }
+      else{
+        window['cy'].nodes('#' + n.id).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+      }
+      
     }
   }
   if (opts.isRelayer) {
@@ -82,7 +89,7 @@ function processNodes(g, parent, layout, opts) {
     if(n.data("isDirected") !=1 ){
       points = new layoutBase.PointD(0, 0);
       dimension = new layoutBase.DimensionD(0, 0);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i], n.rank);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i], 0);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = opts.eles.nodes('#' + nodes[i].id()).data('isDirected');
       //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
