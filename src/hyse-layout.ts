@@ -70,6 +70,13 @@ export class HySELayout extends CoSELayout {
     
         this.prepareCompoundNodes();
 
+
+        let graphs = this.graphManager.getGraphs();
+        for(let i = 0; i < graphs.length; i++){
+          console.log("graphs: ", graphs[i]);
+        }
+
+
         this.cy.nodes().css('border-color', 'blue');
         this.cy.nodes().css('border-width', '1px');
       }
@@ -302,15 +309,34 @@ export class HySELayout extends CoSELayout {
         this.calcRepulsionForces();
         this.swapAndFlip();
         this.moveNodes();
-    
+
+        //run the layout for compound nodes and keep the seeds nodes fixed
+        //this.calculateSpringForcesForCompoundNodes();
+        //this.calculateRepulsionForcesForCompoundNodes();
+        //this.moveNodesForCompoundNodes();
+        
         return false;
       }
-    
+
+      //calculate the spring forces for compound nodes
+      calculateSpringForcesForCompoundNodes(){
+        let graphs = this.graphManager.getGraphs();
+        for(let i = 0; i < graphs.length; i++){
+          console.log("graphs: ", graphs[i]);
+        }
+      }
+
       // overrides layout-base.js method
       calcSpringForce(edge: HySEEdge, idealLength: number) {
         let sourceNode = edge.getSource();
         let targetNode = edge.getTarget();
     
+
+        if((sourceNode.isDirected == 1 && targetNode.isDirected == 0) || (sourceNode.isDirected == 0 && targetNode.isDirected == 1)){
+          return;
+        }
+
+
         // Update edge length
         if (this.uniformLeafNodeSizes && sourceNode.getChild() == null && targetNode.getChild() == null) {
           edge.updateLengthSimple();
