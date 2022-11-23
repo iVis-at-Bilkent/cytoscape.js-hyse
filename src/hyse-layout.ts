@@ -130,6 +130,23 @@ export class HySELayout extends CoSELayout {
         //   groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id));
           
         // }
+
+
+        //find the most left and most right nodes in graph manager nodes
+        let mostLeftNode = this.graphManager.allNodes[0];
+        let mostRightNode = this.graphManager.allNodes[0];
+        this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
+          console.log(node.id);
+          console.log(node.getCenterX());
+          if(node.getCenterX()<mostLeftNode.getCenterX()){
+            mostLeftNode = node;
+          }
+          if(node.getCenterX()>mostRightNode.getCenterX()){
+            mostRightNode = node;
+          }
+        });
+
+
         //create a compound node for each group
         for (let i = 0; i < Object.keys(groups).length; i++) {
           
@@ -142,8 +159,8 @@ export class HySELayout extends CoSELayout {
           let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
           let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
           
-          let left = (seedIndex+1) < this.orderedLayers[seedLayer].length/2?true:false;
-          let up = (seedLayer+1) < this.orderedLayers.length/2?true:false;
+          let left = (seedIndex+1) <= this.orderedLayers[seedLayer].length/2?true:false;
+          let up = (seedLayer+1) <= this.orderedLayers.length/2?true:false;
 
           
           let randomX = Math.floor(Math.random() * 200)+100;
@@ -155,6 +172,9 @@ export class HySELayout extends CoSELayout {
 
           this.graphManager.add(this.newGraph(), newNode);
 
+          //get the center of seed node so that we can set the y coordinate of child nodes
+          let seedCenter = new layoutBase.PointD(seed.getCenterX(),seed.getCenterY());
+          
 
           // let xDimension = newNode.getChild().calcEstimatedSize();
           // console.log("xDimension: ", xDimension);
@@ -167,16 +187,16 @@ export class HySELayout extends CoSELayout {
             let randomChildX= 0;
             let randomChildY= 0;
             if(left){
-              randomChildX = Math.floor(Math.random() * newNode.rect.width)-newNode.rect.x;
+              randomChildX = mostLeftNode.getCenterX() - (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
             }
             else{
-              randomChildX = Math.floor(Math.random() * newNode.rect.width)+newNode.rect.x;
+              randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
             }
             if(up){
-              randomChildY = Math.floor(Math.random() * newNode.rect.height)-newNode.rect.y;
+              randomChildY = seedCenter.y - Math.floor(Math.random() * newNode.rect.height);
             }
             else{
-              randomChildY = Math.floor(Math.random() * newNode.rect.height)+newNode.rect.y;
+              randomChildY = seedCenter.y + Math.floor(Math.random() * newNode.rect.height);
             }
             
             let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
