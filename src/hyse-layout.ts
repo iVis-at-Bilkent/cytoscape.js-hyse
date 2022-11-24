@@ -311,20 +311,114 @@ export class HySELayout extends CoSELayout {
         this.moveNodes();
 
         //run the layout for compound nodes and keep the seeds nodes fixed
-        //this.calculateSpringForcesForCompoundNodes();
-        //this.calculateRepulsionForcesForCompoundNodes();
-        //this.moveNodesForCompoundNodes();
+        this.calculateSpringForcesForCompoundNodes();
+        this.calculateRepulsionForcesForCompoundNodes();
+        this.moveCompoundNodes();
         
         return false;
+      }
+
+      //calculate repulsion forces within each graph and between graphs
+      calculateRepulsionForcesForCompoundNodes(){
+        let graphs = this.graphManager.getGraphs();
+        
+        for(let i = 0; i < graphs.length; i++){
+          
+          let nodes = graphs[i].getNodes();
+          for(let j = 0; j < nodes.length; j++){
+            for(let k = 0; k < nodes.length; k++){
+              if(j==k){
+                continue;
+              }
+              let node1 = nodes[j];
+              let node2 = nodes[k];
+              if(node1.isDirected == 1 || node2.isDirected == 1){
+                continue;
+              }
+              if(node1.getChild() == null && node2.getChild() == null){
+                this.calcRepulsionForceForCompoundChild(node1, node2);
+              }
+            }
+          }
+        }
+      }
+
+      //calculate repulsion forces between two nodes
+      calcRepulsionForceForCompoundChild(node1: HySENode, node2: HySENode) {
+        let node1Center = node1.getCenter();
+        let node2Center = node2.getCenter();
+        let distanceX = node1Center.x - node2Center.x;
+        let distanceY = node1Center.y - node2Center.y;
+        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        if (distance == 0) {
+          distance = 0.01;
+        }
+        let repulsion = this.repulsion * 500 * 500 / (distance * distance);
+        let forceX = repulsion * distanceX / distance;
+        let forceY = repulsion * distanceY / distance;
+        node1.repulsionForceX += forceX;
+        node1.repulsionForceY += forceY;
+        node2.repulsionForceX -= forceX;
+        node2.repulsionForceY -= forceY;
+      }
+
+      calculateRepuslionForceBetween2Children(child1: HySENode, child2: HySENode){
+        let distanceX = child1.getCenterX() - child2.getCenterX();
+        let distanceY = child1.getCenterY() - child2.getCenterY();
+        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        let repulsionForce = child1.nodeRepulsion * child2.nodeRepulsion / distance;
+        let repulsionForceX = repulsionForce * distanceX / distance;
+        let repulsionForceY = repulsionForce * distanceY / distance;
+        child1.repulsionForceX += repulsionForceX;
+        child1.repulsionForceY += repulsionForceY;
+        child2.repulsionForceX -= repulsionForceX;
+        child2.repulsionForceY -= repulsionForceY;
       }
 
       //calculate the spring forces for compound nodes
       calculateSpringForcesForCompoundNodes(){
         let graphs = this.graphManager.getGraphs();
         for(let i = 0; i < graphs.length; i++){
-          console.log("graphs: ", graphs[i]);
+          this.calculateSpringForcesForChildren(graphs[i]);
         }
       }
+
+      //calculate the spring forces for the children of a compound node
+      calculateSpringForcesForChildren(graph){
+        let edges = graph.getEdges();
+        
+        for(let i = 0; i < edges.length; i++){
+          let edge = edges[i];
+          let source = edge.getSource();
+          let target = edge.getTarget();
+          if(source.isDirected == 1 || target.isDirected == 1){
+            continue;
+          }
+          this.calculateSpringForceForChildren(edge, 60); 
+        }
+      }
+
+      //calculate the spring forces for a child of a compound node
+      calculateSpringForceForChildren(edge: HySEEdge, idealLength: number){
+        let source = edge.getSource();
+        let target = edge.getTarget();
+        let length = edge.getLength();
+
+        if (length == 0) {
+          return;
+        }
+        // Calculate spring forces
+        let springForce = edge.edgeElasticity * (length - idealLength);
+        
+        let springForceX = springForce * (edge.lengthX / length);
+        let springForceY = springForce * (edge.lengthY / length);
+        
+        source.springForceX+=  springForceX;
+        source.springForceY+=  springForceY;
+        target.springForceX-=  springForceX;
+        target.springForceY-=  springForceY;
+      }
+
 
       // overrides layout-base.js method
       calcSpringForce(edge: HySEEdge, idealLength: number) {
@@ -392,6 +486,12 @@ export class HySELayout extends CoSELayout {
           }
     
           // Here we use half of the nodes' repulsion values for backward compatibility
+          if(nodeA.nodeRepulsion == undefined){
+            nodeA.nodeRepulsion = 500;
+          }
+          if(nodeB.nodeRepulsion == undefined){
+            nodeB.nodeRepulsion = 500;
+          }
           repulsionForceX = -(nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) / (distanceX * distanceX);
         }
         if (c1 < c2) {
@@ -609,6 +709,21 @@ export class HySELayout extends CoSELayout {
                 }
               }
             }
+          }
+        }
+      }
+
+      moveCompoundNodes(){
+        let graphs = this.graphManager.getGraphs();
+        for (let i = 0; i < graphs.length; i++) {
+          let nodes = graphs[i].getNodes();
+          for (let j = 0; j < nodes.length; j++) {
+            if(nodes[j].isDirected == 1){
+              break;
+            }
+            nodes[j].calculateDisplacementForCompound(false);
+            nodes[j].moveCompound();
+            nodes[j].resetForcesAndDisplacement();
           }
         }
       }
