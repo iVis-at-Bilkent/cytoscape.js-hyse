@@ -77,6 +77,15 @@ export class HySENode extends CoSENode  {
   moveCompound() {
     // `this` brings properties from base class
     let layout = this.graphManager.getLayout();
+    // let graphs = this.graphManager.getGraphs();
+    // if(graphs.filter(x=>x.parent == this).length>0){
+    //   let graph = this.graphManager.getGraphs().filter(x=>x.parent == this)[0];
+    //   let nodes = graph.nodes;
+    //   nodes.forEach(node => {
+    //     node.moveBy(this.displacementX, this.displacementY);
+    //   });
+    // }
+
     this.moveBy(this.displacementX, this.displacementY);
     layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
   }

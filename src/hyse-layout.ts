@@ -27,6 +27,7 @@ export class HySELayout extends CoSELayout {
     orderGap = 80;
     expansionCoefficient = 12;
     useExpansionByStreching = true;
+    edgesBetweenGraphs: HySEEdge[] = [];
 
     [x: string]: any;
     constructor(layering, cy) {
@@ -74,6 +75,17 @@ export class HySELayout extends CoSELayout {
         let graphs = this.graphManager.getGraphs();
         for(let i = 0; i < graphs.length; i++){
           console.log("graphs: ", graphs[i]);
+        }
+
+        
+        let edges = this.graphManager.getAllEdges();
+        for(let i = 0; i < edges.length; i++){
+          let edge = edges[i];
+          let source = edge.getSource();
+          let target = edge.getTarget();
+          if(source.owner != target.owner){
+            this.edgesBetweenGraphs.push(edge);
+          }
         }
 
 
@@ -177,6 +189,7 @@ export class HySELayout extends CoSELayout {
           let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
           newNode.isDirected = 0;
 
+          console.log("GraphManager : ",this.graphManager.graphs);
           this.graphManager.add(this.newGraph(), newNode);
 
           //get the center of seed node so that we can set the y coordinate of child nodes
@@ -213,6 +226,11 @@ export class HySELayout extends CoSELayout {
           console.log("new Nodes",newNode);  
         }
         
+        //update bounds for each graph in graph manager
+        this.graphManager.graphs.forEach(graph=>{
+          graph.parent.updateBounds();
+        });
+
         //this.graphManager.updateBounds();
       }
 
@@ -311,6 +329,10 @@ export class HySELayout extends CoSELayout {
         this.swapAndFlip();
         this.moveNodes();
 
+        this.springForCompundNodes();
+        this.repulsionForCompundNodes();
+        this.moveCompoundNodes();
+
         //run the layout for compound nodes and keep the seeds nodes fixed
         this.calculateSpringForcesForCompoundNodes();
         this.calculateRepulsionForcesForCompoundNodes();
@@ -319,11 +341,38 @@ export class HySELayout extends CoSELayout {
         return false;
       }
 
+      springForCompundNodes(){
+        this.edgesBetweenGraphs.forEach(edge => {
+          let source = edge.getSource();
+          let target = edge.getTarget();
+          let sourceGraph = source.getOwner();
+          let targetGraph = target.getOwner();
+          //add a hyse edge between the two graphs
+          let hyseEdge = new HySEEdge(sourceGraph, targetGraph, "dummyEdge"+edge.id);
+          this.calculateSpringForceForTier1Nodes(hyseEdge,80);
+        });
+      }
+
+      repulsionForCompundNodes(){
+        let graphs = this.graphManager.getGraphs();
+        
+        for(let i = 0;i<graphs.length;i++){
+          for(let j = 0;j<graphs.length;j++){
+            if(i==j){
+              continue;
+            }
+            let graph1 = graphs[i].parent;
+            let graph2 = graphs[j].parent;
+            this.calculateRepulsionForcesBetweenGraphs(graph1,graph2);
+          }
+        }
+      }
+
       //calculate repulsion forces within each graph and between graphs
       calculateRepulsionForcesForCompoundNodes(){
 
-        let graphs = this.graphManager.getGraphs();
-        
+        let graphs = this.graphManager.graphs;
+
         for(let i = 0; i < graphs.length; i++){
           
           let nodes = graphs[i].getNodes();
@@ -363,10 +412,51 @@ export class HySELayout extends CoSELayout {
       //calculate the spring forces for compound nodes
       calculateSpringForcesForCompoundNodes(){
         let graphs = this.graphManager.getGraphs();
+
         for(let i = 0; i < graphs.length; i++){
           this.calculateSpringForcesForChildren(graphs[i]);
         }
       }
+
+      //calculate the spring forces for a child of a compound node
+      calculateSpringForceForTier1Nodes(edge: HySEEdge, idealLength: number){
+        var sourceNode = edge.getSource().parent;
+        var targetNode = edge.getTarget().parent;
+
+        var length;
+        var springForce;
+        var springForceX;
+        var springForceY;
+
+        // Update edge length
+        //edge.updateLengthSimple();
+        //update the edge length by the distance between the centers of the two nodes
+        edge.length = Math.sqrt(Math.pow(sourceNode.getCenterX() - targetNode.getCenterX(), 2) + Math.pow(sourceNode.getCenterY() - targetNode.getCenterY(), 2));
+        
+        length = edge.getLength();
+        
+        if(length == 0)
+          return;
+        
+        // Calculate spring forces
+        springForce = edge.edgeElasticity * (length - idealLength);
+
+        // Project force onto x and y axes
+        springForceX = springForce * (edge.lengthX / length);
+        springForceY = springForce * (edge.lengthY / length);
+
+        if(sourceNode.id){
+          sourceNode.springForceX += springForceX;
+          sourceNode.springForceY += springForceY;
+        }
+        
+        if(targetNode.id){
+          targetNode.springForceX -= springForceX;
+          targetNode.springForceY -= springForceY;
+        }
+
+      }
+
 
       //calculate the spring forces for the children of a compound node
       calculateSpringForcesForChildren(graph){
@@ -517,6 +607,97 @@ export class HySELayout extends CoSELayout {
         // Apply forces on the two nodes
         nodeA.repulsionForceX -= repulsionForceX;
         nodeB.repulsionForceX += repulsionForceX;
+      }
+
+      calculateRepulsionForcesBetweenGraphs(nodeA,nodeB){
+
+        var rectA = nodeA.getRect();
+        var rectB = nodeB.getRect();
+        var overlapAmount = new Array(2);
+        var clipPoints = new Array(4);
+        var distanceX;
+        var distanceY;
+        var distanceSquared;
+        var distance;
+        var repulsionForce;
+        var repulsionForceX;
+        var repulsionForceY;
+
+        if (rectA.intersects(rectB))// two nodes overlap
+        {
+          // calculate separation amount in x and y directions
+          layoutBase.IGeometry.calcSeparationAmount(rectA,
+                  rectB,
+                  overlapAmount,
+                  CoSEConstants.DEFAULT_EDGE_LENGTH / 2.0);
+
+          repulsionForceX = 2 * overlapAmount[0];
+          repulsionForceY = 2 * overlapAmount[1];
+          
+          var childrenConstant = nodeA.noOfChildren * nodeB.noOfChildren / (nodeA.noOfChildren + nodeB.noOfChildren);
+          
+          // Apply forces on the two nodes
+          if(nodeA.id){
+            nodeA.repulsionForceX -= childrenConstant * repulsionForceX;
+            nodeA.repulsionForceY -= childrenConstant * repulsionForceY;
+          }
+          if(nodeB.id){
+            nodeB.repulsionForceX += childrenConstant * repulsionForceX;
+            nodeB.repulsionForceY += childrenConstant * repulsionForceY;
+          }
+        }
+        else// no overlap
+        {
+          // calculate distance
+
+          if (this.uniformLeafNodeSizes &&
+                  nodeA.getChild() == null && nodeB.getChild() == null)// simply base repulsion on distance of node centers
+          {
+            distanceX = rectB.getCenterX() - rectA.getCenterX();
+            distanceY = rectB.getCenterY() - rectA.getCenterY();
+          }
+          else// use clipping points
+          {
+            layoutBase.IGeometry.getIntersection(rectA, rectB, clipPoints);
+
+            distanceX = clipPoints[2] - clipPoints[0];
+            distanceY = clipPoints[3] - clipPoints[1];
+          }
+
+          // No repulsion range. FR grid variant should take care of this.
+          if (Math.abs(distanceX) < CoSEConstants.MIN_REPULSION_DIST)
+          {
+            distanceX = layoutBase.IMath.sign(distanceX) *
+            CoSEConstants.MIN_REPULSION_DIST;
+          }
+
+          if (Math.abs(distanceY) < CoSEConstants.MIN_REPULSION_DIST)
+          {
+            distanceY = layoutBase.IMath.sign(distanceY) *
+            CoSEConstants.MIN_REPULSION_DIST;
+          }
+
+          distanceSquared = distanceX * distanceX + distanceY * distanceY;
+          distance = Math.sqrt(distanceSquared);
+          // console.log("repulsion: " + nodeA.nodeRepulsion + " " + nodeB.nodeRepulsion);
+          // Here we use half of the nodes' repulsion values for backward compatibility
+          repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
+
+          // Project force onto x and y axes
+          repulsionForceX = repulsionForce * distanceX / distance;
+          repulsionForceY = repulsionForce * distanceY / distance;
+          
+          // Apply forces on the two nodes    
+          if(nodeA.id){
+            nodeA.repulsionForceX -= repulsionForceX;
+            nodeA.repulsionForceY -= repulsionForceY;
+          }
+          if(nodeB.id){
+            nodeB.repulsionForceX += repulsionForceX;
+            nodeB.repulsionForceY += repulsionForceY;
+          }
+        }
+
       }
 
       fdCalculateRepulsionForces(nodeA,nodeB){
@@ -815,6 +996,16 @@ export class HySELayout extends CoSELayout {
 
       moveCompoundNodes(){
         let graphs = this.graphManager.getGraphs();
+
+        for(let i = 0;i<graphs.length;i++){
+          if(graphs[i].parent.id){
+            graphs[i].parent.calculateDisplacementForCompound(false);
+            graphs[i].parent.moveCompound();
+            graphs[i].parent.resetForcesAndDisplacement();
+            graphs[i].parent.updateBounds();
+          }
+        }
+
         for (let i = 0; i < graphs.length; i++) {
           let nodes = graphs[i].getNodes();
           for (let j = 0; j < nodes.length; j++) {
