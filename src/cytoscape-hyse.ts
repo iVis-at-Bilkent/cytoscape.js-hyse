@@ -138,8 +138,8 @@ export class DagreAndSpringEmbedderLayout {
         ele = typeof ele === "object" ? ele : this;
         if(ele != undefined){
             let dModel = ele.scratch('force_directed_pos');
-            console.log("found force directed position for node " + ele.id() + " as ", dModel);
-            console.log(counter);
+            // console.log("found force directed position for node " + ele.id() + " as ", dModel);
+            // console.log(counter);
             if(dModel != undefined){
                 return {
                 x: dModel.x,

@@ -119,9 +119,13 @@ export class HySENode extends CoSENode  {
 
   resetForcesAndDisplacement() {
     this.springForceX = 0;
+    this.springForceY = 0;
     this.repulsionForceX = 0;
+    this.repulsionForceY = 0;
     this.gravitationForceX = 0;
+    this.gravitationForceY = 0;
     this.displacementX = 0;
+    this.displacementY = 0;
   }
 
 

@@ -36,9 +36,9 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   let counter = 0;
   for (let i = 0; i < gm.getAllNodes().length; i++) {
     const n = gm.getAllNodes()[i];
-    console.log(counter++);
+    // console.log(counter++);
     if (!opts.isRelayer) {
-      console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
+      // console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
       if(n.id instanceof Object){
         window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
       }
