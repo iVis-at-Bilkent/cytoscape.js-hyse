@@ -331,7 +331,7 @@ export class HySELayout extends CoSELayout {
 
         this.springForCompundNodes();
         this.repulsionForCompundNodes();
-        this.moveCompoundNodes();
+        this.moveBiggerCompoundNodes();
 
         //run the layout for compound nodes and keep the seeds nodes fixed
         this.calculateSpringForcesForCompoundNodes();
@@ -349,7 +349,7 @@ export class HySELayout extends CoSELayout {
           let targetGraph = target.getOwner();
           //add a hyse edge between the two graphs
           let hyseEdge = new HySEEdge(sourceGraph, targetGraph, "dummyEdge"+edge.id);
-          this.calculateSpringForceForTier1Nodes(hyseEdge,80);
+          this.calculateSpringForceForTier1Nodes(hyseEdge,40);
         });
       }
 
@@ -433,8 +433,12 @@ export class HySELayout extends CoSELayout {
         //update the edge length by the distance between the centers of the two nodes
         edge.length = Math.sqrt(Math.pow(sourceNode.getCenterX() - targetNode.getCenterX(), 2) + Math.pow(sourceNode.getCenterY() - targetNode.getCenterY(), 2));
         
-        length = edge.getLength();
+        //get X and Y lengths
+        edge.lengthX = targetNode.getCenterX() - sourceNode.getCenterX();
+        edge.lengthY = targetNode.getCenterY() - sourceNode.getCenterY();
         
+        length = edge.getLength();
+        //console.log("length: ", length);
         if(length == 0)
           return;
         
@@ -444,6 +448,7 @@ export class HySELayout extends CoSELayout {
         // Project force onto x and y axes
         springForceX = springForce * (edge.lengthX / length);
         springForceY = springForce * (edge.lengthY / length);
+
 
         if(sourceNode.id){
           sourceNode.springForceX += springForceX;
@@ -633,17 +638,18 @@ export class HySELayout extends CoSELayout {
 
           repulsionForceX = 2 * overlapAmount[0];
           repulsionForceY = 2 * overlapAmount[1];
-          
-          var childrenConstant = nodeA.noOfChildren * nodeB.noOfChildren / (nodeA.noOfChildren + nodeB.noOfChildren);
+          var childrenConstant = nodeA.child.nodes.length * nodeB.child.nodes.length / (nodeA.child.nodes.length + nodeB.child.nodes.length);
           
           // Apply forces on the two nodes
           if(nodeA.id){
             nodeA.repulsionForceX -= childrenConstant * repulsionForceX;
             nodeA.repulsionForceY -= childrenConstant * repulsionForceY;
+            //console.log("repulsion force on node " + nodeA.id + " is " + nodeA.repulsionForceX + " " + nodeA.repulsionForceY);
           }
           if(nodeB.id){
             nodeB.repulsionForceX += childrenConstant * repulsionForceX;
             nodeB.repulsionForceY += childrenConstant * repulsionForceY;
+            //console.log("repulsion force on node " + nodeB.id + " is " + nodeB.repulsionForceX + " " + nodeB.repulsionForceY);
           }
         }
         else// no overlap
@@ -681,12 +687,12 @@ export class HySELayout extends CoSELayout {
           distance = Math.sqrt(distanceSquared);
           // console.log("repulsion: " + nodeA.nodeRepulsion + " " + nodeB.nodeRepulsion);
           // Here we use half of the nodes' repulsion values for backward compatibility
-          repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
+          repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.child.nodes.length * nodeB.child.nodes.length / distanceSquared;
 
           // Project force onto x and y axes
           repulsionForceX = repulsionForce * distanceX / distance;
           repulsionForceY = repulsionForce * distanceY / distance;
-          
+          //console.log("repulsion: " + repulsionForceX + " " + repulsionForceY);
           // Apply forces on the two nodes    
           if(nodeA.id){
             nodeA.repulsionForceX -= repulsionForceX;
@@ -994,7 +1000,7 @@ export class HySELayout extends CoSELayout {
         }
       }
 
-      moveCompoundNodes(){
+      moveBiggerCompoundNodes(){
         let graphs = this.graphManager.getGraphs();
 
         for(let i = 0;i<graphs.length;i++){
@@ -1005,6 +1011,10 @@ export class HySELayout extends CoSELayout {
             graphs[i].parent.updateBounds();
           }
         }
+      }
+
+      moveCompoundNodes(){
+        let graphs = this.graphManager.getGraphs();
 
         for (let i = 0; i < graphs.length; i++) {
           let nodes = graphs[i].getNodes();

@@ -48,6 +48,7 @@ export class HySENode extends CoSENode  {
     this.displacementX += layout.coolingFactor * (this.springForceX + this.repulsionForceX);
     this.displacementY += layout.coolingFactor * (this.springForceY + this.repulsionForceY);
 
+    
     if(isPostProcess){
       if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
         this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementX);
@@ -77,17 +78,19 @@ export class HySENode extends CoSENode  {
   moveCompound() {
     // `this` brings properties from base class
     let layout = this.graphManager.getLayout();
-    // let graphs = this.graphManager.getGraphs();
-    // if(graphs.filter(x=>x.parent == this).length>0){
-    //   let graph = this.graphManager.getGraphs().filter(x=>x.parent == this)[0];
-    //   let nodes = graph.nodes;
-    //   nodes.forEach(node => {
-    //     node.moveBy(this.displacementX, this.displacementY);
-    //   });
-    // }
+    //console.log("compound node", this.id);
+    
+    if(this.child){
+      this.child.nodes.forEach(node => {
+        node.moveBy(this.displacementX, this.displacementY);
+      });
+    }
+    else{
+      this.moveBy(this.displacementX, this.displacementY);
+      layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+    }
 
-    this.moveBy(this.displacementX, this.displacementY);
-    layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+    
   }
 
   moveOnXaxis(movement:number) {
