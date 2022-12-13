@@ -27,11 +27,18 @@ export class HySENode extends CoSENode  {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
     this.displacementX += layout.coolingFactor * (this.springForceX + this.repulsionForceX);
-    // this.displacementY += layout.coolingFactor * (this.springForceY + this.repulsionForceY);
+    if(this.isDirected!=1){
+      this.displacementY += layout.coolingFactor * (this.springForceY + this.repulsionForceY);
+    }
+    
 
     if(isPostProcess){
       if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
         this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementX);
+      }
+
+      if (this.isDirected != 1 && Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
+        this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementY);
       }
       
     }
@@ -39,6 +46,11 @@ export class HySENode extends CoSENode  {
     if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement) {
       this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement *
         layoutBase.IMath.sign(this.displacementX);
+    }
+
+    if (this.isDirected != 1 && Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement) {
+      this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement *
+        layoutBase.IMath.sign(this.displacementY);
     }
   }
 
@@ -71,8 +83,20 @@ export class HySENode extends CoSENode  {
   move() {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
-    this.moveBy(this.displacementX, 0);
-    layout.totalDisplacement += Math.abs(this.displacementX);
+    if(this.child){
+      this.child.nodes.forEach(node => {
+        node.move();
+      });
+      this.updateBounds();
+    }
+    else if(this.isDirected != 1){
+      this.moveBy(this.displacementX, this.displacementY);
+      layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+    }
+    else{
+      this.moveBy(this.displacementX, 0);
+      layout.totalDisplacement += Math.abs(this.displacementX);
+    }
   }
 
   moveCompound() {

@@ -74,6 +74,10 @@ export class HySELayout extends CoSELayout {
 
         let graphs = this.graphManager.getGraphs();
         for(let i = 0; i < graphs.length; i++){
+          if(graphs[i].parent.id){
+            //add the parent node to the root graph
+            this.graphManager.getRoot().add(graphs[i].parent);
+          }
           console.log("graphs: ", graphs[i]);
         }
 
@@ -326,17 +330,18 @@ export class HySELayout extends CoSELayout {
         this.totalDisplacement = 0; // defined inside parent class
         super.calcSpringForces();
         this.calcRepulsionForces();
+        this.repulsionForUndirected();
         this.swapAndFlip();
         this.moveNodes();
 
-        this.springForCompundNodes();
-        this.repulsionForCompundNodes();
-        this.moveBiggerCompoundNodes();
+        // this.springForCompundNodes();
+        // this.repulsionForCompundNodes();
+        // this.moveBiggerCompoundNodes();
 
-        //run the layout for compound nodes and keep the seeds nodes fixed
-        this.calculateSpringForcesForCompoundNodes();
-        this.calculateRepulsionForcesForCompoundNodes();
-        this.moveCompoundNodes();
+        // //run the layout for compound nodes and keep the seeds nodes fixed
+        // this.calculateSpringForcesForCompoundNodes();
+        // this.calculateRepulsionForcesForCompoundNodes();
+        // this.moveCompoundNodes();
         
         return false;
       }
@@ -351,6 +356,26 @@ export class HySELayout extends CoSELayout {
           let hyseEdge = new HySEEdge(sourceGraph, targetGraph, "dummyEdge"+edge.id);
           this.calculateSpringForceForTier1Nodes(hyseEdge,40);
         });
+      }
+
+      repulsionForUndirected(){
+        var nodes = this.graphManager.allNodes as HySENode[];
+        for (var i = 0; i < nodes.length; i++) {
+          var node1 = nodes[i];
+          // if(node1.isDirected == 1){
+          //   continue;
+          // }
+          for (var j = 0; j < nodes.length; j++) {
+            var node2 = nodes[j];
+            if(node1.id == node2.id){
+              continue;
+            }
+            // if (node1.getOwner() != node2.getOwner()) {
+            //   continue;
+            // }
+            super.calcRepulsionForce(node1, node2);
+          }
+        }
       }
 
       repulsionForCompundNodes(){
@@ -528,11 +553,10 @@ export class HySELayout extends CoSELayout {
       calcSpringForce(edge: HySEEdge, idealLength: number) {
         let sourceNode = edge.getSource();
         let targetNode = edge.getTarget();
-    
 
-        if((sourceNode.isDirected == 1 && targetNode.isDirected == 0) || (sourceNode.isDirected == 0 && targetNode.isDirected == 1)){
-          return;
-        }
+        // if((sourceNode.isDirected == 1 && targetNode.isDirected == 0) || (sourceNode.isDirected == 0 && targetNode.isDirected == 1)){
+        //   return;
+        // }
 
 
         // Update edge length
@@ -563,8 +587,10 @@ export class HySELayout extends CoSELayout {
         sourceNode.springForceX += springForceX;
         targetNode.springForceX -= springForceX;
 
-        if(sourceNode.isDirected == 1 && targetNode.isDirected == 1){
+        if(sourceNode.isDirected == 0){
           sourceNode.springForceY += springForceY;
+        }
+        if(targetNode.isDirected == 0){
           targetNode.springForceY -= springForceY;
         }
 
@@ -1032,12 +1058,11 @@ export class HySELayout extends CoSELayout {
       moveNodes(isPostProcess = false) {
         const nodes = this.graphManager.allNodes as HySENode[];
         for (let i = 0; i < nodes.length; i++) {
-          if(nodes[i].isDirected !== 1){
-            continue;
-          }
           nodes[i].calculateDisplacement(isPostProcess);
           nodes[i].move();
-          this.maintainLayers(nodes[i]);
+          if(nodes[i].isDirected == 1){
+            this.maintainLayers(nodes[i]);
+          }
           nodes[i].resetForcesAndDisplacement();
         }
       }
