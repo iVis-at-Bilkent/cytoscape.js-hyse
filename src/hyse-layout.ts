@@ -19,7 +19,7 @@ export class HySELayout extends CoSELayout {
     isFastCooling = true;
     isHighlightSwappedPair = false;
     cy: any;
-    distinctColors = ['#2962ff', '#00c853', '#ff3d00', '#ffd600', '#76ff03', '#18ffff', '#d500f9', '#f48fb1'];
+    distinctColors = [ '#00c853', '#ff3d00', '#ffd600', '#76ff03', '#18ffff', '#d500f9', '#f48fb1','#2962ff'];
     cntBan4swap = 0;
     nodeRepulsionCalculationWidth = 7;
     fullyCalcRep4Ticks = 0.2;
@@ -96,8 +96,32 @@ export class HySELayout extends CoSELayout {
         }
 
 
-        this.cy.nodes().css('border-color', 'blue');
-        this.cy.nodes().css('border-width', '1px');
+        //this.cy.nodes().css('border-color', 'blue');
+        //this.cy.nodes().css('border-width', '1px');
+        //color the nodes in different graphs as different colors
+        let colorIndex = 0;
+        
+        for(let i = 0; i < graphs.length; i++){
+          // if(!graphs[i].parent.id){
+          //   continue;
+          // }
+          let nodes = graphs[i].getNodes();
+          for(let j = 0; j < nodes.length; j++){
+            
+            if(nodes[j].child){
+              continue;
+            }
+            
+            let node = this.cy.getElementById(nodes[j].id.id());
+            node.css('border-color', this.distinctColors[colorIndex]);
+            node.css('border-width', '3px');
+            
+          }
+          colorIndex++;
+          if(colorIndex == this.distinctColors.length){
+            colorIndex = 0;
+          }
+        }
       }
 
 

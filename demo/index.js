@@ -36,7 +36,25 @@ function pageLoaded() {
                     'target-arrow-color': '#ccc',
                     'target-arrow-shape': 'triangle'
                 }
-            }
+            },
+            {
+              selector: ':selected',
+              style: {
+                "border-width": 4,
+                "border-color": "rgb(1,105,217)",
+                "background-color": "#2F2D2C"
+              }
+            },
+            //color the nodes in the heirarchy
+            {
+                selector: 'node[isDirected = 1]',
+                style: {
+                    'background-color': '#eee29b',
+                    //'border-width': '2px',
+                    //'border-color': '#1e90ff',
+                    'label': 'data(id)'
+                }
+            },
         ]
     }).on('cxttap', 'node', function (evt) {
         //display the context menu
@@ -53,7 +71,7 @@ function pageLoaded() {
                 onClickFunction: function (event) {
                     //change the data of the node to be in the heirarchy i-e set isDirected to true
                     var node = event.target;
-                    node.data('isDirected', true);
+                    node.data('isDirected', 1);
                     //run the layout
                     const o = getOptions();
                     o.isForceDirected = true;
@@ -91,6 +109,32 @@ function runLayout() {
     o.isForceDirected = true;
     cy.layout(o).run();
 }
+
+function addNodesToHeirarchy(){
+    //get the selected nodes
+    var selectedNodes = cy.$(':selected');
+    //change the data of the nodes to be in the heirarchy i-e set isDirected to true
+    selectedNodes.forEach(function(node){
+        node.data('isDirected', 1);
+    });
+    //run the layout
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
+}
+
+function reset(){
+    
+    //set isDirected to false for all nodes
+    cy.nodes().forEach(function(node){
+        node.data('isDirected', 0);
+    });
+    //run cytoscape layout
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
+}
+
 
 function addNode(){
     //get a random number between 0 and 1000
