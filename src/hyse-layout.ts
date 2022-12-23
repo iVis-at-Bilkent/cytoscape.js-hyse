@@ -65,9 +65,11 @@ export class HySELayout extends CoSELayout {
 
         //this.graphManager.graphs[2].shift({x: 1000, y: 1000});
 
-        console.log("after prepareCompoundNodes", this.graphManager);
         console.log("orderedLayers: ", this.orderedLayers);
-        this.prepareOrderedLayers();
+        if(this.layering.length > 0){
+          this.prepareOrderedLayers();
+        }
+        
     
         this.prepareCompoundNodes();
 
@@ -77,6 +79,7 @@ export class HySELayout extends CoSELayout {
           if(graphs[i].parent.id){
             //add the parent node to the root graph
             this.graphManager.getRoot().add(graphs[i].parent);
+            //this.graphManager.allNodes.push(graphs[i].parent);
           }
           console.log("graphs: ", graphs[i]);
         }
@@ -158,6 +161,11 @@ export class HySELayout extends CoSELayout {
         //find the most left and most right nodes in graph manager nodes
         let mostLeftNode = this.graphManager.allNodes[0];
         let mostRightNode = this.graphManager.allNodes[0];
+        let allUndirected = true;
+        if(this.orderedLayers.length > 0){
+          allUndirected = false;
+        }
+
         this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
           console.log(node.id);
           console.log(node.getCenterX());
@@ -178,26 +186,70 @@ export class HySELayout extends CoSELayout {
 
           
           //check the position of seed node in layers and set the position of compound node accordingly
-          let seed = seeds[id];
-          let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
-          let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
+          if(allUndirected){
+            let points = new layoutBase.PointD(0, 0);
+            let dimension = new layoutBase.DimensionD(40,40);
+            let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
+            newNode.isDirected = 0;
+
+            console.log("GraphManager : ",this.graphManager.graphs);
+            this.graphManager.add(this.newGraph(), newNode);
+            group.forEach(x=>{
+              //get random position for the node within the compound node
+              let randomX = Math.floor(Math.random() * 200)+100;
+              let randomY = Math.floor(Math.random() * 200)+100;
+              let childpoints = new layoutBase.PointD(randomX, randomY);
+              x.setRect(childpoints,{width:30,height:30});
+              newNode.getChild().add(x);
+            });
+            console.log("new Nodes",newNode);  
+          }
+          else{
+            let seed = seeds[id];
+            let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
+            let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
+            
+            let left = (seedIndex+1) <= this.orderedLayers[seedLayer].length/2?true:false;
+            let up = (seedLayer+1) <= this.orderedLayers.length/2?true:false;
+
+            
+            let randomX = Math.floor(Math.random() * 200)+100;
+            let randomY = Math.floor(Math.random() * 200)+100;
+            let points = new layoutBase.PointD(randomX, randomY);
+            let dimension = new layoutBase.DimensionD(40,40);
+            let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
+            newNode.isDirected = 0;
+
+            console.log("GraphManager : ",this.graphManager.graphs);
+            this.graphManager.add(this.newGraph(), newNode);
+
+            //get the center of seed node so that we can set the y coordinate of child nodes
+            let seedCenter = new layoutBase.PointD(seed.getCenterX(),seed.getCenterY());
+            //add the nodes in the group to the new node
+            group.forEach(x=>{
+              //get random position for the node within the compound node
+              let randomChildX= 0;
+              let randomChildY= 0;
+              if(left){
+                randomChildX = mostLeftNode.getCenterX() - (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+              }
+              else{
+                randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+              }
+              if(up){
+                randomChildY = seedCenter.y - Math.floor(Math.random() * newNode.rect.height);
+              }
+              else{
+                randomChildY = seedCenter.y + Math.floor(Math.random() * newNode.rect.height);
+              }
+              
+              let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
+              x.setRect(childpoints,{width:30,height:30});
+              newNode.getChild().add(x);
+            });
+            console.log("new Nodes",newNode);  
+          }
           
-          let left = (seedIndex+1) <= this.orderedLayers[seedLayer].length/2?true:false;
-          let up = (seedLayer+1) <= this.orderedLayers.length/2?true:false;
-
-          
-          let randomX = Math.floor(Math.random() * 200)+100;
-          let randomY = Math.floor(Math.random() * 200)+100;
-          let points = new layoutBase.PointD(randomX, randomY);
-          let dimension = new layoutBase.DimensionD(40,40);
-          let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
-          newNode.isDirected = 0;
-
-          console.log("GraphManager : ",this.graphManager.graphs);
-          this.graphManager.add(this.newGraph(), newNode);
-
-          //get the center of seed node so that we can set the y coordinate of child nodes
-          let seedCenter = new layoutBase.PointD(seed.getCenterX(),seed.getCenterY());
           
 
           // let xDimension = newNode.getChild().calcEstimatedSize();
@@ -205,29 +257,7 @@ export class HySELayout extends CoSELayout {
           // newNode.setRect(points,{x:xDimension, y:xDimension});
           
           
-          //add the nodes in the group to the new node
-          group.forEach(x=>{
-            //get random position for the node within the compound node
-            let randomChildX= 0;
-            let randomChildY= 0;
-            if(left){
-              randomChildX = mostLeftNode.getCenterX() - (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
-            }
-            else{
-              randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
-            }
-            if(up){
-              randomChildY = seedCenter.y - Math.floor(Math.random() * newNode.rect.height);
-            }
-            else{
-              randomChildY = seedCenter.y + Math.floor(Math.random() * newNode.rect.height);
-            }
-            
-            let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
-            x.setRect(childpoints,{width:30,height:30});
-            newNode.getChild().add(x);
-          });
-          console.log("new Nodes",newNode);  
+          
         }
         
         //update bounds for each graph in graph manager

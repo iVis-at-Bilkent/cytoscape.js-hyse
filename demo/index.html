@@ -2,10 +2,18 @@
 <html>
 
 <head>
+    <!-- graphml uses -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
     <meta charset="utf-8">
     <title>Cytoscape - HySE</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js" integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/cytoscape-graphml/cytoscape-graphml.js"></script>
+    <script src="./cytoscape-context-menus.js"></script>
+    <script src="./file-operations.js"> </script>
+    <script src="./experiment-small-graphs.js"> </script>
     <script src="../dist/cytoscape-hyse.js"> </script>
     <script src="./sampleGraph.js"></script>
     <script src="./index.js"></script>
@@ -15,6 +23,10 @@
 <body>
     <h1>Cytoscape - HySE</h1>
     <button hidden onclick="addNode()">Add Node</button>
+    <!--create a dropdown showing sample graphs-->
+    <select id="experimentGraphs">
+        <option value="sampleGraph">Sample Graph</option>
+    </select>
     <button onclick="runLayout()">Run Layout</button>
     <div hidden class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
