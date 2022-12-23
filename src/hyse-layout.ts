@@ -100,6 +100,7 @@ export class HySELayout extends CoSELayout {
         //this.cy.nodes().css('border-width', '1px');
         //color the nodes in different graphs as different colors
         let colorIndex = 0;
+        let colorIndex2 = 0;
         
         for(let i = 0; i < graphs.length; i++){
           // if(!graphs[i].parent.id){
@@ -111,10 +112,18 @@ export class HySELayout extends CoSELayout {
             if(nodes[j].child){
               continue;
             }
+            if(nodes[j].isDirected == 1){
+              let node = this.cy.getElementById(nodes[j].id.id());
+              node.css('border-color', this.distinctColors[colorIndex2]);
+              node.css('border-width', '3px');
+              colorIndex2++;
+            }
+            else{
+              let node = this.cy.getElementById(nodes[j].id.id());
+              node.css('border-color', this.distinctColors[colorIndex]);
+              node.css('border-width', '3px');
+            }
             
-            let node = this.cy.getElementById(nodes[j].id.id());
-            node.css('border-color', this.distinctColors[colorIndex]);
-            node.css('border-width', '3px');
             
           }
           colorIndex++;
