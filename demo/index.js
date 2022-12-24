@@ -110,6 +110,13 @@ function runLayout() {
     cy.layout(o).run();
 }
 
+function rerun(){
+    //run cytoscape layout
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
+}
+
 function addNodesToHeirarchy(){
     //get the selected nodes
     var selectedNodes = cy.$(':selected');

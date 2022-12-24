@@ -92,6 +92,9 @@ function processNodes(g, parent, layout, opts) {
       const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i], 0);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = opts.eles.nodes('#' + nodes[i].id()).data('isDirected');
+      if(hyseNode.isDirected == undefined){
+        hyseNode.isDirected = 0;
+      }
       //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
       const lNode = parent.add(hyseNode);
       id2LNode[nodes[i].id()] = lNode;

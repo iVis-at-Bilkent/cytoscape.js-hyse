@@ -181,7 +181,7 @@ export class HySELayout extends CoSELayout {
           dfs(node,i);
         }
         
-        //console.log(groups);
+        console.log(groups);
 
         //display ids of nodes in each group
         // for (let i = 0; i < Object.keys(groups).length; i++) {
