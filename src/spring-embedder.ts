@@ -27,6 +27,8 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.expansionCoefficient = opts.expansionCoefficient;
   l.orderGap = opts.orderGap;
 
+  console.log("opts: " ,opts);
+
   let gm = l.newGraphManager();
 
   processNodes(g, gm.addRoot(), l, opts);
@@ -89,9 +91,9 @@ function processNodes(g, parent, layout, opts) {
     if(n.data("isDirected") !=1 ){
       points = new layoutBase.PointD(0, 0);
       dimension = new layoutBase.DimensionD(0, 0);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i], 0);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), 0);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
-      hyseNode.isDirected = opts.eles.nodes('#' + nodes[i].id()).data('isDirected');
+      hyseNode.isDirected = 0;
       if(hyseNode.isDirected == undefined){
         hyseNode.isDirected = 0;
       }
@@ -103,9 +105,9 @@ function processNodes(g, parent, layout, opts) {
       n= g.node(n.id());
       points = new layoutBase.PointD(n.x, n.y);
       dimension = new layoutBase.DimensionD(n.width, n.height);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i], n.rank);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), n.rank);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
-      hyseNode.isDirected = opts.eles.nodes('#' + nodes[i].id()).data('isDirected');
+      hyseNode.isDirected = 1;
       //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
       const lNode = parent.add(hyseNode);
       id2LNode[nodes[i].id()] = lNode;
@@ -133,7 +135,6 @@ function processEdges(g, gm, opts) {
       name2vw[edges[i].id()].w = w;
     }
   }
-  console.log(name2vw);
   for (let name in name2vw) {
     const edge = name2vw[name];
     const sourceNode = id2LNode[edge.v];
@@ -141,9 +142,6 @@ function processEdges(g, gm, opts) {
     const hiseEdge = new HySEEdge(sourceNode, targetNode, null);
     hiseEdge.idealLength = opts.idealEdgeLength;
     hiseEdge.edgeElasticity = opts.edgeElasticity;
-    console.log("adding edge from " + sourceNode + " to " + targetNode);
-    console.log(sourceNode);
-    console.log(targetNode);
     gm.add(hiseEdge, sourceNode, targetNode);
   }
 }

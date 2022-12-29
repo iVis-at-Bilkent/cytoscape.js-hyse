@@ -23,26 +23,14 @@ export class HySENode extends CoSENode  {
   }
 
 
-  calculateDisplacement(isPostProcess = false) {
+  calculateDisplacement() {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
-    this.displacementX += layout.coolingFactor * (this.springForceX + this.repulsionForceX);
+    this.displacementX += (layout.coolingFactor * (this.springForceX + this.repulsionForceX)/this.noOfChildren);
     if(this.isDirected!=1){
-      this.displacementY += layout.coolingFactor * (this.springForceY + this.repulsionForceY);
+      this.displacementY += (layout.coolingFactor * (this.springForceY + this.repulsionForceY)/this.noOfChildren);
     }
     
-
-    if(isPostProcess){
-      if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
-        this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementX);
-      }
-
-      if (this.isDirected != 1 && Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
-        this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementY);
-      }
-      
-    }
-
     if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement) {
       this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement *
         layoutBase.IMath.sign(this.displacementX);
@@ -52,76 +40,43 @@ export class HySENode extends CoSENode  {
       this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement *
         layoutBase.IMath.sign(this.displacementY);
     }
+
+    if(this.child)
+    {
+      this.propogateDisplacementToChildren(this.displacementX, this.displacementY);
+    }
+
   }
 
-  calculateDisplacementForCompound(isPostProcess = false) {
-    // `this` brings properties from base class 
-    let layout = this.graphManager.getLayout();
-    this.displacementX += layout.coolingFactor * (this.springForceX + this.repulsionForceX);
-    this.displacementY += layout.coolingFactor * (this.springForceY + this.repulsionForceY);
-
-    
-    if(isPostProcess){
-      if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement/3) {
-        this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement/3 * layoutBase.IMath.sign(this.displacementX);
+  propogateDisplacementToChildren(displacementX: number, displacementY: number) {
+    this.child.nodes.forEach(node => {
+      if(node.child){
+        node.propogateDisplacementToChildren(displacementX, displacementY);
       }
-      
-    }
-
-    if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement *
-        layoutBase.IMath.sign(this.displacementX);
-    }
-
-    if (Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement *
-        layoutBase.IMath.sign(this.displacementY);
-    }
-
+      else{
+        node.displacementX += displacementX;
+        node.displacementY += displacementY;
+      }
+    });
   }
 
   move() {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
     if(this.child){
-      this.child.nodes.forEach(node => {
-        node.move();
-      });
-      this.updateBounds();
+      // this.child.nodes.forEach(node => {
+      //   node.move();
+      // });
+      // this.updateBounds();
     }
     else if(this.isDirected != 1){
       this.moveBy(this.displacementX, this.displacementY);
-      layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+      //layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
     }
     else{
       this.moveBy(this.displacementX, 0);
       layout.totalDisplacement += Math.abs(this.displacementX);
     }
-  }
-
-  moveCompound() {
-    // `this` brings properties from base class
-    let layout = this.graphManager.getLayout();
-    //console.log("compound node", this.id);
-    
-    if(this.child){
-      this.child.nodes.forEach(node => {
-        node.moveBy(this.displacementX, this.displacementY);
-      });
-    }
-    else{
-      this.moveBy(this.displacementX, this.displacementY);
-      layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
-    }
-
-    
-  }
-
-  moveOnXaxis(movement:number) {
-    // `this` brings properties from base class 
-    let layout = this.graphManager.getLayout();
-    this.moveBy(movement, 0);
-    layout.totalDisplacement += Math.abs(movement);
   }
 
   /** Swap horizontal positions of this node and the other

@@ -101,6 +101,7 @@ function runLayout() {
     var graph = window.experimentSmallGraphs[selectedGraph];
     //set the graph elements
     if(graph != undefined){
+      console.log(graph);
       loadGraphMLFromStr(graph);
     }
     
@@ -241,3 +242,23 @@ function getOptions() {
     cy.graphml(s);
     //insertDummyNodesIfNeeded();
   }
+
+function loadGraph(){
+  document.getElementById("fileInput").click();
+
+  document.getElementById("fileInput").onchange = function () {
+    var file = this.files[0];
+    var reader = new FileReader();
+    reader.onload = function (progressEvent) {
+      
+      loadGraphMLFromStr(this.result);
+
+      //run cytoscape layout
+      const o = getOptions();
+      o.isForceDirected = true;
+      cy.layout(o).run();
+    };
+    reader.readAsText(file);
+  };
+
+}

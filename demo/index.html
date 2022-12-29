@@ -27,10 +27,13 @@
     <select id="experimentGraphs">
         <option value="sampleGraph">Sample Graph</option>
     </select>
+    
     <button onclick="runLayout()">Run Layout</button>
     <button onclick="addNodesToHeirarchy()">Add Nodes To Heirarchy</button>
+    <input type="file" id="fileInput" accept=".graphml" hidden>
+    <button onclick="loadGraph()">Load Graph From File</button>
     <button onclick="rerun()">ReRun</button>
-    <button onclick="reset()">Reset</button>
+    <!-- <button onclick="reset()">Reset</button> -->
     <div hidden class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -43,7 +46,7 @@
             <tbody>
               <tr>
                 <td><label class="form-label" for="nodeSep">nodeSep</label></td>
-                <td><input type="number" class="form-control form-control-sm" id="nodeSep" value="20"></td>
+                <td><input type="number" class="form-control form-control-sm" id="nodeSep" value="40"></td>
               </tr>
               <tr>
                 <td><label class="form-label" for="edgeSep">edgeSep</label></td>
@@ -149,7 +152,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="coolingCoefficient">coolingCoefficient</label></td>
-              <td><input type="number" class="form-control form-control-sm" id="coolingCoefficient" value="1.5">
+              <td><input type="number" class="form-control form-control-sm" id="coolingCoefficient" value="0.8">
               </td>
             </tr>
             <tr>
@@ -193,7 +196,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="idealEdgeLength"> idealEdgeLength </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="idealEdgeLength" value="30"></td>
+              <td><input type="number" class="form-control form-control-sm" id="idealEdgeLength" value="50"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="edgeElasticity"> edgeElasticity </label></td>
@@ -202,7 +205,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="nodeRepulsion"> nodeRepulsion </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion" value="500"></td>
+              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion" value="4500"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="swapForceLimit"> swapForceLimit </label></td>
@@ -230,7 +233,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="maxNodeDisplacement"> maxNodeDisplacement </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="maxNodeDisplacement" value="100">
+              <td><input type="number" class="form-control form-control-sm" id="maxNodeDisplacement" value="300">
               </td>
             </tr>
             <tr>
