@@ -636,12 +636,12 @@ export class HySELayout extends CoSELayout {
            
           // Apply forces on the two nodes    
           if(nodeA.isDirected != 1){
-            nodeA.repulsionForceX -= repulsionForceX/nodeA.noOfChildren;
-            nodeA.repulsionForceY -= repulsionForceY/nodeA.noOfChildren;
+            nodeA.repulsionForceX -= repulsionForceX;
+            nodeA.repulsionForceY -= repulsionForceY;
           }
           if(nodeB.isDirected != 1){
-            nodeB.repulsionForceX += repulsionForceX/nodeB.noOfChildren;
-            nodeB.repulsionForceY += repulsionForceY/nodeB.noOfChildren;
+            nodeB.repulsionForceX += repulsionForceX;
+            nodeB.repulsionForceY += repulsionForceY;
           }
         }
 
