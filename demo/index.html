@@ -22,17 +22,19 @@
 
 <body>
     <h1>Cytoscape - HySE</h1>
-    <button hidden onclick="addNode()">Add Node</button>
-    <!--create a dropdown showing sample graphs-->
-    <select id="experimentGraphs">
-        <option value="sampleGraph">Sample Graph</option>
-    </select>
-    
-    <button onclick="runLayout()">Run Layout</button>
-    <button onclick="addNodesToHeirarchy()">Add Nodes To Heirarchy</button>
-    <input type="file" id="fileInput" accept=".graphml" hidden>
-    <button onclick="loadGraph()">Load Graph From File</button>
-    <button onclick="rerun()">ReRun</button>
+    <div class="head-buttons">
+      <button hidden onclick="addNode()">Add Node</button>
+      <!--create a dropdown showing sample graphs-->
+      <select id="experimentGraphs">
+          <option value="sampleGraph">Sample Graph</option>
+      </select>
+      
+      <button onclick="runLayout()">Load and Layout Sample</button>
+      <button onclick="addNodesToHeirarchy()">Add Selected To Heirarchy and Re-Layout</button>
+      <input type="file" id="fileInput" accept=".graphml" hidden>
+      <button onclick="loadGraph()">Load Graph From File</button>
+      <button onclick="rerun()">Re-Layout</button>
+    </div>
     <!-- <button onclick="reset()">Reset</button> -->
     <div hidden class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">

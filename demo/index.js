@@ -20,11 +20,12 @@ function pageLoaded() {
     const cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
         elements: graphElements,
+        wheelSensitivity: 0.2,
         style: [
             {
                 selector: 'node',
                 style: {
-                    'background-color': '#666',
+                    'background-color': '#a3a3a3',
                     'label': 'data(id)'
                 }
             },
@@ -50,8 +51,8 @@ function pageLoaded() {
                 selector: 'node[isDirected = 1]',
                 style: {
                     'background-color': '#eee29b',
-                    //'border-width': '2px',
-                    //'border-color': '#1e90ff',
+                    'border-width': '2px',
+                    'border-color': '#eee29b',
                     'label': 'data(id)'
                 }
             },

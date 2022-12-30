@@ -3,3 +3,9 @@
     height: 90vh;
     border: 2px solid rgb(151, 39, 39);
 }
+.head-buttons {
+    margin: 5px;
+}
+.head-buttons button {
+    margin: 5px;
+}

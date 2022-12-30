@@ -115,14 +115,14 @@ export class HySELayout extends CoSELayout {
             }
             if(nodes[j].isDirected == 1){
               let node = this.cy.getElementById(nodes[j].id);
-              node.css('border-color', this.distinctColors[colorIndex2]);
-              node.css('border-width', '3px');
+              //node.css('border-color', this.distinctColors[colorIndex2]);
+              //node.css('border-width', '3px');
               colorIndex2++;
             }
             else{
               let node = this.cy.getElementById(nodes[j].id);
               node.css('border-color', this.distinctColors[colorIndex]);
-              node.css('border-width', '3px');
+              node.css('border-width', '2px');
             }
             
             
