@@ -513,14 +513,27 @@ export class HySELayout extends CoSELayout {
         // Apply forces on the end nodes
         sourceNode.springForceX += springForceX;
         targetNode.springForceX -= springForceX;
-
+        
+        // if(sourceNode.isDirected == 1 && targetNode.isDirected == 1){
+        //   sourceNode.springForceX += springForceX;
+        //   targetNode.springForceX -= springForceX;
+        // }
         if(sourceNode.isDirected != 1){
+          //sourceNode.springForceX += springForceX;
           sourceNode.springForceY += springForceY;
         }
         if(targetNode.isDirected != 1){
+          //targetNode.springForceX -= springForceX;
           targetNode.springForceY -= springForceY;
         }
-
+        if(sourceNode.isDirected == 1 && targetNode.isDirected != 1){
+          targetNode.springForceY += springForceY/1.1;
+          targetNode.springForceX += springForceX/1.1;
+        }
+        if(sourceNode.isDirected != 1 && targetNode.isDirected == 1){
+          sourceNode.springForceY -= springForceY/1.1;
+          sourceNode.springForceX -= springForceX/1.1;
+        }
 
       }
     
