@@ -38,6 +38,7 @@ function pageLoaded() {
                     'target-arrow-shape': 'triangle'
                 }
             },
+            //color the selected nodes
             {
               selector: ':selected',
               style: {
@@ -55,6 +56,14 @@ function pageLoaded() {
                     'border-color': '#eee29b',
                     'label': 'data(id)'
                 }
+            },
+            //color the selected edges
+            {
+              selector: 'edge:selected',
+              style: {
+                'width': 3,
+                'line-color': '#2F2D2C',
+              }
             },
         ]
     }).on('cxttap', 'node', function (evt) {
@@ -262,4 +271,8 @@ function loadGraph(){
     reader.readAsText(file);
   };
 
+}
+
+function deleteSelected(){
+  cy.$(':selected').remove();
 }
