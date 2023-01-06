@@ -57,6 +57,15 @@ function pageLoaded() {
                     'label': 'data(id)'
                 }
             },
+            //color the selected nodes in the heirarchy
+            {
+                selector: 'node[isDirected = 1]:selected',
+                style: {
+                    'background-color': '#2F2D2C',
+                    'border-width': '2px',
+                    'border-color': '#2F2D2C'
+                }
+            },
             //color the selected edges
             {
               selector: 'edge:selected',

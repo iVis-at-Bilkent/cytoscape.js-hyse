@@ -193,6 +193,27 @@ window.graphElements = {
       //     isDirected:0
       //   },
       // },
+      // {
+      //   data: {
+      //     id: "c_19",
+      //     isDirected:0,
+      //     parent: "c_5",
+      //   },
+      // },
+      // {
+      //   data: {
+      //     id: "c_20",
+      //     isDirected:0,
+      //     parent: "c_3",
+      //   },
+      // },
+      // {
+      //   data: {
+      //     id: "c_21",
+      //     isDirected:0,
+      //     parent: "c_5",
+      //   },
+      // },
     ],
     edges: [
       {
@@ -384,6 +405,12 @@ window.graphElements = {
       },
       // {
       //   data: {
+      //     source: "c_19",
+      //     target: "c_5",
+      //   },
+      // },
+      // {
+      //   data: {
       //     source: "c_15",
       //     target: "n2_3",
       //   },
@@ -404,6 +431,12 @@ window.graphElements = {
       //   data: {
       //     source: "c_14",
       //     target: "c_13",
+      //   },
+      // },
+      // {
+      //   data: {
+      //     source: "c_21",
+      //     target: "c_19",
       //   },
       // },
     ],

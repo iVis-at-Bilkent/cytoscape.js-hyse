@@ -28,6 +28,7 @@ export class HySELayout extends CoSELayout {
     expansionCoefficient = 12;
     useExpansionByStreching = true;
     edgesBetweenGraphs: HySEEdge[] = [];
+    dummyCompoundNodes: HySENode[] = [];
 
     [x: string]: any;
     constructor(layering, cy) {
@@ -73,16 +74,24 @@ export class HySELayout extends CoSELayout {
     
         this.prepareCompoundNodes();
 
+        this.dummyCompoundNodes.forEach(node => {
+          this.graphManager.getRoot().add(node);
+          this.graphManager.allNodes.push(node);
+        });
 
         let graphs = this.graphManager.getGraphs();
-        for(let i = 0; i < graphs.length; i++){
-          if(graphs[i].parent.id){
-            //add the parent node to the root graph
-            this.graphManager.getRoot().add(graphs[i].parent);
-            this.graphManager.allNodes.push(graphs[i].parent);
-          }
-          console.log("graphs: ", graphs[i]);
-        }
+        // for(let i = 0; i < graphs.length; i++){
+        //   if(graphs[i].parent.id){
+        //     //add the parent node to the root graph
+        //     if(this.graphManager.getRoot() && this.graphManager.getRoot().indexOf(graphs[i].parent) == -1){
+        //       this.graphManager.getRoot().add(graphs[i].parent);
+        //     }
+        //     //if (this.graphManager.allNodes.indexOf(graphs[i].parent) == -1){
+        //       this.graphManager.allNodes.push(graphs[i].parent);
+        //     //}
+        //   }
+        //   console.log("graphs: ", graphs[i]);
+        // }
 
         
         let edges = this.graphManager.getAllEdges();
@@ -96,34 +105,22 @@ export class HySELayout extends CoSELayout {
         }
 
         this.graphManager.getRoot().calcEstimatedSize();
-
+        //this.calcIdealEdgeLengths();
         //this.cy.nodes().css('border-color', 'blue');
         //this.cy.nodes().css('border-width', '1px');
         //color the nodes in different graphs as different colors
         let colorIndex = 0;
-        let colorIndex2 = 0;
         
-        for(let i = 0; i < graphs.length; i++){
+        for(let i = 0; i < this.dummyCompoundNodes.length; i++){
           // if(!graphs[i].parent.id){
           //   continue;
           // }
-          let nodes = graphs[i].getNodes();
+          let nodes = this.dummyCompoundNodes[i].child.getNodes();
           for(let j = 0; j < nodes.length; j++){
             
-            if(nodes[j].child){
-              continue;
-            }
-            if(nodes[j].isDirected == 1){
-              let node = this.cy.getElementById(nodes[j].id);
-              //node.css('border-color', this.distinctColors[colorIndex2]);
-              //node.css('border-width', '3px');
-              colorIndex2++;
-            }
-            else{
-              let node = this.cy.getElementById(nodes[j].id);
-              node.css('border-color', this.distinctColors[colorIndex]);
-              node.css('border-width', '2px');
-            }
+            let node = this.cy.getElementById(nodes[j].id);
+            node.css('border-color', this.distinctColors[colorIndex]);
+            node.css('border-width', '2px');
             
             
           }
@@ -159,6 +156,15 @@ export class HySELayout extends CoSELayout {
             seeds[group].add(seed);
             }
             // seeds[group] = seed;
+          }
+          if(node.child){
+            node.child.nodes.forEach((child) => { 
+              dfs(child,group);
+            });
+          }
+          if(node.parentId){
+            let parent = node.owner.parent;
+            dfs(parent,group);
           }
 
           node.edges.filter(x=>x.source.isDirected != 1 && x.target.isDirected != 1).forEach((edge) => {
@@ -247,6 +253,7 @@ export class HySELayout extends CoSELayout {
               x.setRect(childpoints,{width:30,height:30});
               x.parent = newNode;
               newNode.getChild().add(x);
+              
             });
             console.log("new Nodes",newNode);  
           }
@@ -319,6 +326,7 @@ export class HySELayout extends CoSELayout {
               x.parent = newNode;
               newNode.getChild().add(x);
             });
+            this.dummyCompoundNodes.push(newNode);
             console.log("new Nodes",newNode);  
           }
           
@@ -454,7 +462,17 @@ export class HySELayout extends CoSELayout {
             }
             //console.log("same");
             //super.calcRepulsionForce(node1, node2);
+            // if(node1.id == "c_5" || node2.id == "c_5"){
+            //   console.log("repulsion force");
+            //   console.log("node1: ", node1.id, " node2: ", node2.id);
+            // }
+            
             this.fdCalculateRepulsionForces(node1, node2);
+            
+            // if(node1.id == "c_20" && node2.id == "c_19" || node1.id == "c_19" && node2.id == "c_20"){
+            //   console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcex: ", node1.repulsionForceX, " node2.nodeRepulsionForcex: ", node2.repulsionForceX);
+            //   console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcey: ", node1.repulsionForceY, " node2.nodeRepulsionForcey: ", node2.repulsionForceY);
+            // }
             //console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcex: ", node1.repulsionForceX, " node2.nodeRepulsionForcex: ", node2.repulsionForceX);
             //console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcey: ", node1.repulsionForceY, " node2.nodeRepulsionForcey: ", node2.repulsionForceY);
           }
@@ -466,6 +484,7 @@ export class HySELayout extends CoSELayout {
       calcSpringForce(edge: HySEEdge, idealLength: number) {
         let sourceNode = edge.getSource();
         let targetNode = edge.getTarget();
+        
         //console.log("sourceNode: ", sourceNode.id, " targetNode: ", targetNode.id);
         //console.log("idealLength: ", idealLength);
         // if((sourceNode.isDirected == 1 && targetNode.isDirected == 0) || (sourceNode.isDirected == 0 && targetNode.isDirected == 1)){
@@ -499,6 +518,9 @@ export class HySELayout extends CoSELayout {
         if (length == 0) {
           return;
         }
+        // if(sourceNode.id == "c_5" || targetNode.id == "c_5"){
+        //   console.log("edge length: ", length, " idealLength: ", idealLength);
+        // }
         // Calculate spring forces
         let springForce = edge.edgeElasticity * (length - idealLength);
         // if (springForce < 0) {
@@ -534,6 +556,11 @@ export class HySELayout extends CoSELayout {
           sourceNode.springForceY -= springForceY/1.1;
           sourceNode.springForceX -= springForceX/1.1;
         }
+        // if(sourceNode.id == "c_5" || targetNode.id == "c_5"){
+        //   console.log("spring force");
+        //   console.log("node1: ", sourceNode.id, " node2: ", targetNode.id);
+        //   console.log("springForceX: ", springForceX, " springForceY: ", springForceY);
+        // }
 
       }
     

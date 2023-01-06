@@ -2,6 +2,7 @@ import { HySELayout } from "./hyse-layout";
 import { HySENode } from "./hyse-node";
 // import { layoutBase.PointD, DimensionD } from "cose-base";
 import {layoutBase} from "cose-base";
+import coseBase from "cose-base";
 import { HySEEdge } from "./hyse-edge";
 import { Str2HySENode } from "./helper";
 
@@ -26,7 +27,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.maxNodeDisplacement = opts.maxNodeDisplacement;
   l.expansionCoefficient = opts.expansionCoefficient;
   l.orderGap = opts.orderGap;
-
+  coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 
   let gm = l.newGraphManager();
@@ -80,11 +81,50 @@ function assignInitialPositions(g, layering, opts) {
   }
 }
 
+function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
+
+  for(let i =0;i<node.children().length;i ++){
+    let n = node.children()[i];
+    if(nodesVisited.includes(n.id())){
+      return;
+    }
+    nodesVisited.push(n.id());
+    let points = null;
+    let dimension = null;
+    console.log("n", n);
+    if(n.data("isDirected") !=1 ){
+      points = new layoutBase.PointD(0, 0);
+      dimension = new layoutBase.DimensionD(0, 0);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), 0);
+      hyseNode.nodeRepulsion = opts.nodeRepulsion;
+      hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
+      hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length+1;
+      if(hyseNode.noOfChildren > 1){
+        let newGraph = layout.newGraph();
+        layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, newGraph, layout, opts, nodesVisited, n, hyseNode);
+      }
+      if(opts.eles.nodes('#' + n.id()).data("parent")){
+        hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
+      }
+      
+      const lNode = hyseParent.getChild().add(hyseNode);
+      id2LNode[n.id()] = lNode;
+    }
+  }
+}
+
+
 function processNodes(g, parent, layout, opts) {
   const nodes = opts.eles.nodes().filter(x => !x.id().startsWith('_d'));
   // node ların sol üst köşesinin koordinatları veriliyor
+  let nodesVisited:string[] = [];
   for (let i = 0; i < nodes.length; i++) {
     let n = nodes[i];
+    if(nodesVisited.includes(n.id())){
+      continue;
+    }
+    nodesVisited.push(n.id());
     let points = null;
     let dimension = null;
     console.log("n", n);
@@ -96,6 +136,16 @@ function processNodes(g, parent, layout, opts) {
       hyseNode.isDirected = 0;
       if(hyseNode.isDirected == undefined){
         hyseNode.isDirected = 0;
+      }
+      hyseNode.noOfChildren = opts.eles.nodes('#' + nodes[i].id()).children().length+1;
+      console.log("hyseNode.noOfChildren", opts.eles.nodes('#' + nodes[i].id()).children());
+      if(hyseNode.noOfChildren > 1){
+        let newGraph = layout.newGraph();
+        layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, newGraph, layout, opts, nodesVisited, n, hyseNode);
+      }
+      if(opts.eles.nodes('#' + nodes[i].id()).data("parent")){
+        hyseNode.parentId = opts.eles.nodes('#' + nodes[i].id()).data("parent");
       }
       //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
       const lNode = parent.add(hyseNode);
