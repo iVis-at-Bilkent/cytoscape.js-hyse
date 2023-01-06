@@ -31,4 +31,4 @@ After getting a build (use `npm run build` or `npm run build-dev`), you can impo
 
 ## Team
 
-  * [Hamza Islan](https://github.com/hamzaislam101), [Hasan Balcı](https://github.com/hasanbalci) and [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Hamza Islam](https://github.com/hamzaislam101), [Hasan Balcı](https://github.com/hasanbalci) and [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
