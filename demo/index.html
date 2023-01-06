@@ -35,6 +35,11 @@
       <button onclick="loadGraph()">Load Graph From File</button>
       <button onclick="rerun()">Re-Layout</button>
       <button onclick="deleteSelected()">Delete Selected</button>
+      <label class="label">Ticks per frame</label>
+      <input type="number" class="number-input" id="ticksPerFrame" value="5">
+      <label class="label">Tick Delay</label>
+      <input type="number" class="number-input" id="tickDelay" value="100">
+      <button onclick="runAnimatedLayout()">Run Animated Layout</button>
     </div>
     <!-- <button onclick="reset()">Reset</button> -->
     <div hidden class="accordion-item">
@@ -150,8 +155,8 @@
         <table class="table table-borderless table-hover table-sm align-middle">
           <tbody>
             <tr>
-              <td><label class="form-label" for="ticksPerFrame">ticksPerFrame</label></td>
-              <td><input type="number" class="form-control form-control-sm" id="ticksPerFrame" value="30"></td>
+              <td><label class="form-label" for="ticksPerFrame2">ticksPerFrame</label></td>
+              <td><input type="number" class="form-control form-control-sm" id="ticksPerFrame2" value="30"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="coolingCoefficient">coolingCoefficient</label></td>
@@ -183,8 +188,8 @@
               </td>
             </tr>
             <tr>
-              <td><label class="form-label" for="tickDelay">tickDelay (ms)</label></td>
-              <td><input type="number" class="form-control form-control-sm" id="tickDelay" value="100"></td>
+              <td><label class="form-label" for="tickDelay2">tickDelay (ms)</label></td>
+              <td><input type="number" class="form-control form-control-sm" id="tickDelay2" value="1500"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="fullyCalcRep4Ticks"> fullyCalcRep4Ticks </label></td>

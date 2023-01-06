@@ -10,7 +10,7 @@ const id2LNode: Str2HySENode = {};
 
 export function runSpringEmbedder(g, layering: string[][], opts, cy) {
 
-
+  const nodes = opts.eles.nodes();
   let filteredLayers = filterDummyNodesFromLayers(layering);
   randomizeOrderInLayers(filteredLayers);
   const l = new HySELayout(filteredLayers, cy);
@@ -34,27 +34,74 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
 
   processNodes(g, gm.addRoot(), l, opts);
   processEdges(g, gm, opts);
-  l.runLayout();
-  console.log("setting positions");
-  let counter = 0;
-  for (let i = 0; i < gm.getAllNodes().length; i++) {
-    const n = gm.getAllNodes()[i];
-    // console.log(counter++);
-    if (!opts.isRelayer) {
-      // console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
-      if(n.id instanceof Object){
-        window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+
+
+  if(opts.animate != "during"){
+    l.runLayout();
+    console.log("setting positions");
+    let counter = 0;
+    for (let i = 0; i < gm.getAllNodes().length; i++) {
+      const n = gm.getAllNodes()[i];
+      // console.log(counter++);
+      if (!opts.isRelayer) {
+        // console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
+        if(n.id instanceof Object){
+          window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+        }
+        else{
+          window['cy'].nodes('#' + n.id).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
+        }
+        
       }
-      else{
-        window['cy'].nodes('#' + n.id).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
-      }
-      
+    }
+    if (opts.isRelayer) {
+      layering = getNewLayeringFromForceDirected(gm, layering);
     }
   }
-  if (opts.isRelayer) {
-    layering = getNewLayeringFromForceDirected(gm, layering);
+  else{
+    runTickByTickAnimated(l,nodes,opts);
   }
   return layering;
+}
+
+function runTickByTickAnimated(layout: HySELayout, nodes, options) {
+  layout.beforeLayout();
+  layout.swapPeriod = options.swapPeriod;
+  layout.minPairSwapPeriod = options.minPairSwapPeriod;
+  layout.isFastCooling = options.isFastCooling;
+  layout.swapForceLimit = options.swapForceLimit;
+  layout.coolingCoefficient = options.coolingCoefficient;
+  layout.orderFlipPeriod = options.orderFlipPeriod;
+  layout.nodeRepulsionCalculationWidth = options.nodeRepulsionCalculationWidth;
+  layout.fullyCalcRep4Ticks = options.fullyCalcRep4Ticks;
+  layout.uniformNodeDimensions = options.uniformNodeDimensions;
+  layout.maxNodeDisplacement = options.maxNodeDisplacement;
+  layout.orderGap = options.orderGap;
+  const executeTickFn = () => {
+    setTimeout(() => {
+      let isLayoutEnded = false;
+      for (let i = 0; i < options.ticksPerFrame && !isLayoutEnded; i++) {
+        isLayoutEnded = layout.tick();
+      }
+      nodes.positions((ele) => {
+        const lNode = id2LNode[ele.id()]
+        return {
+          x: lNode.getRect().getCenterX(),
+          y: lNode.getRect().getCenterY()
+        };
+      });
+      if (!isLayoutEnded) {
+        requestAnimationFrame(executeTickFn);
+      } else {
+        console.log("Ended in ", layout.totalIterations, " ticks ");
+        if (options.stop && typeof options.stop == "function") {
+          options.stop();
+        }
+      }
+    }, options.tickDelay);
+  };
+
+  requestAnimationFrame(executeTickFn);
 }
 
 function getNewLayeringFromForceDirected(gm, layering) {

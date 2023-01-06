@@ -9,3 +9,11 @@
 .head-buttons button {
     margin: 5px;
 }
+.label {
+    font-size: 1em;
+    color: #000;
+    text-shadow: 0 0 1px #fff;
+}
+.number-input{
+    width: 50px;
+}

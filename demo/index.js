@@ -137,6 +137,14 @@ function rerun(){
     cy.layout(o).run();
 }
 
+function runAnimatedLayout(){
+    //run cytoscape layout
+    const o = getOptions();
+    o.isForceDirected = true;
+    o.animate = "during";
+    cy.layout(o).run();
+}
+
 function addNodesToHeirarchy(){
     //get the selected nodes
     var selectedNodes = cy.$(':selected');
