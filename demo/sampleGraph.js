@@ -193,27 +193,34 @@ window.graphElements = {
       //     isDirected:0
       //   },
       // },
-      // {
-      //   data: {
-      //     id: "c_19",
-      //     isDirected:0,
-      //     parent: "c_5",
-      //   },
-      // },
-      // {
-      //   data: {
-      //     id: "c_20",
-      //     isDirected:0,
-      //     parent: "c_3",
-      //   },
-      // },
-      // {
-      //   data: {
-      //     id: "c_21",
-      //     isDirected:0,
-      //     parent: "c_5",
-      //   },
-      // },
+      {
+        data: {
+          id: "c_19",
+          isDirected:0,
+          parent: "c_5",
+        },
+      },
+      {
+        data: {
+          id: "c_20",
+          isDirected:0,
+          parent: "c_3",
+        },
+      },
+      {
+        data: {
+          id: "c_21",
+          isDirected:0,
+          parent: "c_5",
+        },
+      },
+      {
+        data: {
+          id: "c_22",
+          isDirected:0,
+          parent: "c_5",
+        },
+      },
     ],
     edges: [
       {
@@ -296,7 +303,7 @@ window.graphElements = {
       },
       {
         data: {
-          source: "c_5",
+          source: "c_19",
           target: "c_2",
         },
       },
@@ -433,11 +440,17 @@ window.graphElements = {
       //     target: "c_13",
       //   },
       // },
-      // {
-      //   data: {
-      //     source: "c_21",
-      //     target: "c_19",
-      //   },
-      // },
+      {
+        data: {
+          source: "c_21",
+          target: "c_19",
+        },
+      },
+      {
+        data: {
+          source: "c_21",
+          target: "c_22",
+        },
+      },
     ],
   };

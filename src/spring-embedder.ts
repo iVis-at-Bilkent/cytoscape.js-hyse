@@ -146,6 +146,7 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
       hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length+1;
+      
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
         layout.graphManager.add(newGraph, hyseNode);
@@ -154,7 +155,9 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
       if(opts.eles.nodes('#' + n.id()).data("parent")){
         hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
       }
-      
+      if (hyseNode.noOfChildren >= 2) {
+        hyseNode.noOfChildren -= 1;
+      }
       const lNode = hyseParent.getChild().add(hyseNode);
       id2LNode[n.id()] = lNode;
     }
@@ -185,6 +188,7 @@ function processNodes(g, parent, layout, opts) {
         hyseNode.isDirected = 0;
       }
       hyseNode.noOfChildren = opts.eles.nodes('#' + nodes[i].id()).children().length+1;
+      
       console.log("hyseNode.noOfChildren", opts.eles.nodes('#' + nodes[i].id()).children());
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
@@ -195,6 +199,9 @@ function processNodes(g, parent, layout, opts) {
         hyseNode.parentId = opts.eles.nodes('#' + nodes[i].id()).data("parent");
       }
       //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
+      if (hyseNode.noOfChildren >= 2) {
+        hyseNode.noOfChildren -= 1;
+      }
       const lNode = parent.add(hyseNode);
       id2LNode[nodes[i].id()] = lNode;
     }
