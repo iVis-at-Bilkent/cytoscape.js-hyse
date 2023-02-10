@@ -25,6 +25,12 @@ function pageLoaded() {
             {
                 selector: 'node',
                 style: {
+                    'width': function (ele) {
+                        return ele.data('width');
+                    },
+                    'height': function (ele) {
+                        return ele.data('height');
+                    },
                     'background-color': '#a3a3a3',
                     'label': 'data(id)'
                 }

@@ -52,7 +52,9 @@ window.graphElements = {
       {
         data: {
           id: "n2_2",
-          isDirected:1
+          isDirected:1,
+          width:80,
+          height:140,
         },
       },
       {
@@ -64,7 +66,9 @@ window.graphElements = {
       {
         data: {
           id: "n2_4",
-          isDirected:1
+          isDirected:1,
+          width:100,
+          height:80,
         },
       },
       {
@@ -76,7 +80,8 @@ window.graphElements = {
       {
         data: {
           id: "n3_2",
-          isDirected:1
+          isDirected:1,
+          width:50,
         },
       },
       {
@@ -130,25 +135,33 @@ window.graphElements = {
       {
         data: {
           id: "c_8",
-          isDirected:0
+          isDirected:0,
+          width:50,
+          height:50,
         },
       },
       {
         data: {
           id: "c_9",
-          isDirected:0
+          isDirected:0,
+          width:80,
+          height:80,
         },
       },
       {
         data: {
           id: "c_10",
-          isDirected:0
+          isDirected:0,
+          height:60,
+          width:50,
         },
       },
       {
         data: {
           id: "c_11",
-          isDirected:0
+          isDirected:0,
+          width:50,
+          height:60,
         },
       },
       {

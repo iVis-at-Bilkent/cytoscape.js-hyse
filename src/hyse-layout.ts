@@ -571,12 +571,12 @@ export class HySELayout extends CoSELayout {
           targetNode.springForceY -= springForceY;
         }
         if(sourceNode.isDirected == 1 && targetNode.isDirected != 1){
-          targetNode.springForceY += springForceY/1.1;
-          targetNode.springForceX += springForceX/1.1;
+          targetNode.springForceY += springForceY/1.5;
+          targetNode.springForceX += springForceX/1.5;
         }
         if(sourceNode.isDirected != 1 && targetNode.isDirected == 1){
-          sourceNode.springForceY -= springForceY/1.1;
-          sourceNode.springForceX -= springForceX/1.1;
+          sourceNode.springForceY -= springForceY/1.5;
+          sourceNode.springForceX -= springForceX/1.5;
         }
         // if((sourceNode.id == "c_21" && targetNode.id == "c_19") || ( targetNode.id == "c_21" && sourceNode.id == "c_19")){
         //   console.log("spring force");
