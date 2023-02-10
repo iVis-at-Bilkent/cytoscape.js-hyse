@@ -111,6 +111,11 @@ export class HySELayout extends CoSELayout {
         //color the nodes in different graphs as different colors
         let colorIndex = 0;
         
+        for(let i = 0;i<nodes.length;i++){
+          let node = this.cy.getElementById(nodes[i].id);
+          node.css('border-color', '#eee29b');
+        }
+
         for(let i = 0; i < this.dummyCompoundNodes.length; i++){
           // if(!graphs[i].parent.id){
           //   continue;
