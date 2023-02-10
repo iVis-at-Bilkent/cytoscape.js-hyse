@@ -137,6 +137,22 @@ function rerun(){
     cy.layout(o).run();
 }
 
+function runCose(){
+    //run cose-bilkent layout
+    const o = getOptions();
+    o.name = 'cose-bilkent';
+    cy.layout(o).run();
+}
+
+function runCoseAnimated(){
+    //run cose-bilkent layout
+    const o = getOptions();
+    o.name = 'cose-bilkent';
+    o.animate = "during";
+    o.refresh = o.ticksPerFrame;
+    cy.layout(o).run();
+}
+
 function runAnimatedLayout(){
     //run cytoscape layout
     const o = getOptions();

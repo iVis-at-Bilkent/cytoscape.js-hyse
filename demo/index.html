@@ -17,6 +17,9 @@
     <script src="../dist/cytoscape-hyse.js"> </script>
     <script src="./sampleGraph.js"></script>
     <script src="./index.js"></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="./cytoscape-cose-bilkent.js"></script>
     
 </head>
 
@@ -34,6 +37,8 @@
       <input type="file" id="fileInput" accept=".graphml" hidden>
       <button onclick="loadGraph()">Load Graph From File</button>
       <button onclick="rerun()">Re-Layout</button>
+      <button onclick="runCose()">Run Cose</button>
+      <button onclick="runCoseAnimated()">Run Cose Animated</button>
       <button onclick="deleteSelected()">Delete Selected</button>
       <label class="label">Ticks per frame</label>
       <input type="number" class="number-input" id="ticksPerFrame" value="5">
