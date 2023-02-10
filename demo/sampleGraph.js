@@ -99,7 +99,9 @@ window.graphElements = {
       {
         data: {
           id: "c_2",
-          isDirected:0
+          isDirected:0,
+          width:80,
+          height:60,
         },
       },
       {
@@ -117,7 +119,9 @@ window.graphElements = {
       {
         data: {
           id: "c_6",
-          isDirected:0
+          isDirected:0,
+          width:70,
+          height:100,
         },
       },
       {
@@ -225,6 +229,8 @@ window.graphElements = {
           id: "c_21",
           isDirected:0,
           parent: "c_5",
+          width:90,
+          height:90,
         },
       },
       {
