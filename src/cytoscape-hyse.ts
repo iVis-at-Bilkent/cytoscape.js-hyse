@@ -37,6 +37,40 @@ export class DagreAndSpringEmbedderLayout {
       }
     };
 
+    
+    // add nodes to dagre
+    //only add those nodes which are in the heirachical layout
+
+    let nodes = eles.nodes().filter(function (ele) {
+      return  ele.data("isDirected") === 1;
+    });
+
+    //let nodes = eles.nodes();
+    let maxHeight = 0;
+    let maxWidth = 0;
+    for (let i = 0; i < nodes.length; i++) {
+      let node = nodes[i];
+      
+      let nbb = node.layoutDimensions(options);
+
+      g.setNode(node.id(), {
+        width: nbb.w,
+        height: nbb.h,
+        name: node.id(),
+        isDirected:node.data("isDirected"),
+      });
+      if(nbb.h > maxHeight){
+        maxHeight = nbb.h;
+      }
+      if(nbb.w > maxWidth){
+        maxWidth = nbb.w;
+      }
+      // console.log( g.node(node.id()) );
+    }
+
+    options.rankGap = 1.5*maxHeight;
+    options.orderGap = 1.5*maxWidth;
+
     setGObj('nodesep', options.nodeSep);
     setGObj('edgesep', options.edgeSep);
     setGObj('ranksep', options.rankSep);
@@ -50,27 +84,6 @@ export class DagreAndSpringEmbedderLayout {
     g.setDefaultEdgeLabel(function () { return {}; });
     g.setDefaultNodeLabel(function () { return {}; });
 
-    // add nodes to dagre
-    //only add those nodes which are in the heirachical layout
-
-    let nodes = eles.nodes().filter(function (ele) {
-        return  ele.data("isDirected") === 1;
-    });
-
-    //let nodes = eles.nodes();
-    for (let i = 0; i < nodes.length; i++) {
-      let node = nodes[i];
-      
-      let nbb = node.layoutDimensions(options);
-
-      g.setNode(node.id(), {
-        width: nbb.w,
-        height: nbb.h,
-        name: node.id(),
-        isDirected:node.data("isDirected"),
-    });
-    // console.log( g.node(node.id()) );
-    }
 
     // add edges to dagre
     let edges = eles.edges().stdFilter(function (edge) {
@@ -151,7 +164,9 @@ export class DagreAndSpringEmbedderLayout {
       });
     } else {
         console.log("not force directed");
+        console.log("not f nodes", nodes);
       nodes.layoutPositions(this, options, function (ele) {
+        counter++;
         ele = typeof ele === "object" ? ele : this;
         let dModel = ele.scratch().dagre;
 
