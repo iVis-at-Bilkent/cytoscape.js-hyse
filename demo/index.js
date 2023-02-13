@@ -131,9 +131,10 @@ function runLayout() {
     }
     
     //run cytoscape layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    cy.layout(o).run();
+    // const o = getOptions();
+    // o.isForceDirected = true;
+    // o.isAnimated = false;
+    // cy.layout(o).run();
 }
 
 function rerun(){
@@ -147,6 +148,7 @@ function runCose(){
     //run cose-bilkent layout
     const o = getOptions();
     o.name = 'cose-bilkent';
+    o.isForceDirected = true;
     cy.layout(o).run();
 }
 
@@ -155,6 +157,7 @@ function runCoseAnimated(){
     const o = getOptions();
     o.name = 'cose-bilkent';
     o.animate = "during";
+    o.isForceDirected = true;
     o.refresh = o.ticksPerFrame;
     cy.layout(o).run();
 }
@@ -288,6 +291,7 @@ function getOptions() {
 
   function loadGraphMLFromStr(s) {
     cy.$().remove();
+    cy.graphml({layoutBy: "hyse",isForceDirected:true});
     cy.graphml(s);
     //insertDummyNodesIfNeeded();
   }
