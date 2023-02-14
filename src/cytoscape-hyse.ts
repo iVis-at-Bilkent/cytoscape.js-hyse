@@ -68,8 +68,8 @@ export class DagreAndSpringEmbedderLayout {
       // console.log( g.node(node.id()) );
     }
 
-    if(options.rankGap<20+maxHeight){
-      options.rankGap = 20+maxHeight;
+    if(options.rankGap<40+maxHeight/2){
+      options.rankGap = 40+maxHeight/2;
     }
     if(options.orderGap<20+maxWidth){
       options.orderGap = 20+maxWidth;
