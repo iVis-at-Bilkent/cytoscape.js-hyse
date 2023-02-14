@@ -71,7 +71,7 @@ export class HySENode extends CoSENode  {
     }
     else if(this.isDirected != 1){
       this.moveBy(this.displacementX, this.displacementY);
-      //layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+      layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
     }
     else{
       this.moveBy(this.displacementX, 0);

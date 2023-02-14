@@ -131,10 +131,10 @@ function runLayout() {
     }
     
     //run cytoscape layout
-    // const o = getOptions();
-    // o.isForceDirected = true;
-    // o.isAnimated = false;
-    // cy.layout(o).run();
+    const o = getOptions();
+    o.isForceDirected = true;
+    o.isAnimated = false;
+    cy.layout(o).run();
 }
 
 function rerun(){
@@ -291,7 +291,7 @@ function getOptions() {
 
   function loadGraphMLFromStr(s) {
     cy.$().remove();
-    cy.graphml({layoutBy: "hyse",isForceDirected:true});
+    cy.graphml({layoutBy: "hyse"});
     cy.graphml(s);
     //insertDummyNodesIfNeeded();
   }
