@@ -32,27 +32,28 @@
           <option value="sampleGraph">Sample Graph</option>
       </select>
       
-      <button tooltip="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
+      <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
       
       <input type="file" id="fileInput" accept=".graphml" hidden>
-      <button tooltip="Load Graph From File" onclick="loadGraph()">Load</button>
+      <button title="Load Graph From File" onclick="loadGraph()">Load</button>
       
-      <button tooltip="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
+      <button title="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
       
-      <button tooltip="Re-Layout" onclick="rerun()">HySE</button>
-      
-      <button tooltip="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
+      <button title="Delete Selected Items" onclick="deleteSelected()">Delete Selected</button>
 
-      <label class="label">Tick Delay</label>
-      <input type="number" class="number-input" id="tickDelay" value="100">
+      <button title="Re-Layout" onclick="rerun()">HySE</button>
+      
+      <button title="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
 
-      <label class="label">Ticks Per Frame</label>
-      <input type="number" class="number-input" id="ticksPerFrame" value="5">
+      <label title="Tick Delay" class="label">Tick Delay</label>
+      <input title="Tick Delay" type="number" class="number-input" id="tickDelay" value="100">
+
+      <label title="Ticks Per Frame" class="label">Ticks Per Frame</label>
+      <input title="Ticks Per Frame" type="number" class="number-input" id="ticksPerFrame" value="5">
       
 
-      <button tooltip="Run Cose" onclick="runCose()">CoSE</button>
-      <button tooltip="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
-      <!-- <button onclick="deleteSelected()">Delete Selected</button> -->
+      <button title="Run Cose" onclick="runCose()">CoSE</button>
+      <button title="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
       
       
     </div>

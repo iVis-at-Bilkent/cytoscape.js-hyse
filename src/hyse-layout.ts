@@ -479,7 +479,7 @@ export class HySELayout extends CoSELayout {
         var nodes = this.graphManager.allNodes as HySENode[];
         for (var i = 0; i < nodes.length; i++) {
           var node1 = nodes[i];
-          for (var j = 0; j < nodes.length; j++) {
+          for (var j = i+1; j < nodes.length; j++) {
             var node2 = nodes[j];
             //console.log(" node1 id: ", node1.id, " node2 id: ", node2.id);
             if (node1.getOwner() != node2.getOwner() ) {
