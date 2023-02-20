@@ -86,8 +86,8 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
       nodes.positions((ele) => {
         const lNode = id2LNode[ele.id()]
         return {
-          x: lNode.getRect().getCenterX(),
-          y: lNode.getRect().getCenterY()
+          x: lNode.getRect().x,
+          y: lNode.getRect().y
         };
       });
       if (!isLayoutEnded) {
