@@ -11,19 +11,19 @@ export class HySELayout extends CoSELayout {
     orderedLayers: HySENode[][];
     id2LNode: Str2HySENode = {};
     id2TotalForceX = {};
-    swapForceLimit = 100;
+    swapForceLimit = 1000;
     swappedPairs = {};
     banned2SwapPairs = {};
     minPairSwapPeriod = 20 * this.swapPeriod;
     orderFlipPeriod = 100;
     isFastCooling = true;
-    isHighlightSwappedPair = false;
+    isHighlightSwappedPair = true;
     cy: any;
     distinctColors = [ '#00c853', '#ff3d00', '#ffd600', '#76ff03', '#18ffff', '#d500f9', '#f48fb1','#2962ff'];
     cntBan4swap = 0;
     nodeRepulsionCalculationWidth = 7;
     fullyCalcRep4Ticks = 0.2;
-    uniformNodeDimensions = true;
+    uniformNodeDimensions = false;
     orderGap = 80;
     expansionCoefficient = 12;
     useExpansionByStreching = true;
@@ -54,9 +54,12 @@ export class HySELayout extends CoSELayout {
         super.initSpringEmbedder();
         this.maxNodeDisplacement = maxNodeDispParam;
         this.uniformLeafNodeSizes = this.uniformNodeDimensions;
-        this.useFRGridVariant = false;
+        this.useFRGridVariant = true;
         
-        
+        console.log("beforeLayout");
+        console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
+        console.log("useFRGridVariant: ", this.useFRGridVariant);
+
         
         const nodes = this.graphManager.getAllNodes();
         for (let i = 0; i < nodes.length; i++) {
@@ -393,8 +396,8 @@ export class HySELayout extends CoSELayout {
         // if(this.useExpansionByStreching){
         //   this.expandNodesByStreching();
         //   for(let i = 0; i < 20; i++) {
-        //     this.repelNodePostAlogo();
-        //     this.moveNodes(true);
+        //     //this.repelNodePostAlogo();
+        //     this.moveNodes();
         //   }
         // }
         // else{
@@ -421,6 +424,22 @@ export class HySELayout extends CoSELayout {
         window['hyseExecutionTimes'].push(t);
         console.log("HyseLayout ended in ", this.totalIterations, " ticks ");
       }
+
+      isDirectedConverged() {
+        var converged;
+        var oscilating = false;
+
+        if (this.totalIterations > this.maxIterations / 3)
+        {
+          oscilating = Math.abs(this.totalDisplacement - this.oldTotalDisplacement) < 3;
+        }
+
+        converged = this.totalDisplacement < this.totalDisplacementThreshold*4;
+
+        this.oldTotalDisplacement = this.totalDisplacement;
+
+        return converged || oscilating;
+      }
     
       tick() {
         this.totalIterations++; // defined inside parent class
@@ -429,7 +448,8 @@ export class HySELayout extends CoSELayout {
         // }
         if (this.totalIterations % CoSEConstants.CONVERGENCE_CHECK_PERIOD == 0) {
           // console.log("totalDisplacement: ", this.totalDisplacement, " coolingFactor: ", this.coolingFactor);
-          if (super.isConverged() || this.totalIterations > this.maxIterations) {
+          
+          if ((this.isDirectedConverged() ) || this.totalIterations > this.maxIterations) {
             //this.setPositionsFromLayering();
             return true;
           }
@@ -441,7 +461,7 @@ export class HySELayout extends CoSELayout {
           if (this.coolingFactor < 0) { 
             this.coolingFactor = 0;
           }
-          // console.log("this.coolingFactor: ", this.coolingFactor);
+          console.log("this.coolingFactor: ", this.coolingFactor);
         }
         this.totalDisplacement = 0; // defined inside parent class
         this.graphManager.updateBounds();
@@ -553,6 +573,14 @@ export class HySELayout extends CoSELayout {
         //   console.log("edge length: ", length, " idealLength: ", idealLength);
         // }
         // Calculate spring forces
+        
+        if(this.totalIterations < (this.fullyCalcRep4Ticks * this.maxIterations)/2){
+          return;
+        }
+        
+        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations) && sourceNode.isDirected === 1 && targetNode.isDirected === 1){
+          edge.edgeElasticity = edge.edgeElasticity * 0.99;
+        }
         let springForce = edge.edgeElasticity * (length - idealLength);
         // if (springForce < 0) {
         //   console.log("repulsive spring force !");
@@ -608,7 +636,7 @@ export class HySELayout extends CoSELayout {
         const distX = Math.abs(c1 - c2) - (rectA.width / 2 + rectB.width / 2);
     
         if (distX < 0) { // two nodes overlap
-          repulsionForceX = 0.5 * distX;
+          repulsionForceX = 0.99 * distX;
         } else { // no overlap
           let distanceX = -distX;
           if (this.uniformLeafNodeSizes) { // simply base repulsion on distance of node centers
@@ -624,7 +652,7 @@ export class HySELayout extends CoSELayout {
           }
     
           // Here we use half of the nodes' repulsion values for backward compatibility
-          repulsionForceX = -(nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) / (distanceX * distanceX);
+          repulsionForceX = -(nodeA.nodeRepulsion + nodeB.nodeRepulsion) / (distanceX * distanceX);
         }
         if (c1 < c2) {
           repulsionForceX = -repulsionForceX;
@@ -732,8 +760,8 @@ export class HySELayout extends CoSELayout {
           if (this.id2TotalForceX[id] == undefined || this.id2TotalForceX[id] == null) {
             this.id2TotalForceX[id] = 0;
           }
-          // this.id2TotalForceX[id] += this.id2LNode[id].repulsionForceX + this.id2LNode[id].springForceX;
-          this.id2TotalForceX[id] += this.id2LNode[id].springForceX;
+          this.id2TotalForceX[id] += this.id2LNode[id].repulsionForceX + this.id2LNode[id].springForceX;
+          //this.id2TotalForceX[id] += this.id2LNode[id].springForceX;
         }
         // swap the nodes
         if (this.totalIterations % this.swapPeriod == 0) {
@@ -850,7 +878,7 @@ export class HySELayout extends CoSELayout {
           this.highlightPair(pairId, true);
           // swap if both nodes request swapping
           // console.log('swap ', pairId);
-          this.id2LNode[p.n1].swapPositionWith(this.id2LNode[p.n2]);
+          this.id2LNode[p.n1].swapPositionWith(this.id2LNode[p.n2],false);
           this.swapOnOrderedLayers(p.layerId, p.order1, p.order2);
           this.swappedPairs[pairId] = this.totalIterations;
           this.banned2SwapPairs[pairId] = true;
@@ -907,9 +935,9 @@ export class HySELayout extends CoSELayout {
                 const n1 = currLayer[j];
                 const n2 = currLayer[k];
                 //if any of these is child then don't calculate repulsion
-                if (n1.isChild || n2.isChild) {
-                    continue;
-                }
+                // if (n1.isChild || n2.isChild) {
+                //     continue;
+                // }
                 this.calcRepulsionForce(currLayer[j], currLayer[k]);
               }
             }
@@ -920,9 +948,9 @@ export class HySELayout extends CoSELayout {
             for (let j = 0; j < currLayer.length - 1; j++) {
                 let n1 = currLayer[j];
                 let n2 = currLayer[j + 1];
-                if (n1.isChild || n2.isChild) {
-                    continue;
-                }
+                // if (n1.isChild || n2.isChild) {
+                //     continue;
+                // }
               this.calcRepulsionForce(currLayer[j], currLayer[j + 1]);
               for (let skip = 2; skip <= this.nodeRepulsionCalculationWidth; skip++) {
                 if (j < currLayer.length - skip) {
@@ -992,7 +1020,7 @@ export class HySELayout extends CoSELayout {
     
       expandNodesByStreching() {
         const t1 = new Date().getTime();
-        const nodes = this.graphManager.allNodes as HySENode[];
+        const nodes = this.graphManager.allNodes.filter(x=>x.isDirected==1) as HySENode[];
         var mostLeft = Math.min(...nodes.map(node => node.rect.x));
         var mostRight = Math.max(...nodes.map(node => node.rect.x + node.rect.width));
     
@@ -1008,7 +1036,7 @@ export class HySELayout extends CoSELayout {
             //calculate the new x position
             let newX = mid + distance*stretchFactor;
             //move the node
-            nodes[i].moveOnXaxis(newX-nodes[i].rect.x);
+            nodes[i].moveBy(newX-nodes[i].rect.x,0);
           }
           else{
             //calculate the distance from the middle
@@ -1016,7 +1044,7 @@ export class HySELayout extends CoSELayout {
             //calculate the new x position
             let newX = mid - distance*stretchFactor;
             //move the node
-            nodes[i].moveOnXaxis(newX-nodes[i].rect.x);
+            nodes[i].moveBy(newX-nodes[i].rect.x,0);
           }
     
         }

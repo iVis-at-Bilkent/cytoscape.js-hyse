@@ -54,7 +54,7 @@ window.graphElements = {
           id: "n2_2",
           isDirected:1,
           width:80,
-          height:140,
+          height:120,
         },
       },
       {
@@ -240,6 +240,13 @@ window.graphElements = {
           parent: "c_5",
         },
       },
+      {
+        data: {
+          id: "c_23",
+          isDirected:0,
+          parent: "c_22",
+        },
+      },
     ],
     edges: [
       {
@@ -414,7 +421,7 @@ window.graphElements = {
       {
         data: {
           source: "n1_1",
-          target: "c_12",
+          target: "c_14",
         },
       },
       {

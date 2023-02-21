@@ -27,18 +27,16 @@ export class HySENode extends CoSENode  {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
     this.displacementX += (layout.coolingFactor * (this.springForceX + this.repulsionForceX)/this.noOfChildren);
-    if(this.isDirected!=1){
+    if(this.isDirected!==1){
       this.displacementY += (layout.coolingFactor * (this.springForceY + this.repulsionForceY)/this.noOfChildren);
     }
     
     if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement *
-        layoutBase.IMath.sign(this.displacementX);
+      this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementX);
     }
 
     if (this.isDirected != 1 && Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement *
-        layoutBase.IMath.sign(this.displacementY);
+      this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementY);
     }
 
     if(this.child)
@@ -102,6 +100,35 @@ export class HySENode extends CoSENode  {
     }
     this.setLocation(x1, y1);
     other.setLocation(x2, y2);
+    //swap the forces and displacements
+    const tempNode = new HySENode(this.graphManager, null, null, null, "", 0);
+    tempNode.springForceX = this.springForceX;
+    tempNode.springForceY = this.springForceY;
+    tempNode.repulsionForceX = this.repulsionForceX;
+    tempNode.repulsionForceY = this.repulsionForceY;
+    tempNode.gravitationForceX = this.gravitationForceX;
+    tempNode.gravitationForceY = this.gravitationForceY;
+    tempNode.displacementX = this.displacementX;
+    tempNode.displacementY = this.displacementY;
+
+    this.springForceX = other.springForceX;
+    this.springForceY = other.springForceY;
+    this.repulsionForceX = other.repulsionForceX;
+    this.repulsionForceY = other.repulsionForceY;
+    this.gravitationForceX = other.gravitationForceX;
+    this.gravitationForceY = other.gravitationForceY;
+    this.displacementX = other.displacementX;
+    this.displacementY = other.displacementY;
+    
+    other.springForceX = tempNode.springForceX;
+    other.springForceY = tempNode.springForceY;
+    other.repulsionForceX = tempNode.repulsionForceX;
+    other.repulsionForceY = tempNode.repulsionForceY;
+    other.gravitationForceX = tempNode.gravitationForceX;
+    other.gravitationForceY = tempNode.gravitationForceY;
+    other.displacementX = tempNode.displacementX;
+    other.displacementY = tempNode.displacementY;
+
     if (isResetForceAndDisplacement) {
       this.resetForcesAndDisplacement();
       other.resetForcesAndDisplacement();
