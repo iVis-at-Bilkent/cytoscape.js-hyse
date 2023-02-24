@@ -584,12 +584,12 @@ export class HySELayout extends CoSELayout {
         if(this.totalIterations < (this.fullyCalcRep4Ticks * this.maxIterations)/2){
           return;
         }
-        
+        var letDirectedMove = true;
         if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/3 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
           if(edge.edgeElasticity > 0.14){
-            edge.edgeElasticity = edge.edgeElasticity * 0.65;
+            edge.edgeElasticity = edge.edgeElasticity * 0.95;
           }
-          
+          letDirectedMove = false;
         }
         let springForce = edge.edgeElasticity * (length - idealLength);
         // if (springForce < 0) {
@@ -602,8 +602,22 @@ export class HySELayout extends CoSELayout {
         let springForceY = springForce * (edge.lengthY / length);
     
         // Apply forces on the end nodes
-        sourceNode.springForceX += springForceX;
-        targetNode.springForceX -= springForceX;
+        if(sourceNode.isDirected === 1 && targetNode.isDirected !== 1){
+          if(letDirectedMove){
+            sourceNode.springForceX += springForceX;
+          }
+        }else{
+          sourceNode.springForceX += springForceX;
+        }
+        
+        if(targetNode.isDirected === 1 && sourceNode.isDirected !== 1){
+          if(letDirectedMove){
+            targetNode.springForceX -= springForceX;
+          }
+        }
+        else{
+          targetNode.springForceX -= springForceX;
+        }
         
         // if(sourceNode.isDirected == 1 && targetNode.isDirected == 1){
         //   sourceNode.springForceX += springForceX;

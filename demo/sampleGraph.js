@@ -421,13 +421,13 @@ window.graphElements = {
       {
         data: {
           source: "n1_1",
-          target: "c_14",
+          target: "c_13",
         },
       },
       {
         data: {
           source: "n1_2",
-          target: "c_13",
+          target: "c_14",
         },
       },
       {
