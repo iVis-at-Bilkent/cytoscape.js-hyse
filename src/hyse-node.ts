@@ -70,10 +70,22 @@ export class HySENode extends CoSENode  {
     else if(this.isDirected != 1){
       this.moveBy(this.displacementX, this.displacementY);
       layout.totalDisplacement += Math.abs(this.displacementX) + Math.abs(this.displacementY);
+      if(this.isDirected === 0){
+        layout.undirectedDisplacement += Math.abs(this.displacementY);
+      }
+      else{
+        layout.directedDisplacement += Math.abs(this.displacementY);
+      }
     }
     else{
       this.moveBy(this.displacementX, 0);
       layout.totalDisplacement += Math.abs(this.displacementX);
+      if(this.isDirected == 1){
+        layout.directedDisplacement += Math.abs(this.displacementY);
+      }
+      else{
+        layout.undirectedDisplacement += Math.abs(this.displacementY);
+      }
     }
   }
 

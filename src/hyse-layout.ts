@@ -29,7 +29,10 @@ export class HySELayout extends CoSELayout {
     useExpansionByStreching = true;
     edgesBetweenGraphs: HySEEdge[] = [];
     dummyCompoundNodes: HySENode[] = [];
-
+    directedDisplacement = 0;
+    undirectedDisplacement = 0;
+    oldDirectedDisplacement = 0;
+    oldUndirectedDisplacement = 0;
     [x: string]: any;
     constructor(layering, cy) {
       console.trace();
@@ -431,12 +434,14 @@ export class HySELayout extends CoSELayout {
 
         if (this.totalIterations > this.maxIterations / 3)
         {
-          oscilating = Math.abs(this.totalDisplacement - this.oldTotalDisplacement) < 3;
+          oscilating = Math.abs(this.totalDisplacement - this.oldTotalDisplacement) < 2;
         }
 
-        converged = this.totalDisplacement < this.totalDisplacementThreshold*4;
+        converged = this.totalDisplacement < this.totalDisplacementThreshold*2;
 
         this.oldTotalDisplacement = this.totalDisplacement;
+        this.oldDirectedDisplacement = this.directedDisplacement;
+        this.oldUndirectedDisplacement = this.undirectedDisplacement;
 
         return converged || oscilating;
       }
@@ -464,6 +469,8 @@ export class HySELayout extends CoSELayout {
           console.log("this.coolingFactor: ", this.coolingFactor);
         }
         this.totalDisplacement = 0; // defined inside parent class
+        this.undirectedDisplacement = 0;
+        this.directedDisplacement = 0;
         this.graphManager.updateBounds();
         super.calcSpringForces();
         this.calcRepulsionForces();
@@ -578,8 +585,11 @@ export class HySELayout extends CoSELayout {
           return;
         }
         
-        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations) && sourceNode.isDirected === 1 && targetNode.isDirected === 1){
-          edge.edgeElasticity = edge.edgeElasticity * 0.99;
+        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/3 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
+          if(edge.edgeElasticity > 0.14){
+            edge.edgeElasticity = edge.edgeElasticity * 0.65;
+          }
+          
         }
         let springForce = edge.edgeElasticity * (length - idealLength);
         // if (springForce < 0) {
@@ -635,8 +645,8 @@ export class HySELayout extends CoSELayout {
         const c2 = rectB.getCenterX();
         const distX = Math.abs(c1 - c2) - (rectA.width / 2 + rectB.width / 2);
     
-        if (distX < 0) { // two nodes overlap
-          repulsionForceX = 0.99 * distX;
+        if (distX <= 0) { // two nodes overlap
+          repulsionForceX = 2 * distX;
         } else { // no overlap
           let distanceX = -distX;
           if (this.uniformLeafNodeSizes) { // simply base repulsion on distance of node centers
