@@ -42,9 +42,8 @@ export class DagreAndSpringEmbedderLayout {
     //only add those nodes which are in the heirachical layout
 
     let nodes = eles.nodes().filter(function (ele) {
-      return  ele.data("isDirected") === 1;
+      return  ele.data("isDirected") == 1;
     });
-
     //let nodes = eles.nodes();
     let maxHeight = 0;
     let maxWidth = 0;

@@ -26,10 +26,10 @@ function pageLoaded() {
                 selector: 'node',
                 style: {
                     'width': function (ele) {
-                        return ele.data('width');
+                      return ele.data('width')*1 || 30;
                     },
                     'height': function (ele) {
-                        return ele.data('height');
+                      return ele.data('height')*1 || 30;
                     },
                     'background-color': '#a3a3a3',
                     'label': 'data(id)'
@@ -291,28 +291,55 @@ function getOptions() {
 
   function loadGraphMLFromStr(s) {
     cy.$().remove();
-    cy.graphml({layoutBy: "hyse"});
+    cy.graphml({node: {
+      css: true,
+      data: true,
+      position: true,
+      discludeds: []
+    },
+    edge: {
+      css: true,
+      data: true,
+      discludeds: []
+    },layoutBy:'preset'});
     cy.graphml(s);
+    
+    cy.nodes().forEach(function(node){
+        node.position({x:node.data('x')*1,y:node.data('y')*1});
+    });
+
+    cy.layout({name:'preset'}).run();
+
+    
     //insertDummyNodesIfNeeded();
   }
 
+  function saveGraph() {
+    const blob = new Blob([cy.graphml()], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, "graph.graphml");
+  }
+
+  function saveAs(blob, filename) {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  }
+
 function loadGraph(){
+
+  document.getElementById("fileInput").value = null;
+
   document.getElementById("fileInput").click();
 
-  document.getElementById("fileInput").onchange = function () {
+  document.getElementById("fileInput").addEventListener("change", function () {
     var file = this.files[0];
     var reader = new FileReader();
     reader.onload = function (progressEvent) {
-      
       loadGraphMLFromStr(this.result);
-
-      //run cytoscape layout
-      const o = getOptions();
-      o.isForceDirected = true;
-      cy.layout(o).run();
     };
     reader.readAsText(file);
-  };
+  });
 
 }
 
