@@ -391,6 +391,7 @@ export class HySELayout extends CoSELayout {
         while (!layoutEnded) {
           layoutEnded = this.tick();
         }
+        this.postLayoutOverlapRemoval();
     
         //FOR DEBUGGING
         //let beforeLayers = JSON.parse(JSON.stringify(this.orderedLayers,['id','rank','order']));;
@@ -480,6 +481,30 @@ export class HySELayout extends CoSELayout {
         
         
         return false;
+      }
+
+      postLayoutOverlapRemoval() {
+        //check all the ordered layers and see if there is any overlap between nodes
+        //if there is an overlap, move the nodes away from each other
+        console.log(this.orderedLayers);
+        this.orderedLayers.forEach(layer=>{
+          for(let i = 0; i < layer.length-1; i++) {
+            let node1 = layer[i] as HySENode;
+            let node2 = layer[i+1] as HySENode;
+            //get the x distance between the two nodes
+            let xDistance = Math.abs(node1.getRect().getCenterX() - node2.getRect().getCenterX());
+            //if distance is less than the width of the two nodes, then there is an overlap
+            if(xDistance < node1.getWidth() + node2.getWidth()) {
+              console.log("overlap between nodes: ", node1.id, " and ", node2.id);
+              //move the nodes away from each other
+              let xMove = (node1.getWidth() + node2.getWidth() - xDistance)/2;
+              console.log("moved ", node1.id, " by ", -xMove, " and ", node2.id, " by ", xMove);
+              node1.moveBy(-xMove,0);
+              node2.moveBy(xMove,0);
+            }
+          }
+        });
+
       }
 
       repulsionForUndirected(){
