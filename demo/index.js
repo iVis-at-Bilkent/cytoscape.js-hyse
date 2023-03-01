@@ -21,7 +21,53 @@ function pageLoaded() {
         container: document.getElementById('cy'),
         elements: graphElements,
         wheelSensitivity: 0.2,
-        style: [
+        style: getStyle(),
+    }).on('cxttap', 'node', function (evt) {
+        //display the context menu
+        contextMenu.showMenuItem('add-node-to-heirarchy');
+    });
+
+    var contextMenu = cy.contextMenus({
+        menuItems: [
+            {
+                id: 'add-node-to-heirarchy',
+                content: 'Add Node to Heirarchy',
+                tooltipText: 'Add Node to Heirarchy',
+                selector: 'node',
+                onClickFunction: function (event) {
+                    //change the data of the node to be in the heirarchy i-e set isDirected to true
+                    var node = event.target;
+                    node.data('isDirected', 1);
+                    //run the layout
+                    const o = getOptions();
+                    o.isForceDirected = true;
+                    cy.layout(o).run();
+                },  
+                hasTrailingDivider: true
+            }
+          ]
+    });
+
+
+
+    //run cytoscape layout
+    const o = getOptions();
+    o.isForceDirected = true;
+    cy.layout(o).run();
+    //window.cy = cy;
+
+};
+
+function assignRandomWidthAndHeight(){
+    //assign random width and height to the nodes
+    cy.nodes().forEach(function(node){
+        node.data('width', Math.floor(Math.random() * 80) + 20);
+        node.data('height', Math.floor(Math.random() * 80) + 20);
+    });
+}
+
+function getStyle(){
+  return  [
             {
                 selector: 'node',
                 style: {
@@ -80,41 +126,7 @@ function pageLoaded() {
                 'line-color': '#2F2D2C',
               }
             },
-        ]
-    }).on('cxttap', 'node', function (evt) {
-        //display the context menu
-        contextMenu.showMenuItem('add-node-to-heirarchy');
-    });
-
-    var contextMenu = cy.contextMenus({
-        menuItems: [
-            {
-                id: 'add-node-to-heirarchy',
-                content: 'Add Node to Heirarchy',
-                tooltipText: 'Add Node to Heirarchy',
-                selector: 'node',
-                onClickFunction: function (event) {
-                    //change the data of the node to be in the heirarchy i-e set isDirected to true
-                    var node = event.target;
-                    node.data('isDirected', 1);
-                    //run the layout
-                    const o = getOptions();
-                    o.isForceDirected = true;
-                    cy.layout(o).run();
-                },  
-                hasTrailingDivider: true
-            }
-          ]
-    });
-
-
-
-    //run cytoscape layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    cy.layout(o).run();
-    //window.cy = cy;
-
+        ];
 };
 
 function runLayout() {
@@ -292,13 +304,13 @@ function getOptions() {
   function loadGraphMLFromStr(s) {
     cy.$().remove();
     cy.graphml({node: {
-      css: true,
+      css: false,
       data: true,
       position: true,
       discludeds: []
     },
     edge: {
-      css: true,
+      css: false,
       data: true,
       discludeds: []
     },layoutBy:'preset'});
@@ -308,8 +320,10 @@ function getOptions() {
         node.position({x:node.data('x')*1,y:node.data('y')*1});
     });
 
+    
     cy.layout({name:'preset'}).run();
-
+    console.log(getStyle());
+    cy.style().fromJson(getStyle()).update();
     
     //insertDummyNodesIfNeeded();
   }
