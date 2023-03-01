@@ -33,6 +33,7 @@ export class HySELayout extends CoSELayout {
     undirectedDisplacement = 0;
     oldDirectedDisplacement = 0;
     oldUndirectedDisplacement = 0;
+    performPostProcessing = true;
     [x: string]: any;
     constructor(layering, cy) {
       console.trace();
@@ -391,8 +392,11 @@ export class HySELayout extends CoSELayout {
         while (!layoutEnded) {
           layoutEnded = this.tick();
         }
-        this.postLayoutOverlapRemoval();
-    
+
+        if(this.performPostProcessing){
+          this.postLayoutOverlapRemoval();
+        }
+        
         //FOR DEBUGGING
         //let beforeLayers = JSON.parse(JSON.stringify(this.orderedLayers,['id','rank','order']));;
         //console.log("beforeLayers: ", beforeLayers);

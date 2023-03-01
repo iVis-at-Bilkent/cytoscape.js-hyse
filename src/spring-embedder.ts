@@ -27,6 +27,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.maxNodeDisplacement = opts.maxNodeDisplacement;
   l.expansionCoefficient = opts.expansionCoefficient;
   l.orderGap = opts.orderGap;
+  l.performPostProcessing = opts.performPostProcessing;
   coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 
@@ -77,6 +78,7 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
   layout.uniformNodeDimensions = options.uniformNodeDimensions;
   layout.maxNodeDisplacement = options.maxNodeDisplacement;
   layout.orderGap = options.orderGap;
+  layout.performPostProcessing = options.performPostProcessing;
   const executeTickFn = () => {
     setTimeout(() => {
       let isLayoutEnded = false;

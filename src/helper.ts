@@ -58,7 +58,10 @@ export const DEFAULT_OPTIONS = Object.freeze({
   ticksPerFrame: 30, // only used if `animate` equals to 'during'
   // layout event callbacks
   ready: () => { }, // on layoutready
-  stop: () => { } // on layoutstop
+  stop: () => { }, // on layoutstop
+
+  performPostProcessing:undefined,
+
 });
 
 export function isFunction(o) { return typeof o === 'function'; };

@@ -271,6 +271,7 @@ function getOptions() {
       "uniformNodeDimensions",
       "maxNodeDisplacement",
       "expansionCoefficient",
+      "performPostProcessing",
     ];
     const o = { name: "hyse" };
     for (let i = 0; i < opts.length; i++) {
