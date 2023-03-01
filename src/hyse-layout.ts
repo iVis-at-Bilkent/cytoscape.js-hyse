@@ -610,8 +610,8 @@ export class HySELayout extends CoSELayout {
           return;
         }
         var letDirectedMove = true;
-        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/3 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
-          if(edge.edgeElasticity > 0.14){
+        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/100 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
+          if(edge.edgeElasticity > 0.20){
             edge.edgeElasticity = edge.edgeElasticity * 0.95;
           }
           letDirectedMove = false;
