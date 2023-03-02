@@ -596,11 +596,9 @@ export class HySELayout extends CoSELayout {
           edge.updateLengthSimple();
         } else {
           edge.updateLength();
-          // if (edge.isOverlapingSourceAndTarget) {
-          //   //console.log(sourceNode.id, " ", targetNode.id);
-          //   //console.log("edge is overlaping");
-          //   //return;
-          // }
+          if (edge.isOverlapingSourceAndTarget) {
+            return;
+          }
         }
     
         let length = edge.getLength();
