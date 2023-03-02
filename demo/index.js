@@ -61,8 +61,8 @@ function pageLoaded() {
 function assignRandomWidthAndHeight(){
     //assign random width and height to the nodes
     cy.nodes().forEach(function(node){
-        node.data('width', Math.floor(Math.random() * 80) + 20);
-        node.data('height', Math.floor(Math.random() * 80) + 20);
+        node.data('width', Math.floor(Math.random() * 140) + 20);
+        node.data('height', Math.floor(Math.random() * 140) + 20);
     });
 }
 
