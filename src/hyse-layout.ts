@@ -246,7 +246,7 @@ export class HySELayout extends CoSELayout {
             let points = new layoutBase.PointD(0, 0);
             let newGraph = this.newGraph();
             group.forEach(x=>{
-              x.setRect({x:0,y:0},{width:30,height:30});
+              x.setRect({x:0,y:0},x.rect);
               newGraph.add(x);
             });
             newGraph.calcEstimatedSize();
@@ -262,7 +262,7 @@ export class HySELayout extends CoSELayout {
               let randomX = Math.floor(Math.random() * newGraph.getEstimatedSize());
               let randomY = Math.floor(Math.random() * newGraph.getEstimatedSize());
               let childpoints = new layoutBase.PointD(randomX, randomY);
-              x.setRect(childpoints,{width:30,height:30});
+              x.setRect(childpoints,x.rect);
               x.parent = newNode;
               newNode.getChild().add(x);
               
@@ -290,7 +290,7 @@ export class HySELayout extends CoSELayout {
             
             let newGraph = this.newGraph();
             group.forEach(x=>{
-              x.setRect({x:0,y:0},{width:30,height:30});
+              x.setRect({x:0,y:0},x.rect);
               newGraph.add(x);
             });
             console.log("newGraph : ",newGraph);
@@ -335,7 +335,7 @@ export class HySELayout extends CoSELayout {
               // }
               
               let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
-              x.setRect(childpoints,{width:30,height:30});
+              x.setRect(childpoints,x.rect);
               x.parent = newNode;
               newNode.getChild().add(x);
             });
