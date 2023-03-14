@@ -394,7 +394,8 @@ export class HySELayout extends CoSELayout {
         }
 
         if(this.performPostProcessing){
-          this.postLayoutOverlapRemoval();
+          //this.postLayoutOverlapRemoval();
+          this.postLayoutRepulsionPhase();
         }
         
         //FOR DEBUGGING
@@ -485,6 +486,18 @@ export class HySELayout extends CoSELayout {
         
         
         return false;
+      }
+
+      postLayoutRepulsionPhase() {
+        this.totalDisplacement = 0;
+        this.undirectedDisplacement = 0;
+        this.directedDisplacement = 0;
+        for (let i = 0; i < 20; i++) {
+          this.graphManager.updateBounds();
+          this.calcRepulsionForces();
+          this.moveNodes();
+        }
+        console.log("post repulsion"+this.totalDisplacement+" displacement");
       }
 
       postLayoutOverlapRemoval() {
