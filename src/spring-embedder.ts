@@ -95,6 +95,9 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
       if (!isLayoutEnded) {
         requestAnimationFrame(executeTickFn);
       } else {
+        if(layout.performPostProcessing){
+          layout.postLayoutRepulsionPhase();
+        }
         console.log("Ended in ", layout.totalIterations, " ticks ");
         if (options.stop && typeof options.stop == "function") {
           options.stop();
