@@ -25,45 +25,82 @@
 
 <body>
     <h1>Cytoscape - HySE</h1>
-    <div class="head-buttons">
-      <button hidden onclick="addNode()">Add Node</button>
-      <!--create a dropdown showing sample graphs-->
-      <select id="experimentGraphs">
-          <option value="sampleGraph">Sample Graph</option>
-      </select>
+    <div class="row">
+      <div class="cy-column">
+        <div id="cy"></div>
+      </div>
+      <div class="button-column">
+        <div class="head-buttons">
+          <button hidden onclick="addNode()">Add Node</button>
+          <div class="row">
+            <select id="experimentGraphs">
+              <option value="sampleGraph">Sample Graph</option>
+          </select>
+          </div>
+          <!--create a dropdown showing sample graphs-->
+          
+          <div class="row">
+            <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
+          
+            <input type="file" id="fileInput" accept=".graphml" hidden>
+            <button title="Load Graph From File" onclick="loadGraph()">Load</button>
       
-      <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
-      
-      <input type="file" id="fileInput" accept=".graphml" hidden>
-      <button title="Load Graph From File" onclick="loadGraph()">Load</button>
+            <button title="Save Graph To File" onclick="saveGraph()">Save</button>
+          </div>
+          
+          <div class="row">
+            <button title="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
+          </div>
+          
+          <div class="row">
+            <label class="form-label" for="performPostProcessing">Perform Post Processing</label>
+            <input class="form-check-input" type="checkbox" id="performPostProcessing" checked>
+          </div>
 
-      <button title="Save Graph To File" onclick="saveGraph()">Save</button>
-      
-      <button title="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
-      
-      <label class="form-label" for="performPostProcessing">Perform Post Processing</label>
-      <input class="form-check-input" type="checkbox" id="performPostProcessing" checked>
-
-      <button title="Delete Selected Items" onclick="deleteSelected()">Delete Selected</button>
-
-      <button title="Re-Layout" onclick="rerun()">HySE</button>
-      
-      <button title="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
-
-      <label title="Tick Delay" class="label">Tick Delay</label>
-      <input title="Tick Delay" type="number" class="number-input" id="tickDelay" value="100">
-
-      <label title="Ticks Per Frame" class="label">Ticks Per Frame</label>
-      <input title="Ticks Per Frame" type="number" class="number-input" id="ticksPerFrame" value="5">
-      
-
-      <button title="Run Cose" onclick="runCose()">CoSE</button>
-      <button title="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
-
-      <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
-      
-      
+          <div class="row">
+            <button title="Delete Selected Items" onclick="deleteSelected()">Delete Selected</button>
+          </div>
+          
+          
+          <div class="row">
+            <button title="Re-Layout" onclick="rerun()">HySE</button>
+            <button title="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
+          </div>
+          
+          <div class="row">
+            <label title="Tick Delay" class="label">Tick Delay</label>
+            <input title="Tick Delay" type="number" class="number-input" id="tickDelay" value="100">
+          </div>
+          
+          <div class="row">
+            <label title="Ticks Per Frame" class="label">Ticks Per Frame</label>
+            <input title="Ticks Per Frame" type="number" class="number-input" id="ticksPerFrame" value="5">
+          </div>
+          
+          <div class="row">
+            <label title="Distance between ranks in heirarchy + maximum node height" class="form-label" for="rankGap"> Rank Gap </label>
+            <input title="Distance between ranks in heirarchy + maximum node height" type="number" class="form-control form-control-sm" id="rankGap" value="20">
+          </div>
+          
+          <div class="row">
+            <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
+            <input title="Repulsion force between nodes" type="range" min="50" max="10000" class="form-control form-control-sm" id="nodeRepulsion" value="5000">
+          </div>
+    
+          <div class="row">
+            <button title="Run Cose" onclick="runCose()">CoSE</button>
+            <button title="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
+          </div>
+    
+          <div class="row">
+            <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
+          </div>
+          
+        </div>
+      </div>
     </div>
+    
+    
     <!-- <button onclick="reset()">Reset</button> -->
     <div hidden class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
@@ -236,7 +273,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="nodeRepulsion"> nodeRepulsion </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion" value="5000"></td>
+              <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion2" value="5000"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="swapForceLimit"> swapForceLimit </label></td>
@@ -260,7 +297,7 @@
             </tr>
             <tr>
               <td><label class="form-label" for="rankGap"> rankGap </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="rankGap" value="80"></td>
+              <td><input type="number" class="form-control form-control-sm" id="rankGap2" value="80"></td>
             </tr>
             <tr>
               <td><label class="form-label" for="maxNodeDisplacement"> maxNodeDisplacement </label></td>
@@ -341,7 +378,7 @@
         </div>
       </div>
     </div>
-    <div id="cy"></div>
+    
 </body>
 
 </html>
