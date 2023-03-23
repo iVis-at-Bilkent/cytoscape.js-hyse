@@ -219,17 +219,26 @@ export class HySELayout extends CoSELayout {
         //find the most left and most right nodes in graph manager nodes
         let mostLeftNode = this.graphManager.allNodes[0];
         let mostRightNode = this.graphManager.allNodes[0];
+        let mostTopNode = this.graphManager.allNodes[0];
+        let mostBottomNode = this.graphManager.allNodes[0];
         let allUndirected = true;
         if(this.orderedLayers.length > 0){
           allUndirected = false;
         }
 
         this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
+          console.log(node.getCenterX());
           if(node.getCenterX()<mostLeftNode.getCenterX()){
             mostLeftNode = node;
           }
           if(node.getCenterX()>mostRightNode.getCenterX()){
             mostRightNode = node;
+          }
+          if(node.getCenterY()<mostTopNode.getCenterY()){
+            mostTopNode = node;
+          }
+          if(node.getCenterY()>mostBottomNode.getCenterY()){
+            mostBottomNode = node;
           }
         });
 
@@ -285,8 +294,8 @@ export class HySELayout extends CoSELayout {
             });
             let seedLayer = Math.ceil( seedLayers.reduce((a,b)=>a+b)/seedLayers.length);
             let seedIndex =Math.ceil( seedIndexes.reduce((a,b)=>a+b)/seedIndexes.length);
-            let left = (seedIndex) <= this.orderedLayers[seedLayer].length/2?true:false;
-            let up = (seedLayer) <= this.orderedLayers.length/2?true:false;
+            //let left = (seedIndex) <= this.orderedLayers[seedLayer].length/2?true:false;
+            //let up = (seedLayer) <= this.orderedLayers.length/2?true:false;
             
             let newGraph = this.newGraph();
             group.forEach(x=>{
@@ -311,19 +320,70 @@ export class HySELayout extends CoSELayout {
             //get the center of seed node so that we can set the y coordinate of child nodes
             let xCenter = xCenters.reduce((a,b)=>a+b)/xCenters.length;
             let yCenter = yCenters.reduce((a,b)=>a+b)/yCenters.length;
+
+            //find which point is the closest to the xCenter and yCenter
+            let distanceUp = Math.abs(yCenter-mostTopNode.getCenterY());
+            let distanceDown = Math.abs(yCenter-mostBottomNode.getCenterY());
+            let distanceLeft = Math.abs(xCenter-mostLeftNode.getCenterX());
+            let distanceRight = Math.abs(xCenter-mostRightNode.getCenterX());
+
+            let up = distanceUp < distanceDown?true:false;
+            let left = distanceLeft < distanceRight?true:false;
+
+
+
+            //find the closest point on the rectangle whose sides are mostLeftNode, mostRightNode, mostTopNode, mostBottomNode
+            let xVal = Math.min(Math.abs(xCenter-mostLeftNode.getCenterX()),Math.abs(xCenter-mostRightNode.getCenterX()));
+            let yVal = Math.min(Math.abs(yCenter-mostBottomNode.getCenterY()),Math.abs(yCenter-mostTopNode.getCenterY()));
+
+            
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
             //add the nodes in the group to the new node
             group.forEach(x=>{
               //get random position for the node within the compound node
               let randomChildX= 0;
               let randomChildY= 0;
-              if(left){
-                randomChildX = mostLeftNode.getCenterX() - (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+              if(left && up){
+                if(distanceUp < distanceLeft){
+                  randomChildY = mostTopNode.getCenterY() + (newNode.rect.y - Math.floor(Math.random() * newNode.rect.height));
+                  randomChildX = seedCenter.x + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                }
+                else{
+                  randomChildX = mostLeftNode.getCenterX() + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                  randomChildY = seedCenter.y ;
+                }
+              }
+              else if(left && !up){
+                if(distanceDown < distanceLeft){
+                  randomChildY = mostBottomNode.getCenterY() + (newNode.rect.y + Math.floor(Math.random() * newNode.rect.height));
+                  randomChildX = seedCenter.x + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                }
+                else{
+                  randomChildX = mostLeftNode.getCenterX() + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                  randomChildY = seedCenter.y ;
+                }
+              }
+              else if(!left && up){
+                if(distanceUp < distanceRight){
+                  randomChildY = mostTopNode.getCenterY() + (newNode.rect.y - Math.floor(Math.random() * newNode.rect.height));
+                  randomChildX = seedCenter.x + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                }
+                else{
+                  randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                  randomChildY = seedCenter.y ;
+                }
               }
               else{
-                randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                if(distanceDown < distanceRight){
+                  randomChildY = mostBottomNode.getCenterY() + (newNode.rect.y + Math.floor(Math.random() * newNode.rect.height));
+                  randomChildX = seedCenter.x + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                }
+                else{
+                  randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                  randomChildY = seedCenter.y ;
+                }
               }
-              randomChildY = newNode.rect.height*Math.random() + seedCenter.y - newNode.rect.height/2;
+              //randomChildY = newNode.rect.height*Math.random() + seedCenter.y - newNode.rect.height/2;
 
 
               // if(up){
