@@ -345,42 +345,50 @@ export class HySELayout extends CoSELayout {
               let randomChildY= 0;
               if(left && up){
                 if(distanceUp < distanceLeft){
-                  randomChildY = mostTopNode.getCenterY() + (newNode.rect.y - Math.floor(Math.random() * newNode.rect.height));
-                  randomChildX = seedCenter.x + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                  //up
+                  randomChildY =  mostTopNode.rect.y - Math.floor(Math.random() * newNode.rect.height) -50;
+                  randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
-                  randomChildX = mostLeftNode.getCenterX() + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
-                  randomChildY = seedCenter.y ;
+                  //left
+                  randomChildX = mostLeftNode.rect.x - Math.floor(Math.random() * newNode.rect.width) -50;
+                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else if(left && !up){
                 if(distanceDown < distanceLeft){
-                  randomChildY = mostBottomNode.getCenterY() + (newNode.rect.y + Math.floor(Math.random() * newNode.rect.height));
-                  randomChildX = seedCenter.x + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
+                  //down
+                  randomChildY = mostBottomNode.rect.y + mostBottomNode.rect.height + Math.floor(Math.random() * newNode.rect.height) +50;
+                  randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
-                  randomChildX = mostLeftNode.getCenterX() + (newNode.rect.x - Math.floor(Math.random() * newNode.rect.width));
-                  randomChildY = seedCenter.y ;
+                  //left
+                  randomChildX = mostLeftNode.rect.x - Math.floor(Math.random() * newNode.rect.width) -100;
+                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else if(!left && up){
                 if(distanceUp < distanceRight){
-                  randomChildY = mostTopNode.getCenterY() + (newNode.rect.y - Math.floor(Math.random() * newNode.rect.height));
-                  randomChildX = seedCenter.x + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                  //up
+                  randomChildY =  mostTopNode.rect.y - Math.floor(Math.random() * newNode.rect.height) -50;
+                  randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
-                  randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
-                  randomChildY = seedCenter.y ;
+                  //right
+                  randomChildX = mostRightNode.rect.x + mostRightNode.rect.width  + Math.floor(Math.random() * newNode.rect.width) +100;
+                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else{
                 if(distanceDown < distanceRight){
-                  randomChildY = mostBottomNode.getCenterY() + (newNode.rect.y + Math.floor(Math.random() * newNode.rect.height));
-                  randomChildX = seedCenter.x + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
+                  //down
+                  randomChildY = mostBottomNode.rect.y + mostBottomNode.rect.height + Math.floor(Math.random() * newNode.rect.height) +50;
+                  randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
-                  randomChildX = mostRightNode.getCenterX() + (newNode.rect.x + Math.floor(Math.random() * newNode.rect.width));
-                  randomChildY = seedCenter.y ;
+                  //right
+                  randomChildX = mostRightNode.rect.x + mostRightNode.rect.width  + Math.floor(Math.random() * newNode.rect.width) +100;
+                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               //randomChildY = newNode.rect.height*Math.random() + seedCenter.y - newNode.rect.height/2;
