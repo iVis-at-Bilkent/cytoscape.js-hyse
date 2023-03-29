@@ -272,6 +272,7 @@ function getOptions() {
       "maxNodeDisplacement",
       "expansionCoefficient",
       "performPostProcessing",
+      "displayInitialPositions",
     ];
     const o = { name: "hyse" };
     for (let i = 0; i < opts.length; i++) {

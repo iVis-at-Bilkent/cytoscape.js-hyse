@@ -28,6 +28,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.expansionCoefficient = opts.expansionCoefficient;
   l.orderGap = opts.orderGap;
   l.performPostProcessing = opts.performPostProcessing;
+  l.displayInitialPositions = opts.displayInitialPositions;
   coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 

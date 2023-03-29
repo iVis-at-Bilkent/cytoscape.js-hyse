@@ -34,6 +34,7 @@ export class HySELayout extends CoSELayout {
     oldDirectedDisplacement = 0;
     oldUndirectedDisplacement = 0;
     performPostProcessing = true;
+    displayInitialPositions = false;
     [x: string]: any;
     constructor(layering, cy) {
       console.trace();
@@ -221,6 +222,10 @@ export class HySELayout extends CoSELayout {
         let mostRightNode = this.graphManager.allNodes[0];
         let mostTopNode = this.graphManager.allNodes[0];
         let mostBottomNode = this.graphManager.allNodes[0];
+        let leftCompoundNodes:HySENode[] = [];
+        let rightCompoundNodes:HySENode[] = [];
+        let topCompoundNodes:HySENode[] = [];
+        let bottomCompoundNodes:HySENode[] = [];
         let allUndirected = true;
         if(this.orderedLayers.length > 0){
           allUndirected = false;
@@ -327,9 +332,12 @@ export class HySELayout extends CoSELayout {
             let distanceLeft = Math.abs(xCenter-mostLeftNode.getCenterX());
             let distanceRight = Math.abs(xCenter-mostRightNode.getCenterX());
 
-            let up = distanceUp < distanceDown?true:false;
-            let left = distanceLeft < distanceRight?true:false;
-
+            let min = Math.min(distanceUp,distanceDown,distanceLeft,distanceRight);
+            let up = distanceUp == min?true:false;
+            let left = distanceLeft == min?true:false;
+            let right = distanceRight == min?true:false;
+            let down = distanceDown == min?true:false;
+            
 
 
             //find the closest point on the rectangle whose sides are mostLeftNode, mostRightNode, mostTopNode, mostBottomNode
@@ -338,6 +346,126 @@ export class HySELayout extends CoSELayout {
 
             
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
+
+            let placeNewNode = function(newNode:HySENode,side:string,nodesToCheck:HySENode[]){
+              if(side == "right"){
+                //check if the node is colliding with any other node
+                let colliding = false;
+                let collidingNode:any = null;
+                nodesToCheck.forEach(x=>{
+                  if(newNode.rect.intersects(x.rect)){
+                    if(collidingNode != null && collidingNode instanceof HySENode){
+                      if(collidingNode.rect.x + collidingNode.rect.width < x.rect.x + x.rect.width){
+                        collidingNode = x;
+                      }
+                    colliding = true;
+                    }
+                    else{
+                      collidingNode = x;
+                      colliding = true;
+                    }
+                  }
+                });
+                if(colliding && collidingNode != null){
+                  newNode.setRect({x:collidingNode.rect.x + collidingNode.rect.width + 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  placeNewNode(newNode,side,nodesToCheck);
+                }
+                
+              }
+              else if(side == "left"){
+                //check if the node is colliding with any other node
+                let colliding = false;
+                let collidingNode:any = null;
+                nodesToCheck.forEach(x=>{
+                  if(newNode.rect.intersects(x.rect)){
+                    if(collidingNode != null && collidingNode instanceof HySENode){
+                      if(collidingNode.rect.x - collidingNode.rect.width > x.rect.x - x.rect.width){
+                        collidingNode = x;
+                      }
+                    colliding = true;
+                    }
+                    else{
+                      collidingNode = x;
+                      colliding = true;
+                    }
+                  }
+                });
+                if(colliding && collidingNode != null){
+                  newNode.setRect({x:collidingNode.rect.x - newNode.rect.width - 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  placeNewNode(newNode,side,nodesToCheck);
+                }
+              }
+              else if(side == "up"){
+                //check if the node is colliding with any other node
+                let colliding = false;
+                let collidingNode:any = null;
+                nodesToCheck.forEach(x=>{
+                  if(newNode.rect.intersects(x.rect)){
+                    if(collidingNode != null && collidingNode instanceof HySENode){
+                      if(collidingNode.rect.y - collidingNode.rect.height > x.rect.y - x.rect.height){
+                        collidingNode = x;
+                      }
+                    colliding = true;
+                    }
+                    else{
+                      collidingNode = x;
+                      colliding = true;
+                    }
+                  }
+                });
+                if(colliding && collidingNode != null){
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - newNode.rect.height - 50},newNode.rect);
+                  placeNewNode(newNode,side,nodesToCheck);
+                }
+              }
+              else if(side == "down"){
+                //check if the node is colliding with any other node
+                let colliding = false;
+                let collidingNode:any = null;
+                nodesToCheck.forEach(x=>{
+                  if(newNode.rect.intersects(x.rect)){
+                    if(collidingNode != null && collidingNode instanceof HySENode){
+                      if(collidingNode.rect.y + collidingNode.rect.height < x.rect.y + x.rect.height){
+                        collidingNode = x;
+                      }
+                    colliding = true;
+                    }
+                    else{
+                      collidingNode = x;
+                      colliding = true;
+                    }
+                  }
+                });
+                if(colliding && collidingNode != null){
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y + collidingNode.rect.height + 50},newNode.rect);
+                  placeNewNode(newNode,side,nodesToCheck);
+                }
+              }
+            }
+
+            if(up){
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostTopNode.rect.y - newNode.rect.height - 50},newNode.rect);
+              placeNewNode(newNode,"up",topCompoundNodes);
+              topCompoundNodes.push(newNode);
+            }
+            else if(down){
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostBottomNode.rect.y + mostBottomNode.rect.height + 50},newNode.rect);
+              placeNewNode(newNode,"down",bottomCompoundNodes);
+              bottomCompoundNodes.push(newNode);
+            }
+            else if(left){
+              newNode.setRect({x:mostLeftNode.rect.x - newNode.rect.width - 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+              placeNewNode(newNode,"left",leftCompoundNodes);
+              leftCompoundNodes.push(newNode);
+            }
+            else if(right){
+              newNode.setRect({x:mostRightNode.rect.x + mostRightNode.rect.width + 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+              placeNewNode(newNode,"right",rightCompoundNodes);
+              rightCompoundNodes.push(newNode);
+            }
+
+
+
             //add the nodes in the group to the new node
             group.forEach(x=>{
               //get random position for the node within the compound node
@@ -346,61 +474,51 @@ export class HySELayout extends CoSELayout {
               if(left && up){
                 if(distanceUp < distanceLeft){
                   //up
-                  randomChildY =  mostTopNode.rect.y - Math.floor(Math.random() * newNode.rect.height) -50;
+                  randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -50;
                   randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
                   //left
-                  randomChildX = mostLeftNode.rect.x - Math.floor(Math.random() * newNode.rect.width) -50;
+                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -50;
                   randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else if(left && !up){
                 if(distanceDown < distanceLeft){
                   //down
-                  randomChildY = mostBottomNode.rect.y + mostBottomNode.rect.height + Math.floor(Math.random() * newNode.rect.height) +50;
+                  randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +50;
                   randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
                   //left
-                  randomChildX = mostLeftNode.rect.x - Math.floor(Math.random() * newNode.rect.width) -100;
+                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
                   randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else if(!left && up){
                 if(distanceUp < distanceRight){
                   //up
-                  randomChildY =  mostTopNode.rect.y - Math.floor(Math.random() * newNode.rect.height) -50;
+                  randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -50;
                   randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
                   //right
-                  randomChildX = mostRightNode.rect.x + mostRightNode.rect.width  + Math.floor(Math.random() * newNode.rect.width) +100;
+                  randomChildX = newNode.rect.x  + Math.floor(Math.random() * newNode.rect.width);
                   randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
               else{
                 if(distanceDown < distanceRight){
                   //down
-                  randomChildY = mostBottomNode.rect.y + mostBottomNode.rect.height + Math.floor(Math.random() * newNode.rect.height) +50;
+                  randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +50;
                   randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                 }
                 else{
                   //right
-                  randomChildX = mostRightNode.rect.x + mostRightNode.rect.width  + Math.floor(Math.random() * newNode.rect.width) +100;
+                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) +100;
                   randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                 }
               }
-              //randomChildY = newNode.rect.height*Math.random() + seedCenter.y - newNode.rect.height/2;
-
-
-              // if(up){
-
-              //   randomChildY = (seedCenter.y/2) + Math.floor(Math.random() * newNode.rect.height);
-              // }
-              // else{
-              //   randomChildY = (seedCenter.y/2) - Math.floor(Math.random() * newNode.rect.height);
-              // }
               
               let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
               x.setRect(childpoints,x.rect);
@@ -457,11 +575,11 @@ export class HySELayout extends CoSELayout {
         this.beforeLayout();
         console.log(this.graphManager.getAllNodes());
         let layoutEnded = false;
-        while (!layoutEnded) {
+        while (!this.displayInitialPositions && !layoutEnded) {
           layoutEnded = this.tick();
         }
 
-        if(this.performPostProcessing){
+        if(!this.displayInitialPositions && this.performPostProcessing){
           //this.postLayoutOverlapRemoval();
           this.postLayoutRepulsionPhase();
         }
