@@ -232,17 +232,16 @@ export class HySELayout extends CoSELayout {
         }
 
         this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
-          console.log(node.getCenterX());
-          if(node.getCenterX()<mostLeftNode.getCenterX()){
+          if(node.getCenterX() - node.getWidth() <mostLeftNode.getCenterX() - mostLeftNode.getWidth()){
             mostLeftNode = node;
           }
-          if(node.getCenterX()>mostRightNode.getCenterX()){
+          if(node.getCenterX() + node.getWidth()>mostRightNode.getCenterX()+mostRightNode.getWidth()){
             mostRightNode = node;
           }
-          if(node.getCenterY()<mostTopNode.getCenterY()){
+          if(node.getCenterY() - node.getHeight()<mostTopNode.getCenterY()+mostTopNode.getHeight()){
             mostTopNode = node;
           }
-          if(node.getCenterY()>mostBottomNode.getCenterY()){
+          if(node.getCenterY()+node.getHeight()>mostBottomNode.getCenterY()+mostBottomNode.getHeight()){
             mostBottomNode = node;
           }
         });
@@ -256,49 +255,28 @@ export class HySELayout extends CoSELayout {
 
           
           //check the position of seed node in layers and set the position of compound node accordingly
-          if(allUndirected){
-            let points = new layoutBase.PointD(0, 0);
-            let newGraph = this.newGraph();
-            group.forEach(x=>{
-              x.setRect({x:0,y:0},x.rect);
-              newGraph.add(x);
-            });
-            newGraph.calcEstimatedSize();
-            console.log("estimated size : ",newGraph.estimatedSize);
-            let dimension = new layoutBase.DimensionD(newGraph.getEstimatedSize(),newGraph.getEstimatedSize());
-            let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
-            newNode.isDirected = 0;
-            newNode.noOfChildren = group.length;
-            console.log("GraphManager : ",this.graphManager.graphs);
-            this.graphManager.add(this.newGraph(), newNode);
-            group.forEach(x=>{
-              //get random position for the node within the compound node
-              let randomX = Math.floor(Math.random() * newGraph.getEstimatedSize());
-              let randomY = Math.floor(Math.random() * newGraph.getEstimatedSize());
-              let childpoints = new layoutBase.PointD(randomX, randomY);
-              x.setRect(childpoints,x.rect);
-              x.parent = newNode;
-              newNode.getChild().add(x);
-              
-            });
-            console.log("new Nodes",newNode);  
-          }
-          else{
-            let seedNodes = seeds[id];
-            let seedLayers:number[] = [];
-            let seedIndexes:number[] = [];
+          let seedNodes = seeds[id];
+            //let seedLayers:number[] = [];
+            //let seedIndexes:number[] = [];
             let xCenters:number[] = [];
             let yCenters:number[] = [];
-            seedNodes.forEach(seed=>{
-              let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
-              let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
-              xCenters.push(seed.getCenterX());
-              yCenters.push(seed.getCenterY());
-              seedLayers.push(seedLayer);
-              seedIndexes.push(seedIndex);
-            });
-            let seedLayer = Math.ceil( seedLayers.reduce((a,b)=>a+b)/seedLayers.length);
-            let seedIndex =Math.ceil( seedIndexes.reduce((a,b)=>a+b)/seedIndexes.length);
+            if (seedNodes == null || seedNodes.size == 0){
+              xCenters.push(mostBottomNode.getCenterX());
+              yCenters.push(mostRightNode.getCenterY());
+            }
+            else{
+              seedNodes.forEach(seed=>{
+                //let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
+                //let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
+                xCenters.push(seed.getCenterX());
+                yCenters.push(seed.getCenterY());
+                //seedLayers.push(seedLayer);
+                //seedIndexes.push(seedIndex);
+              });
+            }
+            
+            //let seedLayer = Math.ceil( seedLayers.reduce((a,b)=>a+b)/seedLayers.length);
+            //let seedIndex =Math.ceil( seedIndexes.reduce((a,b)=>a+b)/seedIndexes.length);
             //let left = (seedIndex) <= this.orderedLayers[seedLayer].length/2?true:false;
             //let up = (seedLayer) <= this.orderedLayers.length/2?true:false;
             
@@ -527,7 +505,6 @@ export class HySELayout extends CoSELayout {
             });
             this.dummyCompoundNodes.push(newNode);
             console.log("new Nodes",newNode);  
-          }
           
           
 
