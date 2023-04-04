@@ -273,6 +273,7 @@ function getOptions() {
       "expansionCoefficient",
       "performPostProcessing",
       "displayInitialPositions",
+      "randomizeInitialPositions"
     ];
     const o = { name: "hyse" };
     for (let i = 0; i < opts.length; i++) {

@@ -35,6 +35,7 @@ export class HySELayout extends CoSELayout {
     oldUndirectedDisplacement = 0;
     performPostProcessing = true;
     displayInitialPositions = false;
+    randomizeInitialPositions = true;
     [x: string]: any;
     constructor(layering, cy) {
       console.trace();
@@ -452,49 +453,97 @@ export class HySELayout extends CoSELayout {
               if(left && up){
                 if(distanceUp < distanceLeft){
                   //up
-                  randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -50;
-                  randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
+                  if(!this.randomizeInitialPositions){
+                    randomChildY = newNode.rect.y -100;
+                    randomChildX = seedCenter.x;
+                  }
+                  else{
+                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -100;
+                    randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
+                  }
                 }
                 else{
                   //left
-                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -50;
-                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  if(!this.randomizeInitialPositions){
+                    randomChildX = newNode.rect.x -100;
+                    randomChildY = seedCenter.y;
+                  }
+                  else{
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
+                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  }
                 }
               }
               else if(left && !up){
                 if(distanceDown < distanceLeft){
                   //down
-                  randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +50;
-                  randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
+                  if(!this.randomizeInitialPositions){
+                    randomChildY = newNode.rect.y +100;
+                    randomChildX = seedCenter.x;
+                  }
+                  else{
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +100;
+                    randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
+                  }
                 }
                 else{
                   //left
-                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
-                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  if(!this.randomizeInitialPositions){
+                    randomChildX = newNode.rect.x -100;
+                    randomChildY = seedCenter.y;
+                  }
+                  else{
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
+                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  }
                 }
               }
               else if(!left && up){
                 if(distanceUp < distanceRight){
                   //up
-                  randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -50;
-                  randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
+                  if(!this.randomizeInitialPositions){
+                    randomChildY = newNode.rect.y -100;
+                    randomChildX = seedCenter.x;
+                  }
+                  else{
+                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -100;
+                    randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
+                  }
                 }
                 else{
                   //right
-                  randomChildX = newNode.rect.x  + Math.floor(Math.random() * newNode.rect.width);
-                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  if(!this.randomizeInitialPositions){
+                    randomChildX = newNode.rect.x +100;
+                    randomChildY = seedCenter.y;
+                  }
+                  else{
+                    randomChildX = newNode.rect.x  + Math.floor(Math.random() * newNode.rect.width) +100;
+                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  }
                 }
               }
               else{
                 if(distanceDown < distanceRight){
                   //down
-                  randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +50;
-                  randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
+                  if(!this.randomizeInitialPositions){
+                    randomChildY = newNode.rect.y +100;
+                    randomChildX = seedCenter.x;
+                  }
+                  else{
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +100;
+                    randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
+                  }
                 }
                 else{
                   //right
-                  randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) +100;
-                  randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  if(!this.randomizeInitialPositions){
+                    randomChildX = newNode.rect.x +100;
+                    randomChildY = seedCenter.y;
+                  }
+                  else{
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) +100;
+                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
+                  }
                 }
               }
               
