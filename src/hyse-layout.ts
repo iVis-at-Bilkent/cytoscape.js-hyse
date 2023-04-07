@@ -227,11 +227,9 @@ export class HySELayout extends CoSELayout {
         let rightCompoundNodes:HySENode[] = [];
         let topCompoundNodes:HySENode[] = [];
         let bottomCompoundNodes:HySENode[] = [];
-        let allUndirected = true;
-        if(this.orderedLayers.length > 0){
-          allUndirected = false;
-        }
+        
 
+        //get the bounds of heirarchical nodes
         this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
           if(node.getCenterX() - node.getWidth() <mostLeftNode.getCenterX() - mostLeftNode.getWidth()){
             mostLeftNode = node;
@@ -255,57 +253,41 @@ export class HySELayout extends CoSELayout {
           let group = groups[Object.keys(groups)[i]];
 
           
-          //check the position of seed node in layers and set the position of compound node accordingly
+          //check the position of seed node and set the position of compound node accordingly
           let seedNodes = seeds[id];
-            //let seedLayers:number[] = [];
-            //let seedIndexes:number[] = [];
             let xCenters:number[] = [];
             let yCenters:number[] = [];
             if (seedNodes == null || seedNodes.size == 0){
-              xCenters.push(mostBottomNode.getCenterX());
-              yCenters.push(mostRightNode.getCenterY());
+              //if there is disconnected graph
+              xCenters.push(mostBottomNode.rect.x);
+              yCenters.push(mostRightNode.rect.y);
             }
             else{
               seedNodes.forEach(seed=>{
-                //let seedLayer = this.orderedLayers.findIndex(x=>x.includes(seed));
-                //let seedIndex = this.orderedLayers[seedLayer].findIndex(x=>x.id == seed.id);
-                xCenters.push(seed.getCenterX());
-                yCenters.push(seed.getCenterY());
-                //seedLayers.push(seedLayer);
-                //seedIndexes.push(seedIndex);
+                xCenters.push(seed.rect.x);
+                yCenters.push(seed.rect.y);
               });
             }
-            
-            //let seedLayer = Math.ceil( seedLayers.reduce((a,b)=>a+b)/seedLayers.length);
-            //let seedIndex =Math.ceil( seedIndexes.reduce((a,b)=>a+b)/seedIndexes.length);
-            //let left = (seedIndex) <= this.orderedLayers[seedLayer].length/2?true:false;
-            //let up = (seedLayer) <= this.orderedLayers.length/2?true:false;
             
             let newGraph = this.newGraph();
             group.forEach(x=>{
               x.setRect({x:0,y:0},x.rect);
               newGraph.add(x);
             });
-            console.log("newGraph : ",newGraph);
             newGraph.calcEstimatedSize();
-            console.log("estimated size : ",newGraph.getEstimatedSize());
             
-            
-            let randomX = Math.floor(Math.random() * newGraph.getEstimatedSize());
-            let randomY = Math.floor(Math.random() * newGraph.getEstimatedSize());
             let points = new layoutBase.PointD(0, 0);
             let dimension = new layoutBase.DimensionD(newGraph.getEstimatedSize(),newGraph.getEstimatedSize());
             let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
             newNode.isDirected = 0;
             newNode.noOfChildren = group.length;
-            console.log("GraphManager : ",this.graphManager.graphs);
             this.graphManager.add(this.newGraph(), newNode);
 
             //get the center of seed node so that we can set the y coordinate of child nodes
             let xCenter = xCenters.reduce((a,b)=>a+b)/xCenters.length;
             let yCenter = yCenters.reduce((a,b)=>a+b)/yCenters.length;
 
-            //find which point is the closest to the xCenter and yCenter
+            //find which side is the closest to the xCenter and yCenter
             let distanceUp = Math.abs(yCenter-mostTopNode.getCenterY());
             let distanceDown = Math.abs(yCenter-mostBottomNode.getCenterY());
             let distanceLeft = Math.abs(xCenter-mostLeftNode.getCenterX());
@@ -317,20 +299,17 @@ export class HySELayout extends CoSELayout {
             let right = distanceRight == min?true:false;
             let down = distanceDown == min?true:false;
             
-
-
-            //find the closest point on the rectangle whose sides are mostLeftNode, mostRightNode, mostTopNode, mostBottomNode
-            let xVal = Math.min(Math.abs(xCenter-mostLeftNode.getCenterX()),Math.abs(xCenter-mostRightNode.getCenterX()));
-            let yVal = Math.min(Math.abs(yCenter-mostBottomNode.getCenterY()),Math.abs(yCenter-mostTopNode.getCenterY()));
-
-            
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
 
+            //place the compound node by checking with other compound nodes already placed on that side
+            //when going to call recursively, we remove the compound nodes that are already checked and not colliding
+            //plus we need to add some distance to the compound node when calling recursively, because if not then we'll be in an infinite loop of calling recursively
             let placeNewNode = function(newNode:HySENode,side:string,nodesToCheck:HySENode[]){
               if(side == "right"){
                 //check if the node is colliding with any other node
                 let colliding = false;
                 let collidingNode:any = null;
+                let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(newNode.rect.intersects(x.rect)){
                     if(collidingNode != null && collidingNode instanceof HySENode){
@@ -344,9 +323,13 @@ export class HySELayout extends CoSELayout {
                       colliding = true;
                     }
                   }
+                  else{
+                    nodesPassed.push(x);
+                  }
                 });
+                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:collidingNode.rect.x + collidingNode.rect.width + 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  newNode.setRect({x:collidingNode.rect.x + collidingNode.rect.width+50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
                 
@@ -355,6 +338,7 @@ export class HySELayout extends CoSELayout {
                 //check if the node is colliding with any other node
                 let colliding = false;
                 let collidingNode:any = null;
+                let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(newNode.rect.intersects(x.rect)){
                     if(collidingNode != null && collidingNode instanceof HySENode){
@@ -368,9 +352,13 @@ export class HySELayout extends CoSELayout {
                       colliding = true;
                     }
                   }
+                  else{
+                    nodesPassed.push(x);
+                  }
                 });
+                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:collidingNode.rect.x - newNode.rect.width - 50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  newNode.setRect({x:collidingNode.rect.x - newNode.rect.width -50,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
@@ -378,6 +366,7 @@ export class HySELayout extends CoSELayout {
                 //check if the node is colliding with any other node
                 let colliding = false;
                 let collidingNode:any = null;
+                let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(newNode.rect.intersects(x.rect)){
                     if(collidingNode != null && collidingNode instanceof HySENode){
@@ -391,9 +380,13 @@ export class HySELayout extends CoSELayout {
                       colliding = true;
                     }
                   }
+                  else{
+                    nodesPassed.push(x);
+                  }
                 });
+                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - newNode.rect.height - 50},newNode.rect);
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - newNode.rect.height-50},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
@@ -401,6 +394,7 @@ export class HySELayout extends CoSELayout {
                 //check if the node is colliding with any other node
                 let colliding = false;
                 let collidingNode:any = null;
+                let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(newNode.rect.intersects(x.rect)){
                     if(collidingNode != null && collidingNode instanceof HySENode){
@@ -414,21 +408,26 @@ export class HySELayout extends CoSELayout {
                       colliding = true;
                     }
                   }
+                  else{
+                    nodesPassed.push(x);
+                  }
                 });
+                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y + collidingNode.rect.height + 50},newNode.rect);
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y + collidingNode.rect.height +50},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
             }
 
+            //place the compound node to the correct side of the heirarchy
             if(up){
-              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostTopNode.rect.y - newNode.rect.height - 50},newNode.rect);
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostTopNode.rect.y - newNode.rect.height },newNode.rect);
               placeNewNode(newNode,"up",topCompoundNodes);
               topCompoundNodes.push(newNode);
             }
             else if(down){
-              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostBottomNode.rect.y + mostBottomNode.rect.height + 50},newNode.rect);
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostBottomNode.rect.y + mostBottomNode.rect.height },newNode.rect);
               placeNewNode(newNode,"down",bottomCompoundNodes);
               bottomCompoundNodes.push(newNode);
             }
@@ -443,8 +442,6 @@ export class HySELayout extends CoSELayout {
               rightCompoundNodes.push(newNode);
             }
 
-
-
             //add the nodes in the group to the new node
             group.forEach(x=>{
               //get random position for the node within the compound node
@@ -454,22 +451,22 @@ export class HySELayout extends CoSELayout {
                 if(distanceUp < distanceLeft){
                   //up
                   if(!this.randomizeInitialPositions){
-                    randomChildY = newNode.rect.y -100;
+                    randomChildY = newNode.rect.y;
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -100;
+                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height);
                     randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                   }
                 }
                 else{
                   //left
                   if(!this.randomizeInitialPositions){
-                    randomChildX = newNode.rect.x -100;
+                    randomChildX = newNode.rect.x;
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width);
                     randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                   }
                 }
@@ -478,22 +475,22 @@ export class HySELayout extends CoSELayout {
                 if(distanceDown < distanceLeft){
                   //down
                   if(!this.randomizeInitialPositions){
-                    randomChildY = newNode.rect.y +100;
+                    randomChildY = newNode.rect.y;
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +100;
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height);
                     randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                   }
                 }
                 else{
                   //left
                   if(!this.randomizeInitialPositions){
-                    randomChildX = newNode.rect.x -100;
+                    randomChildX = newNode.rect.x;
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) -100;
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width);
                     randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                   }
                 }
@@ -502,22 +499,22 @@ export class HySELayout extends CoSELayout {
                 if(distanceUp < distanceRight){
                   //up
                   if(!this.randomizeInitialPositions){
-                    randomChildY = newNode.rect.y -100;
+                    randomChildY = newNode.rect.y;
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) -100;
+                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * newNode.rect.height);
                     randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * newNode.rect.width);
                   }
                 }
                 else{
                   //right
                   if(!this.randomizeInitialPositions){
-                    randomChildX = newNode.rect.x +100;
+                    randomChildX = newNode.rect.x;
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x  + Math.floor(Math.random() * newNode.rect.width) +100;
+                    randomChildX = newNode.rect.x  + Math.floor(Math.random() * newNode.rect.width);
                     randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                   }
                 }
@@ -526,22 +523,22 @@ export class HySELayout extends CoSELayout {
                 if(distanceDown < distanceRight){
                   //down
                   if(!this.randomizeInitialPositions){
-                    randomChildY = newNode.rect.y +100;
+                    randomChildY = newNode.rect.y;
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height) +100;
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * newNode.rect.height);
                     randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * newNode.rect.width);
                   }
                 }
                 else{
                   //right
                   if(!this.randomizeInitialPositions){
-                    randomChildX = newNode.rect.x +100;
+                    randomChildX = newNode.rect.x;
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width) +100;
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * newNode.rect.width);
                     randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * newNode.rect.height);
                   }
                 }
@@ -553,15 +550,8 @@ export class HySELayout extends CoSELayout {
               newNode.getChild().add(x);
             });
             this.dummyCompoundNodes.push(newNode);
+            newNode.child.updateBounds();
             console.log("new Nodes",newNode);  
-          
-          
-
-          // let xDimension = newNode.getChild().calcEstimatedSize();
-          // console.log("xDimension: ", xDimension);
-          // newNode.setRect(points,{x:xDimension, y:xDimension});
-          
-          
           
         }
         
@@ -570,7 +560,6 @@ export class HySELayout extends CoSELayout {
           graph.parent.updateBounds();
         });
 
-        //this.graphManager.updateBounds();
       }
 
       
