@@ -161,14 +161,17 @@ export class HySELayout extends CoSELayout {
           }
           groups[group].push(node);
           
-          let seed = getIsDirectedNeighborNode(node);
-          if(seed!==null){
+          let seed:any[] = getIsDirectedNeighborNodes(node);
+          if(seed.length>0){
             if(seeds[group]===undefined){
               seeds[group] = new Set();
             }
-            if(!visited.has(seed)){
-            seeds[group].add(seed);
-            }
+            seed.forEach((s) => {
+              if(!seeds[group].has(s)){
+                seeds[group].add(s);
+              }
+            });
+            
             // seeds[group] = seed;
           }
           if(node.child){
@@ -188,12 +191,12 @@ export class HySELayout extends CoSELayout {
           
         };
 
-        let getIsDirectedNeighborNode = function(node:HySENode){
+        let getIsDirectedNeighborNodes = function(node:HySENode){
           let neighbors = node.edges.filter(x=>x.source.isDirected == 1 || x.target.isDirected == 1);
           if(neighbors.length>0){
-            return neighbors[0].source.id == node.id ? neighbors[0].target : neighbors[0].source;
+            return neighbors.map(x=>x.source.id == node.id ? x.target : x.source);
           }
-          return null;
+          return [];
         };
         
         
