@@ -511,8 +511,8 @@ async function runExperiment() {
     ];
     for (let i = 0; i < files.length; i++) {
       
-      var prob = 0.6;
-      var ratio = 0.5;
+      var prob = 1 - document.getElementById("prob").value;
+      var ratio = document.getElementById("ratio").value;
 
       var resp = await fetch(files[i]);
 
@@ -531,17 +531,16 @@ async function runExperiment() {
         if(directedNodes > totalNodes * ratio){
           return;
         }
-        if(totalNodes - visited.length < (totalNodes * ratio) - directedNodes){
-          prob = 0.0;
+        if(totalNodes - Object.keys(visited).length  <= (totalNodes * ratio) - directedNodes){
+          prob = 0;
         }
-        Math.random() > prob ? node.data('isDirected', 1) : node.data('isDirected', 0);
+        Math.random() >= prob ? node.data('isDirected', 1) : node.data('isDirected', 0);
 
         if(node.data('isDirected') == 1){
           directedNodes++;
         }
 
         var neighbors = node.neighborhood().nodes();
-        console.log("neighbors of ",node.id()," are ",neighbors);
         neighbors.forEach(function(neighbor){
           addToHeirarchy(neighbor,visited);
         });
@@ -554,12 +553,6 @@ async function runExperiment() {
         addToHeirarchy(node,visited);
       });
 
-      //set 25 percent of the nodes to be in the heirarchy
-      var nodesToBeInHeirarchy = Math.floor(nodes.length * 0.05);
-      for (let i = 0; i < nodesToBeInHeirarchy; i++) {
-        var randomNode = Math.floor(Math.random() * nodes.length);
-        nodes[randomNode].data('isDirected', 1);
-      }
       console.log("directed nodes length ",cy.nodes('[isDirected = 1]').length);
       // run force directed
       const o = getOptions();
@@ -581,4 +574,44 @@ function addCanvas() {
   const body = document.getElementsByTagName("body")[0];
   body.appendChild(canvas);
   return canvas;
+}
+
+
+function createRandomGraph(){
+  var prob = 1 - document.getElementById("prob").value;
+  var ratio = document.getElementById("ratio").value;
+
+  var nodes = cy.nodes();
+      
+  visited = {};
+
+      function addToHeirarchy(node,visited){
+        if(visited[node.id()]){
+          return;
+        }
+        visited[node.id()] = true;
+        if(directedNodes > totalNodes * ratio){
+          return;
+        }
+        if(totalNodes - Object.keys(visited).length  <= (totalNodes * ratio) - directedNodes){
+          prob = 0;
+        }
+        Math.random() >= prob ? node.data('isDirected', 1) : node.data('isDirected', 0);
+
+        if(node.data('isDirected') == 1){
+          directedNodes++;
+        }
+
+        var neighbors = node.neighborhood().nodes();
+        neighbors.forEach(function(neighbor){
+          addToHeirarchy(neighbor,visited);
+        });
+
+      }
+
+      var totalNodes = nodes.length;
+      var directedNodes = 0;
+      nodes.forEach(function(node){
+        addToHeirarchy(node,visited);
+      });
 }

@@ -113,6 +113,20 @@
           <div class="row">
             <button title="Experiment" onclick="runExperiment()">Run Experiment</button>
           </div>
+
+          <div class="row">
+            <label title="Probability of adding a node to heirarchical part" class="form-label" for="prob"> Add To Heirarchy Prob </label>
+            <input title="Probability of adding a node to heirarchical part" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="prob" value="0.4">
+          </div>
+
+          <div class="row">
+            <label title="Ratio of heirarchical nodes to non-heirarchical nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
+            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.5">
+          </div>
+
+          <div class="row">
+            <button title="Experiment" onclick="createRandomGraph()">Add Nodes to heirarchy randomly</button>
+          </div>
           
         </div>
       </div>
