@@ -38,7 +38,7 @@ export class HySELayout extends CoSELayout {
     randomizeInitialPositions = true;
     [x: string]: any;
     constructor(layering, cy) {
-      console.trace();
+        console.trace();
         super();
         super.initParameters();
         this.layering = layering;
@@ -62,20 +62,20 @@ export class HySELayout extends CoSELayout {
         this.uniformLeafNodeSizes = this.uniformNodeDimensions;
         this.useFRGridVariant = true;
         
-        console.log("beforeLayout");
-        console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
-        console.log("useFRGridVariant: ", this.useFRGridVariant);
+        //1console.log("beforeLayout");
+        //1console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
+        //1console.log("useFRGridVariant: ", this.useFRGridVariant);
 
         
         const nodes = this.graphManager.getAllNodes();
         for (let i = 0; i < nodes.length; i++) {
           this.id2LNode[nodes[i].id] = nodes[i];
         }
-        console.log("id2LNode: ", this.id2LNode);
+        //1console.log("id2LNode: ", this.id2LNode);
 
         //this.graphManager.graphs[2].shift({x: 1000, y: 1000});
 
-        console.log("orderedLayers: ", this.orderedLayers);
+        //1console.log("orderedLayers: ", this.orderedLayers);
         if(this.layering.length > 0){
           this.prepareOrderedLayers();
         }
@@ -248,7 +248,6 @@ export class HySELayout extends CoSELayout {
           }
         });
 
-
         //create a compound node for each group
         for (let i = 0; i < Object.keys(groups).length; i++) {
           
@@ -291,10 +290,10 @@ export class HySELayout extends CoSELayout {
             let yCenter = yCenters.reduce((a,b)=>a+b)/yCenters.length;
 
             //find which side is the closest to the xCenter and yCenter
-            let distanceUp = Math.abs(yCenter-mostTopNode.getCenterY());
-            let distanceDown = Math.abs(yCenter-mostBottomNode.getCenterY());
-            let distanceLeft = Math.abs(xCenter-mostLeftNode.getCenterX());
-            let distanceRight = Math.abs(xCenter-mostRightNode.getCenterX());
+            let distanceUp = Math.abs(yCenter);
+            let distanceDown = Math.abs(mostBottomNode.rect.y+mostBottomNode.rect.height-yCenter);
+            let distanceLeft = Math.abs(xCenter);
+            let distanceRight = Math.abs(mostRightNode.rect.x+mostRightNode.rect.width-xCenter);
 
             let min = Math.min(distanceUp,distanceDown,distanceLeft,distanceRight);
             let up = distanceUp == min?true:false;
@@ -303,6 +302,22 @@ export class HySELayout extends CoSELayout {
             let down = distanceDown == min?true:false;
             
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
+            //1console.log("start");
+            //1console.log("xCenters",xCenters);
+            //1console.log("yCenters",yCenters);
+            // group.forEach(x=>{
+            //   //1console.log("x",x.id);
+            // });
+            //1console.log("distanceUp",distanceUp);
+            //1console.log("distanceDown",distanceDown);
+            //1console.log("distanceLeft",distanceLeft);
+            //1console.log("distanceRight",distanceRight);
+            //1console.log("newNode",newNode);
+            //1console.log("up",up);
+            //1console.log("down",down);
+            //1console.log("left",left);
+            //1console.log("right",right);
+            //1console.log("seedCenter",seedCenter);
 
             //place the compound node by checking with other compound nodes already placed on that side
             //when going to call recursively, we remove the compound nodes that are already checked and not colliding
@@ -387,10 +402,10 @@ export class HySELayout extends CoSELayout {
                     nodesPassed.push(x);
                   }
                 });
-                console.log("up -> nodes to check before",nodesToCheck);
+                //1console.log("up -> nodes to check before",nodesToCheck);
                 nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
-                console.log("up -> nodes to check",nodesToCheck);
-                console.log("up -> colliding",collidingNode);
+                //1console.log("up -> nodes to check",nodesToCheck);
+                //1console.log("up -> colliding",collidingNode);
                 if(colliding && collidingNode != null){
                   newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - newNode.rect.height-50},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
@@ -557,13 +572,13 @@ export class HySELayout extends CoSELayout {
             });
             this.dummyCompoundNodes.push(newNode);
             //newNode.child.updateBounds();
-            console.log("new Nodes",newNode);  
+            //1console.log("new Nodes",newNode);  
           
         }
         
         //update bounds for each graph in graph manager
         this.graphManager.graphs.forEach(graph=>{
-          graph.parent.updateBounds();
+          //graph.parent.updateBounds();
         });
 
       }
@@ -580,30 +595,33 @@ export class HySELayout extends CoSELayout {
         for (let i = 0; i < prevLayer.length; i++) {
           for (let j = 0; j < prevLayer[i].length; j++) {
             if (prevLayer[i][j].id != currLayer[i][j].id) {
-              console.log("flip in layer: ", i, " node: ", j);
+              //1console.log("flip in layer: ", i, " node: ", j);
               counter++;
               x= false;
             }
           }
         }
-        console.log("counter: ", counter);
+        //1console.log("counter: ", counter);
         return x;
       }
     
       // will be called by layout-base.js
       layout() {
+        
         const t1 = new Date().getTime();
         this.beforeLayout();
-        console.log(this.graphManager.getAllNodes());
+        
+        //1console.log(this.graphManager.getAllNodes());
         let layoutEnded = false;
         while (!this.displayInitialPositions && !layoutEnded) {
           layoutEnded = this.tick();
         }
-
+        
         if(!this.displayInitialPositions && this.performPostProcessing){
           //this.postLayoutOverlapRemoval();
           this.postLayoutRepulsionPhase();
         }
+        const t = (new Date().getTime() - t1);
         
         //FOR DEBUGGING
         //let beforeLayers = JSON.parse(JSON.stringify(this.orderedLayers,['id','rank','order']));;
@@ -621,7 +639,7 @@ export class HySELayout extends CoSELayout {
         // }
         
         
-        const t = (new Date().getTime() - t1);
+        
     
         //FOR DEBUGGING
         // let afterLayers = this.orderedLayers;
@@ -679,7 +697,7 @@ export class HySELayout extends CoSELayout {
           if (this.coolingFactor < 0) { 
             this.coolingFactor = 0;
           }
-          console.log("this.coolingFactor: ", this.coolingFactor);
+          //1console.log("this.coolingFactor: ", this.coolingFactor);
         }
         this.totalDisplacement = 0; // defined inside parent class
         this.undirectedDisplacement = 0;
@@ -699,18 +717,18 @@ export class HySELayout extends CoSELayout {
         this.totalDisplacement = 0;
         this.undirectedDisplacement = 0;
         this.directedDisplacement = 0;
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 100; i++) {
           this.graphManager.updateBounds();
           this.calcRepulsionForces();
           this.moveNodes();
         }
-        console.log("post repulsion"+this.totalDisplacement+" displacement");
+        //1console.log("post repulsion"+this.totalDisplacement+" displacement");
       }
 
       postLayoutOverlapRemoval() {
         //check all the ordered layers and see if there is any overlap between nodes
         //if there is an overlap, move the nodes away from each other
-        console.log(this.orderedLayers);
+        //1console.log(this.orderedLayers);
         this.orderedLayers.forEach(layer=>{
           for(let i = 0; i < layer.length-1; i++) {
             let node1 = layer[i] as HySENode;
@@ -719,10 +737,10 @@ export class HySELayout extends CoSELayout {
             let xDistance = Math.abs(node1.getRect().getCenterX() - node2.getRect().getCenterX());
             //if distance is less than the width of the two nodes, then there is an overlap
             if(xDistance < node1.getWidth() + node2.getWidth()) {
-              console.log("overlap between nodes: ", node1.id, " and ", node2.id);
+              //1console.log("overlap between nodes: ", node1.id, " and ", node2.id);
               //move the nodes away from each other
               let xMove = (node1.getWidth() + node2.getWidth() - xDistance)/2;
-              console.log("moved ", node1.id, " by ", -xMove, " and ", node2.id, " by ", xMove);
+              //1console.log("moved ", node1.id, " by ", -xMove, " and ", node2.id, " by ", xMove);
               node1.moveBy(-xMove,0);
               node2.moveBy(xMove,0);
             }
@@ -1062,7 +1080,7 @@ export class HySELayout extends CoSELayout {
             this.flipLayer(layers[i], i);
           } else {
             // reset for and displacement since they are flipped
-            console.log("successfull flip for crossing nums: ", crossNum1, crossNum2);
+            //1console.log("successfull flip for crossing nums: ", crossNum1, crossNum2);
             for (let j = 0; j < layers[i].length; j++) {
               layers[i][j].resetForcesAndDisplacement();
             }
@@ -1288,7 +1306,7 @@ export class HySELayout extends CoSELayout {
           });
         });
         const timetaken = new Date().getTime() - t1;
-        console.log("expansion took", timetaken);
+        //1console.log("expansion took", timetaken);
       }
     
       expandNodesByStreching() {
@@ -1323,7 +1341,7 @@ export class HySELayout extends CoSELayout {
         }
     
         const timetaken = new Date().getTime() - t1;
-        console.log("expansion took", timetaken);
+        //1console.log("expansion took", timetaken);
       }
   
     
@@ -1426,7 +1444,7 @@ export class HySELayout extends CoSELayout {
           }
           this.orderedLayers.push(currLayer);
         }
-        console.log("ordered layers", this.orderedLayers);
+        //1console.log("ordered layers", this.orderedLayers);
       }
     
     

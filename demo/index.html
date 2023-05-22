@@ -11,15 +11,19 @@
     <link rel="stylesheet" href="./style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js" integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/cytoscape-graphml/cytoscape-graphml.js"></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="./cytoscape-cose-bilkent.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script src="./cytoscape-context-menus.js"></script>
     <script src="./file-operations.js"> </script>
     <script src="./experiment-small-graphs.js"> </script>
     <script src="../dist/cytoscape-hyse.js"> </script>
     <script src="./sampleGraph.js"></script>
+    <script src="./cytoscape-layvo.js"></script>
+    <script src="./test.js"></script>
     <script src="./index.js"></script>
-    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
-    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
-    <script src="./cytoscape-cose-bilkent.js"></script>
+    
     
 </head>
 
@@ -104,6 +108,10 @@
     
           <div class="row">
             <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
+          </div>
+
+          <div class="row">
+            <button title="Experiment" onclick="runExperiment()">Run Experiment</button>
           </div>
           
         </div>

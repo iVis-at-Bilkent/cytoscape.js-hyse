@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", pageLoaded);
-function pageLoaded() {
+async function pageLoaded() {
     console.log("page loaded");
     //fill the experiment select box with the experiment graph names in the experiment-small-graphs folder
     var select = document.getElementById("experimentGraphs");
@@ -15,11 +15,14 @@ function pageLoaded() {
         select.appendChild(el);
     }
 
+    var resp = await fetch('./small-sized-compound/g_00190_01_compound.json');
+    
+    resp = await resp.json();
 
     //initialize cytoscapes
     const cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
-        elements: graphElements,
+        elements: resp,
         wheelSensitivity: 0.2,
         style: getStyle(),
     }).on('cxttap', 'node', function (evt) {
@@ -48,6 +51,7 @@ function pageLoaded() {
           ]
     });
 
+    
 
 
     //run cytoscape layout
@@ -55,6 +59,7 @@ function pageLoaded() {
     o.isForceDirected = true;
     cy.layout(o).run();
     //window.cy = cy;
+    window.layvo = cy.layvo("get");
 
 };
 
@@ -362,4 +367,218 @@ function loadGraph(){
 
 function deleteSelected(){
   cy.$(':selected').remove();
+}
+
+function renderChart(results, title = null) {
+  const metrics = [
+    "numberOfEdgeCrosses",
+    "numberOfNodeOverlaps",
+    "numberOfNodeEdgeOverlaps",
+    "totalArea",
+    "totalEdgeLength",
+    "averageEdgeLength",
+    "executionTime",
+  ];
+  for (let i = 0; i < metrics.length; i++) {
+    const ctx = addCanvas().getContext("2d");
+    let labels = [];
+    let dagreData = [];
+    let fdData = [];
+    for (let g in results) {
+      labels.push(g);
+      //dagreData.push(results[g].dagre[metrics[i]]);
+      fdData.push(results[g].fd[metrics[i]]);
+    }
+    const fontSize = 32;
+    let chartTitle = {
+      display: true,
+      text: title,
+      font: {
+        size: fontSize,
+      },
+    };
+    if (!title) {
+      chartTitle = null;
+    }
+    const _ = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          // {
+          //   label: "Dagre # " + metrics[i],
+          //   data: dagreData,
+          //   borderColor: "#ff0000",
+          //   backgroundColor: "#ff000080",
+          // },
+          {
+            label: "FD # " + metrics[i],
+            data: fdData,
+            borderColor: "#0000ff",
+            backgroundColor: "#0000ff80",
+          },
+        ],
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+          title: chartTitle,
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+}
+
+
+async function runExperiment() {
+  const results = {};
+  let cnt = 0;
+  // for (let g in window.test) {
+  //   cy.json({ elements: window.test });
+  //   // run force directed
+  //   const o = getOptions();
+  //   o.isForceDirected = true;
+  //   cy.layout(o).run();
+  //   results[g] = { fd: window.layvo.generalProperties() };
+  //   // results[g]["fd"] = layvo.generalProperties();
+  //   results[g]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+  //   cnt++;
+  //   if (cnt === 5) {
+  //     break;
+  //   }
+  // }
+
+    // var resp = await fetch('./small-sized-compound/aves-weaver-social-06_compound.json');
+
+    let files = [
+      "./small-sized-compound/g_00010_04_compound.json",
+      "./small-sized-compound/g_00010_07_compound.json",
+      "./small-sized-compound/g_00010_09_compound.json",
+      "./small-sized-compound/g_00020_01_compound.json",
+      "./small-sized-compound/g_00020_04_compound.json",
+      "./small-sized-compound/g_00020_09_compound.json",
+      "./small-sized-compound/g_00030_02_compound.json",
+      "./small-sized-compound/g_00030_08_compound.json",
+      "./small-sized-compound/g_00030_09_compound.json",
+      "./small-sized-compound/g_00040_03_compound.json",
+      "./small-sized-compound/g_00040_08_compound.json",
+      "./small-sized-compound/g_00040_09_compound.json",
+      "./small-sized-compound/g_00050_05_compound.json",
+      "./small-sized-compound/g_00050_09_compound.json",
+      "./small-sized-compound/g_00050_10_compound.json",
+      "./small-sized-compound/g_00060_02_compound.json",
+      "./small-sized-compound/g_00060_06_compound.json",
+      "./small-sized-compound/g_00060_08_compound.json",
+      "./small-sized-compound/g_00070_03_compound.json",
+      "./small-sized-compound/g_00080_04_compound.json",
+      "./small-sized-compound/g_00090_03_compound.json",
+      "./small-sized-compound/g_00100_04_compound.json",
+      "./small-sized-compound/g_00110_05_compound.json",
+      "./small-sized-compound/g_00120_08_compound.json",
+      "./small-sized-compound/g_00130_01_compound.json",
+      "./small-sized-compound/g_00140_10_compound.json",
+      "./small-sized-compound/g_00150_08_compound.json",
+      "./small-sized-compound/g_00160_04_compound.json",
+      "./small-sized-compound/g_00170_07_compound.json",
+      "./small-sized-compound/g_00180_08_compound.json",
+      "./small-sized-compound/g_00190_05_compound.json",
+      "./small-sized-compound/g_00200_02_compound.json",
+      "./small-sized-compound/g_00200_09_compound.json",
+      "./small-sized-compound/g_00200_10_compound.json"
+
+    ];
+    for (let i = 0; i < files.length; i++) {
+      
+      var prob = 0.6;
+      var ratio = 0.5;
+
+      var resp = await fetch(files[i]);
+
+
+      resp = await resp.json();
+      cy.json({ elements: resp });
+      var nodes = cy.nodes();
+      
+      visited = {};
+
+      function addToHeirarchy(node,visited){
+        if(visited[node.id()]){
+          return;
+        }
+        visited[node.id()] = true;
+        if(directedNodes > totalNodes * ratio){
+          return;
+        }
+        if(totalNodes - visited.length < (totalNodes * ratio) - directedNodes){
+          prob = 0.0;
+        }
+        Math.random() > prob ? node.data('isDirected', 1) : node.data('isDirected', 0);
+
+        if(node.data('isDirected') == 1){
+          directedNodes++;
+        }
+
+        var neighbors = node.neighborhood().nodes();
+        console.log("neighbors of ",node.id()," are ",neighbors);
+        neighbors.forEach(function(neighbor){
+          addToHeirarchy(neighbor,visited);
+        });
+
+      }
+
+      var totalNodes = nodes.length;
+      var directedNodes = 0;
+      nodes.forEach(function(node){
+        addToHeirarchy(node,visited);
+      });
+
+      //set 25 percent of the nodes to be in the heirarchy
+      var nodesToBeInHeirarchy = Math.floor(nodes.length * 0.05);
+      for (let i = 0; i < nodesToBeInHeirarchy; i++) {
+        var randomNode = Math.floor(Math.random() * nodes.length);
+        nodes[randomNode].data('isDirected', 1);
+      }
+      console.log("directed nodes length ",cy.nodes('[isDirected = 1]').length);
+      // run force directed
+      const o = getOptions();
+      o.isForceDirected = true;
+      cy.layout(o).run();
+      results[i] = { fd: window.layvo.generalProperties() };
+      results[i]["fd"] = layvo.generalProperties();
+      results[i]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+      cnt++;
+    }
+    console.log(results);
+    renderChart(results);
+}
+
+function addCanvas() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1224;
+  canvas.height = 768;
+  const body = document.getElementsByTagName("body")[0];
+  body.appendChild(canvas);
+  return canvas;
 }
