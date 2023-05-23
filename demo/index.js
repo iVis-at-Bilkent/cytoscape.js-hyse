@@ -91,8 +91,8 @@ function getStyle(){
                 style: {
                     'width': 3,
                     'line-color': '#ccc',
-                    'target-arrow-color': '#ccc',
-                    'target-arrow-shape': 'triangle'
+                    'target-arrow-color': '#ff11aa',
+                    'target-arrow-shape': 'triangle-cross'
                 }
             },
             //color the selected nodes
@@ -506,7 +506,9 @@ async function runExperiment() {
       "./small-sized-compound/g_00190_05_compound.json",
       "./small-sized-compound/g_00200_02_compound.json",
       "./small-sized-compound/g_00200_09_compound.json",
-      "./small-sized-compound/g_00200_10_compound.json"
+      "./small-sized-compound/g_00200_10_compound.json",
+      "./medium-sized-compound/g_00500_03_compound.json",
+      // "./medium-sized-compound/g_01000_01_compound.json"
 
     ];
     for (let i = 0; i < files.length; i++) {
@@ -538,20 +540,23 @@ async function runExperiment() {
 
         if(node.data('isDirected') == 1){
           directedNodes++;
+          var neighbors = node.outgoers().nodes();
+          neighbors.forEach(function(neighbor){
+            addToHeirarchy(neighbor,visited);
+          });
         }
 
-        var neighbors = node.outgoers().nodes();
-        neighbors.forEach(function(neighbor){
-          addToHeirarchy(neighbor,visited);
-        });
+        
 
       }
 
       var totalNodes = nodes.length;
       var directedNodes = 0;
-      nodes.forEach(function(node){
-        addToHeirarchy(node,visited);
-      });
+      // nodes.forEach(function(node){
+      //   addToHeirarchy(node,visited);
+      // });
+      var r = Math.floor(Math.random() * totalNodes);
+      addToHeirarchy(nodes[r],visited);
 
       console.log("directed nodes length ",cy.nodes('[isDirected = 1]').length);
       // run force directed
@@ -600,18 +605,21 @@ function createRandomGraph(){
 
         if(node.data('isDirected') == 1){
           directedNodes++;
+          var neighbors = node.outgoers().nodes();
+          neighbors.forEach(function(neighbor){
+            addToHeirarchy(neighbor,visited);
+          });
         }
 
-        var neighbors = node.successors().nodes();
-        neighbors.forEach(function(neighbor){
-          addToHeirarchy(neighbor,visited);
-        });
+        
 
       }
 
       var totalNodes = nodes.length;
       var directedNodes = 0;
-      nodes.forEach(function(node){
-        addToHeirarchy(node,visited);
-      });
+      // nodes.forEach(function(node){
+      //   addToHeirarchy(node,visited);
+      // });
+      var r = Math.floor(Math.random() * totalNodes);
+      addToHeirarchy(nodes[r],visited);
 }
