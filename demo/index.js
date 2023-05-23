@@ -77,10 +77,11 @@ async function pageLoaded() {
 };
 
 function assignRandomWidthAndHeight(){
+    var top = document.getElementById("maxWH").value;
     //assign random width and height to the nodes
     cy.nodes().forEach(function(node){
-        node.data('width', Math.floor(Math.random() * 140) + 20);
-        node.data('height', Math.floor(Math.random() * 140) + 20);
+        node.data('width', Math.floor(Math.random() * top) + 20);
+        node.data('height', Math.floor(Math.random() * top) + 20);
     });
 }
 
