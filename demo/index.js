@@ -540,7 +540,7 @@ async function runExperiment() {
           directedNodes++;
         }
 
-        var neighbors = node.neighborhood().nodes();
+        var neighbors = node.outgoers().nodes();
         neighbors.forEach(function(neighbor){
           addToHeirarchy(neighbor,visited);
         });
@@ -602,7 +602,7 @@ function createRandomGraph(){
           directedNodes++;
         }
 
-        var neighbors = node.neighborhood().nodes();
+        var neighbors = node.successors().nodes();
         neighbors.forEach(function(neighbor){
           addToHeirarchy(neighbor,visited);
         });
