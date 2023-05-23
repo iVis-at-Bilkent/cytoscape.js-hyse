@@ -47,7 +47,20 @@ async function pageLoaded() {
                     cy.layout(o).run();
                 },  
                 hasTrailingDivider: true
-            }
+            },
+            {
+              id: 'add-node-family-to-heirarchy',
+              content: 'Add Node and its successors to Heirarchy',
+              tooltipText: 'Add Node and its successors to Heirarchy',
+              selector: 'node',
+              onClickFunction: function (event) {
+                  //change the data of the node to be in the heirarchy i-e set isDirected to true
+                  var node = event.target;
+                  node.data('isDirected', 1);
+                  createRandomGraph(node.id());
+              },  
+              hasTrailingDivider: true
+          }
           ]
     });
 
@@ -91,8 +104,8 @@ function getStyle(){
                 style: {
                     'width': 3,
                     'line-color': '#ccc',
-                    'target-arrow-color': '#ff11aa',
-                    'target-arrow-shape': 'triangle-cross'
+                    "curve-style": "bezier",
+                    "target-arrow-shape": "triangle"
                 }
             },
             //color the selected nodes
@@ -582,7 +595,7 @@ function addCanvas() {
 }
 
 
-function createRandomGraph(){
+function createRandomGraph(nodeId){
   var prob = 1 - document.getElementById("prob").value;
   var ratio = document.getElementById("ratio").value;
 
@@ -620,6 +633,11 @@ function createRandomGraph(){
       // nodes.forEach(function(node){
       //   addToHeirarchy(node,visited);
       // });
-      var r = Math.floor(Math.random() * totalNodes);
-      addToHeirarchy(nodes[r],visited);
+      if(nodeId == undefined){
+        var r = Math.floor(Math.random() * totalNodes);
+        addToHeirarchy(nodes[r],visited);
+      }
+      else{
+        addToHeirarchy(cy.getElementById(nodeId),visited);
+      }
 }
