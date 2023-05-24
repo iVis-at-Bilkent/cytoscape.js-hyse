@@ -178,7 +178,7 @@ function rerun(){
 function runCose(){
     //run cose-bilkent layout
     const o = getOptions();
-    o.name = 'cose-bilkent';
+    o.name = 'fcose';
     o.isForceDirected = true;
     cy.layout(o).run();
 }
