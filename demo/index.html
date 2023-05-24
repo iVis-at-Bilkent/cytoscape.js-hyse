@@ -100,6 +100,11 @@
             <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
             <input title="Repulsion force between nodes" type="range" min="50" max="10000" class="form-control form-control-sm" id="nodeRepulsion" value="5000">
           </div>
+
+          <div class="row">
+            <label title="Ideal Edge Length" class="form-label" for="idealEdgeLength"> Ideal Edge Length </label>
+            <input title="Ideal Edge Length" type="number" class="form-control form-control-sm" id="idealEdgeLength" value="50">
+          </div>
     
           <div class="row">
             <button title="Run Cose" onclick="runCose()">CoSE</button>
@@ -299,10 +304,10 @@
               <td><input type="number" class="form-control form-control-sm" id="nodeRepulsionCalculationWidth"
                   value="10"></td>
             </tr>
-            <tr>
+            <!-- <tr>
               <td><label class="form-label" for="idealEdgeLength"> idealEdgeLength </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="idealEdgeLength" value="50"></td>
-            </tr>
+              <td><input type="number" class="form-control form-control-sm" id="idealEdgeLength" value="100"></td>
+            </tr> -->
             <tr>
               <td><label class="form-label" for="edgeElasticity"> edgeElasticity </label></td>
               <td><input type="number" class="form-control form-control-sm" id="edgeElasticity" value="0.45">
