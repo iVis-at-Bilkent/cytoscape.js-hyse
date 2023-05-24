@@ -186,7 +186,7 @@ function runCose(){
 function runCoseAnimated(){
     //run cose-bilkent layout
     const o = getOptions();
-    o.name = 'cose-bilkent';
+    o.name = 'fcose';
     o.animate = "during";
     o.isForceDirected = true;
     o.refresh = o.ticksPerFrame;
