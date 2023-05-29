@@ -62,20 +62,20 @@ export class HySELayout extends CoSELayout {
         this.uniformLeafNodeSizes = this.uniformNodeDimensions;
         this.useFRGridVariant = true;
         
-        //1console.log("beforeLayout");
-        //1console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
-        //1console.log("useFRGridVariant: ", this.useFRGridVariant);
+        //console.log("beforeLayout");
+        //console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
+        //console.log("useFRGridVariant: ", this.useFRGridVariant);
 
         
         const nodes = this.graphManager.getAllNodes();
         for (let i = 0; i < nodes.length; i++) {
           this.id2LNode[nodes[i].id] = nodes[i];
         }
-        //1console.log("id2LNode: ", this.id2LNode);
+        //console.log("id2LNode: ", this.id2LNode);
 
         //this.graphManager.graphs[2].shift({x: 1000, y: 1000});
 
-        //1console.log("orderedLayers: ", this.orderedLayers);
+        //console.log("orderedLayers: ", this.orderedLayers);
         if(this.layering.length > 0){
           this.prepareOrderedLayers();
         }
@@ -234,16 +234,16 @@ export class HySELayout extends CoSELayout {
 
         //get the bounds of heirarchical nodes
         this.graphManager.allNodes.filter(x=>x.isDirected == 1).forEach(node => {
-          if(node.rect.x < mostLeftNode.rect.x){
+          if(mostLeftNode.isDirected != 1 || node.rect.x < mostLeftNode.rect.x){
             mostLeftNode = node;
           }
-          if(node.rect.x + node.rect.width>mostRightNode.rect.x + mostRightNode.rect.width){
+          if(mostRightNode.isDirected != 1 || node.rect.x + node.rect.width>mostRightNode.rect.x + mostRightNode.rect.width){
             mostRightNode = node;
           }
-          if(node.rect.y < mostTopNode.rect.y){
+          if(mostTopNode.isDirected != 1 || node.rect.y < mostTopNode.rect.y){
             mostTopNode = node;
           }
-          if(node.rect.y + node.rect.height>mostBottomNode.rect.y+mostBottomNode.rect.height){
+          if(mostBottomNode.isDirected != 1 || node.rect.y + node.rect.height>mostBottomNode.rect.y+mostBottomNode.rect.height){
             mostBottomNode = node;
           }
         });
@@ -302,22 +302,23 @@ export class HySELayout extends CoSELayout {
             let down = distanceDown == min?true:false;
             
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
-            //1console.log("start");
-            //1console.log("xCenters",xCenters);
-            //1console.log("yCenters",yCenters);
-            // group.forEach(x=>{
-            //   //1console.log("x",x.id);
-            // });
-            //1console.log("distanceUp",distanceUp);
-            //1console.log("distanceDown",distanceDown);
-            //1console.log("distanceLeft",distanceLeft);
-            //1console.log("distanceRight",distanceRight);
-            //1console.log("newNode",newNode);
-            //1console.log("up",up);
-            //1console.log("down",down);
-            //1console.log("left",left);
-            //1console.log("right",right);
-            //1console.log("seedCenter",seedCenter);
+            console.log("start");
+            console.log("id",newNode.id);
+            console.log("xCenters",xCenters);
+            console.log("yCenters",yCenters);
+            group.forEach(x=>{
+              //console.log("x",x.id);
+            });
+            console.log("distanceUp",distanceUp);
+            console.log("distanceDown",distanceDown);
+            console.log("distanceLeft",distanceLeft);
+            console.log("distanceRight",distanceRight);
+            console.log("newNode",newNode);
+            console.log("up",up);
+            console.log("down",down);
+            console.log("left",left);
+            console.log("right",right);
+            console.log("seedCenter",seedCenter);
 
             //place the compound node by checking with other compound nodes already placed on that side
             //when going to call recursively, we remove the compound nodes that are already checked and not colliding
@@ -402,10 +403,10 @@ export class HySELayout extends CoSELayout {
                     nodesPassed.push(x);
                   }
                 });
-                //1console.log("up -> nodes to check before",nodesToCheck);
+                //console.log("up -> nodes to check before",nodesToCheck);
                 nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
-                //1console.log("up -> nodes to check",nodesToCheck);
-                //1console.log("up -> colliding",collidingNode);
+                //console.log("up -> nodes to check",nodesToCheck);
+                //console.log("up -> colliding",collidingNode);
                 if(colliding && collidingNode != null){
                   newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - newNode.rect.height-50},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
@@ -476,8 +477,8 @@ export class HySELayout extends CoSELayout {
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height-x.rect.height));
-                    randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
+                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height-x.rect.height-150));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
                   }
                 }
                 else{
@@ -487,8 +488,8 @@ export class HySELayout extends CoSELayout {
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
-                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width-150));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
                   }
                 }
               }
@@ -500,8 +501,8 @@ export class HySELayout extends CoSELayout {
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height-x.rect.height));
-                    randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height- x.rect.height+150));
+                    randomChildX = newNode.rect.x +  Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
                   }
                 }
                 else{
@@ -511,8 +512,8 @@ export class HySELayout extends CoSELayout {
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
-                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width-150));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
                   }
                 }
               }
@@ -524,8 +525,8 @@ export class HySELayout extends CoSELayout {
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY =  newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
-                    randomChildX = seedCenter.x - (newNode.rect.width/2) + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height-150));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
                   }
                 }
                 else{
@@ -535,8 +536,8 @@ export class HySELayout extends CoSELayout {
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x  + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
-                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width+150));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
                   }
                 }
               }
@@ -548,8 +549,8 @@ export class HySELayout extends CoSELayout {
                     randomChildX = seedCenter.x;
                   }
                   else{
-                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
-                    randomChildX = seedCenter.x - (newNode.rect.width/2) +  Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height+150));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
                   }
                 }
                 else{
@@ -559,20 +560,25 @@ export class HySELayout extends CoSELayout {
                     randomChildY = seedCenter.y;
                   }
                   else{
-                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width));
-                    randomChildY = seedCenter.y - (newNode.rect.height/2) + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
+                    randomChildX = newNode.rect.x + Math.floor(Math.random() * (newNode.rect.width - x.rect.width+150));
+                    randomChildY = newNode.rect.y + Math.floor(Math.random() * (newNode.rect.height - x.rect.height));
                   }
                 }
               }
               
               let childpoints = new layoutBase.PointD(randomChildX, randomChildY);
-              x.setRect(childpoints,x.rect);
+              x.rect.x = randomChildX;
+              x.rect.y = randomChildY;
+              // x.rect.x = newNode.rect.x;
+              // x.rect.y = newNode.rect.y;
+              
+              // x.setRect(childpoints,x.rect);
               x.parent = newNode;
               newNode.getChild().add(x);
             });
             this.dummyCompoundNodes.push(newNode);
             //newNode.child.updateBounds();
-            //1console.log("new Nodes",newNode);  
+            //console.log("new Nodes",newNode);  
           
         }
         
@@ -595,13 +601,13 @@ export class HySELayout extends CoSELayout {
         for (let i = 0; i < prevLayer.length; i++) {
           for (let j = 0; j < prevLayer[i].length; j++) {
             if (prevLayer[i][j].id != currLayer[i][j].id) {
-              //1console.log("flip in layer: ", i, " node: ", j);
+              //console.log("flip in layer: ", i, " node: ", j);
               counter++;
               x= false;
             }
           }
         }
-        //1console.log("counter: ", counter);
+        //console.log("counter: ", counter);
         return x;
       }
     
@@ -611,7 +617,7 @@ export class HySELayout extends CoSELayout {
         const t1 = new Date().getTime();
         this.beforeLayout();
         
-        //1console.log(this.graphManager.getAllNodes());
+        //console.log(this.graphManager.getAllNodes());
         let layoutEnded = false;
         while (!this.displayInitialPositions && !layoutEnded) {
           layoutEnded = this.tick();
@@ -697,7 +703,7 @@ export class HySELayout extends CoSELayout {
           if (this.coolingFactor < 0) { 
             this.coolingFactor = 0;
           }
-          //1console.log("this.coolingFactor: ", this.coolingFactor);
+          //console.log("this.coolingFactor: ", this.coolingFactor);
         }
         this.totalDisplacement = 0; // defined inside parent class
         this.undirectedDisplacement = 0;
@@ -722,13 +728,13 @@ export class HySELayout extends CoSELayout {
           this.calcRepulsionForces();
           this.moveNodes();
         }
-        //1console.log("post repulsion"+this.totalDisplacement+" displacement");
+        //console.log("post repulsion"+this.totalDisplacement+" displacement");
       }
 
       postLayoutOverlapRemoval() {
         //check all the ordered layers and see if there is any overlap between nodes
         //if there is an overlap, move the nodes away from each other
-        //1console.log(this.orderedLayers);
+        //console.log(this.orderedLayers);
         this.orderedLayers.forEach(layer=>{
           for(let i = 0; i < layer.length-1; i++) {
             let node1 = layer[i] as HySENode;
@@ -737,10 +743,10 @@ export class HySELayout extends CoSELayout {
             let xDistance = Math.abs(node1.getRect().getCenterX() - node2.getRect().getCenterX());
             //if distance is less than the width of the two nodes, then there is an overlap
             if(xDistance < node1.getWidth() + node2.getWidth()) {
-              //1console.log("overlap between nodes: ", node1.id, " and ", node2.id);
+              //console.log("overlap between nodes: ", node1.id, " and ", node2.id);
               //move the nodes away from each other
               let xMove = (node1.getWidth() + node2.getWidth() - xDistance)/2;
-              //1console.log("moved ", node1.id, " by ", -xMove, " and ", node2.id, " by ", xMove);
+              //console.log("moved ", node1.id, " by ", -xMove, " and ", node2.id, " by ", xMove);
               node1.moveBy(-xMove,0);
               node2.moveBy(xMove,0);
             }
@@ -1080,7 +1086,7 @@ export class HySELayout extends CoSELayout {
             this.flipLayer(layers[i], i);
           } else {
             // reset for and displacement since they are flipped
-            //1console.log("successfull flip for crossing nums: ", crossNum1, crossNum2);
+            //console.log("successfull flip for crossing nums: ", crossNum1, crossNum2);
             for (let j = 0; j < layers[i].length; j++) {
               layers[i][j].resetForcesAndDisplacement();
             }
@@ -1306,7 +1312,7 @@ export class HySELayout extends CoSELayout {
           });
         });
         const timetaken = new Date().getTime() - t1;
-        //1console.log("expansion took", timetaken);
+        //console.log("expansion took", timetaken);
       }
     
       expandNodesByStreching() {
@@ -1341,7 +1347,7 @@ export class HySELayout extends CoSELayout {
         }
     
         const timetaken = new Date().getTime() - t1;
-        //1console.log("expansion took", timetaken);
+        //console.log("expansion took", timetaken);
       }
   
     
@@ -1444,7 +1450,7 @@ export class HySELayout extends CoSELayout {
           }
           this.orderedLayers.push(currLayer);
         }
-        //1console.log("ordered layers", this.orderedLayers);
+        //console.log("ordered layers", this.orderedLayers);
       }
     
     
