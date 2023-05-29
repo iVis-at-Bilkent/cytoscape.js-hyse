@@ -170,6 +170,8 @@ function runLayout() {
 
 function rerun(){
     //run cytoscape layout
+    //remove all nodes whose id starts with compound
+    //cy.remove('node[id ^= "compound"]');
     const o = getOptions();
     o.isForceDirected = true;
     cy.layout(o).run();
