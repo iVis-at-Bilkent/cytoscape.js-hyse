@@ -643,4 +643,63 @@ function createRandomGraph(nodeId){
       else{
         addToHeirarchy(cy.getElementById(nodeId),visited);
       }
+
+      //check if the ratio is satisfied
+      if(cy.nodes('[isDirected = 1]').length < totalNodes * ratio){
+        //run bfs on the isDirected nodes and add the incoming nodes to the heirarchy until the ratio is satisfied
+        var queue = [];
+        var visited = {};
+        var directedNodes = cy.nodes('[isDirected = 1]');
+        directedNodes.forEach(function(node){
+          queue.push(node);
+        }
+        );
+        while(queue.length > 0){
+          var node = queue.shift();
+          if(visited[node.id()]){
+            continue;
+          }
+          visited[node.id()] = true;
+          if(cy.nodes('[isDirected = 1]').length >= totalNodes * ratio){
+            break;
+          }
+          var neighbors = node.incomers().nodes();
+          neighbors.forEach(function(neighbor){
+            queue.push(neighbor);
+          });
+          node.data('isDirected', 1);
+        }
+        
+
+      }
+
+      //check if the ratio is satisfied
+      if(cy.nodes('[isDirected = 1]').length < totalNodes * ratio){
+        //run bfs on the isDirected nodes and add the incoming nodes to the heirarchy until the ratio is satisfied
+        var queue = [];
+        var visited = {};
+        var directedNodes = cy.nodes('[isDirected = 1]');
+        directedNodes.forEach(function(node){
+          queue.push(node);
+        }
+        );
+        while(queue.length > 0){
+          var node = queue.shift();
+          if(visited[node.id()]){
+            continue;
+          }
+          visited[node.id()] = true;
+          if(cy.nodes('[isDirected = 1]').length >= totalNodes * ratio){
+            break;
+          }
+          var neighbors = node.neighborhood().nodes();
+          neighbors.forEach(function(neighbor){
+            queue.push(neighbor);
+          });
+          node.data('isDirected', 1);
+        }
+        
+
+      }
+
 }
