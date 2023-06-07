@@ -99,7 +99,8 @@
           
           <div class="row">
             <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
-            <input title="Repulsion force between nodes" type="range" min="50" max="10000" class="form-control form-control-sm" id="nodeRepulsion" value="5000">
+            <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="5000" oninput="setNodeRepulsionText()">
+            <p id="nodeRepulsionText"></p>
           </div>
 
           <div class="row">
@@ -137,6 +138,12 @@
 
           <div class="row">
             <button title="Experiment" onclick="createRandomGraph()">Add Nodes to heirarchy randomly</button>
+          </div>
+
+          <div>
+            <label title="Depth Of Undirected Parts" class="form-label" for="depthThreshold">Depth</label>
+            <input title="Depth Of Undirected Parts" type="number" class="form-control form-control-sm" id="depthThreshold" value="2">
+            <button onclick="createTestGraph()">Create Test Graph</button>
           </div>
           
         </div>

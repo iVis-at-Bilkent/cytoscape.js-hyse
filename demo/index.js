@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", pageLoaded);
+
+function setNodeRepulsionText(){
+  document.getElementById("nodeRepulsionText").innerText = document.getElementById("nodeRepulsion").value;
+  console.log("running");
+}
+
 async function pageLoaded() {
     console.log("page loaded");
     //fill the experiment select box with the experiment graph names in the experiment-small-graphs folder
@@ -702,4 +708,72 @@ function createRandomGraph(nodeId){
 
       }
 
+}
+
+function filterNodesAndEdges(){
+  var queue = [];
+  var visited = {};
+  var visistedEdges = {};
+  var directedNodes = cy.nodes('[isDirected = 1]');
+  var depthThreshold = document.getElementById("depthThreshold").value;
+
+  function runDFSonUndirectedNodes(node,edge,depth){
+    console.log("visited",visited);
+    
+    if(visited[node.id()]){
+      return;
+    }
+    if(depth > depthThreshold){
+      return;
+    }
+    visited[node.id()] = true;
+    if(edge != null){
+      visistedEdges[edge.id()] = true;
+    }
+    
+    var neighbors = node.neighborhood().nodes('[isDirected != 1]');
+    neighbors.forEach(function(neighbor){
+      var newEdge = node.edgesWith(neighbor)[0]
+      runDFSonUndirectedNodes(neighbor,newEdge,depth+1);
+    });
+    
+  }
+
+  console.log("directed nodes",directedNodes);
+  directedNodes.forEach(function(node){
+    //if the node is attached to an undirected node
+    if(node.neighborhood().nodes('[isDirected != 1]').length > 0){
+      queue.push(node);
+    }
+  }
+  );
+
+  console.log("queue",queue);
+  
+
+  queue.forEach(function(node){
+    runDFSonUndirectedNodes(node,null,0);
+  });
+  console.log("final visited",visited);
+
+  //remove the nodes and edges that are not in the heirarchy and also not in visited
+  cy.nodes().forEach(function(node){
+    if(!visited[node.id()] && !node.data('isDirected') == 1){
+      node.remove();
+    }
+  }
+  );
+
+  cy.edges().forEach(function(edge){
+    if((edge.source().data('isDirected') != 1 || edge.target().data('isDirected') != 1) && !visistedEdges[edge.id()]){
+      edge.remove();
+    }
+  }
+  );
+
+}
+
+function createTestGraph(){
+  createRandomGraph();
+  filterNodesAndEdges();
 }
