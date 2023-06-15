@@ -707,10 +707,10 @@ export class HySELayout extends CoSELayout {
 
         if (this.totalIterations > this.maxIterations / 3)
         {
-          oscilating = Math.abs(this.totalDisplacement - this.oldTotalDisplacement) < 2;
+          oscilating = Math.abs(this.totalDisplacement - this.oldTotalDisplacement) < 3;
         }
 
-        converged = this.totalDisplacement < this.totalDisplacementThreshold*2;
+        converged = this.totalDisplacement < this.totalDisplacementThreshold*4;
 
         this.oldTotalDisplacement = this.totalDisplacement;
         this.oldDirectedDisplacement = this.directedDisplacement;
@@ -763,6 +763,8 @@ export class HySELayout extends CoSELayout {
         this.totalDisplacement = 0;
         this.undirectedDisplacement = 0;
         this.directedDisplacement = 0;
+        this.totalIterations = 0;
+        this.directedCoolingFactor = 1;
         for (let i = 0; i < 50; i++) {
           // this.graphManager.updateBounds();
           this.calcRepulsionForces();
@@ -989,7 +991,7 @@ export class HySELayout extends CoSELayout {
           }
     
           // Here we use half of the nodes' repulsion values for backward compatibility
-          repulsionForceX = -(nodeA.nodeRepulsion + nodeB.nodeRepulsion) / (distanceX * distanceX);
+          repulsionForceX = -(nodeA.nodeRepulsion/2 + nodeB.nodeRepulsion/2) / (distanceX * distanceX);
         }
         if (c1 < c2) {
           repulsionForceX = -repulsionForceX;
