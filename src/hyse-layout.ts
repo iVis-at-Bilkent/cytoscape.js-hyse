@@ -36,6 +36,7 @@ export class HySELayout extends CoSELayout {
     performPostProcessing = true;
     displayInitialPositions = false;
     randomizeInitialPositions = true;
+    directedCoolingFactor = 0.9;
     [x: string]: any;
     constructor(layering, cy) {
         console.trace();
@@ -735,8 +736,12 @@ export class HySELayout extends CoSELayout {
           } else {
             this.coolingFactor = this.initialCoolingFactor * ((this.maxIterations - this.totalIterations) / this.maxIterations);
           }
+          this.directedCoolingFactor = 0.7 * this.directedCoolingFactor;
           if (this.coolingFactor < 0) { 
             this.coolingFactor = 0;
+          }
+          if (this.directedCoolingFactor < 0) {
+            this.directedCoolingFactor = 0;
           }
           //console.log("this.coolingFactor: ", this.coolingFactor);
         }
@@ -758,8 +763,8 @@ export class HySELayout extends CoSELayout {
         this.totalDisplacement = 0;
         this.undirectedDisplacement = 0;
         this.directedDisplacement = 0;
-        for (let i = 0; i < 100; i++) {
-          this.graphManager.updateBounds();
+        for (let i = 0; i < 50; i++) {
+          // this.graphManager.updateBounds();
           this.calcRepulsionForces();
           this.moveNodes();
         }

@@ -26,17 +26,21 @@ export class HySENode extends CoSENode  {
   calculateDisplacement() {
     // `this` brings properties from base class 
     let layout = this.graphManager.getLayout();
-    this.displacementX += (layout.coolingFactor * (this.springForceX + this.repulsionForceX)/this.noOfChildren);
+    let coolingCoefficient = layout.coolingFactor;
+    if(this.isDirected == 1){
+      coolingCoefficient = layout.directedCoolingFactor * 0.7;
+    }
+    this.displacementX += (coolingCoefficient * (this.springForceX + this.repulsionForceX)/this.noOfChildren);
     if(this.isDirected!==1){
-      this.displacementY += (layout.coolingFactor * (this.springForceY + this.repulsionForceY)/this.noOfChildren);
+      this.displacementY += (coolingCoefficient * (this.springForceY + this.repulsionForceY)/this.noOfChildren);
     }
     
-    if (Math.abs(this.displacementX) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementX = layout.coolingFactor * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementX);
+    if (Math.abs(this.displacementX) > coolingCoefficient * layout.maxNodeDisplacement) {
+      this.displacementX = coolingCoefficient * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementX);
     }
 
-    if (this.isDirected != 1 && Math.abs(this.displacementY) > layout.coolingFactor * layout.maxNodeDisplacement) {
-      this.displacementY = layout.coolingFactor * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementY);
+    if (this.isDirected != 1 && Math.abs(this.displacementY) > coolingCoefficient * layout.maxNodeDisplacement) {
+      this.displacementY = coolingCoefficient * layout.maxNodeDisplacement * layoutBase.IMath.sign(this.displacementY);
     }
 
     if(this.child)
