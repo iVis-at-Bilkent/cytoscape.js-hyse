@@ -774,12 +774,12 @@ function filterNodesAndEdges(){
     if((edge.source().data('isDirected') != 1 || edge.target().data('isDirected') != 1) && !visistedEdges[edge.id()]){
       //if edge is between two undirected nodes and is not in the heirarchy
       if (edge.source().data('isDirected') != 1 && edge.target().data('isDirected') != 1){
-        if ( Math.random() <= edgeUU){
+        if ( Math.random() > edgeUU){
           edge.remove();
         }
         
       }
-      else if(Math.random() <= edgeDU){
+      else if(Math.random() > edgeDU){
         edge.remove();
       }
       
