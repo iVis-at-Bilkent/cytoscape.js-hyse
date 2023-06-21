@@ -21,7 +21,7 @@ async function pageLoaded() {
         select.appendChild(el);
     }
 
-    var resp = await fetch('./small-sized-compound/g_00190_01_compound.json');
+    var resp = await fetch('./small-sized-compound/g_00200_02_compound.json');
     
     resp = await resp.json();
 
@@ -757,16 +757,26 @@ function filterNodesAndEdges(){
   console.log("final visited",visited);
 
   //remove the nodes and edges that are not in the heirarchy and also not in visited
-  cy.nodes().forEach(function(node){
-    if(!visited[node.id()] && !node.data('isDirected') == 1){
-      node.remove();
-    }
-  }
-  );
+  // cy.nodes().forEach(function(node){
+  //   if(!visited[node.id()] && !node.data('isDirected') == 1){
+  //     node.remove();
+  //   }
+  // }
+  // );
 
   cy.edges().forEach(function(edge){
     if((edge.source().data('isDirected') != 1 || edge.target().data('isDirected') != 1) && !visistedEdges[edge.id()]){
-      edge.remove();
+      //if edge is between two undirected nodes and is not in the heirarchy
+      if (edge.source().data('isDirected') != 1 && edge.target().data('isDirected') != 1){
+        if ( Math.random() > 0.95){
+          edge.remove();
+        }
+        
+      }
+      else if(Math.random() > 0.1){
+        edge.remove();
+      }
+      
     }
   }
   );
