@@ -135,16 +135,29 @@
 
           <div class="row">
             <label title="Ratio of heirarchical nodes to non-heirarchical nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
-            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.5">
+            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.3">
           </div>
 
           <div class="row">
             <button title="Experiment" onclick="createRandomGraph()">Add Nodes to heirarchy randomly</button>
           </div>
 
-          <div>
+          <div class="row">
             <label title="Depth Of Undirected Parts" class="form-label" for="depthThreshold">Depth</label>
             <input title="Depth Of Undirected Parts" type="number" class="form-control form-control-sm" id="depthThreshold" value="2">
+          </div>
+
+          <div class="row">
+            <label title="Edge Probability Directed - Undirected" class="form-label" for="edgeDU">Directed - Undirected edge prob</label>
+            <input title="Edge Probability Directed - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeDU" value="0.2">
+          </div>
+
+          <div class="row">
+            <label title="Edge Probability Undirected - Undirected" class="form-label" for="edgeUU">Undirected - Undirected edge prob</label>
+            <input title="Edge Probability Undirected - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeUU" value="0.8">
+          </div>
+
+          <div class="row">
             <button onclick="createTestGraph()">Create Test Graph</button>
           </div>
           

@@ -154,7 +154,7 @@ function getStyle(){
         ];
 };
 
-function runLayout() {
+async function runLayout() {
   
     //get the selected experiment graph name
     var select = document.getElementById("experimentGraphs");
@@ -166,7 +166,12 @@ function runLayout() {
       console.log(graph);
       loadGraphMLFromStr(graph);
     }
-    
+    else{
+      var resp = await fetch('./small-sized-compound/g_00200_02_compound.json');
+      resp = await resp.json();
+      cy.elements().remove();
+      cy.json({ elements: resp });
+    }
     //run cytoscape layout
     const o = getOptions();
     o.isForceDirected = true;
@@ -757,23 +762,24 @@ function filterNodesAndEdges(){
   console.log("final visited",visited);
 
   //remove the nodes and edges that are not in the heirarchy and also not in visited
-  // cy.nodes().forEach(function(node){
-  //   if(!visited[node.id()] && !node.data('isDirected') == 1){
-  //     node.remove();
-  //   }
-  // }
-  // );
-
+  cy.nodes().forEach(function(node){
+    if(!visited[node.id()] && !node.data('isDirected') == 1){
+      node.remove();
+    }
+  }
+  );
+  let edgeDU = document.getElementById("edgeDU").value;
+  let edgeUU = document.getElementById("edgeUU").value;
   cy.edges().forEach(function(edge){
     if((edge.source().data('isDirected') != 1 || edge.target().data('isDirected') != 1) && !visistedEdges[edge.id()]){
       //if edge is between two undirected nodes and is not in the heirarchy
       if (edge.source().data('isDirected') != 1 && edge.target().data('isDirected') != 1){
-        if ( Math.random() > 0.95){
+        if ( Math.random() <= edgeUU){
           edge.remove();
         }
         
       }
-      else if(Math.random() > 0.1){
+      else if(Math.random() <= edgeDU){
         edge.remove();
       }
       
