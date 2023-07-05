@@ -777,3 +777,127 @@ function createTestGraph(){
   createRandomGraph();
   filterNodesAndEdges();
 }
+
+async function createTestGraphFromTwoGraphs(){
+  //load the first graph elements in cytoscape
+  var resp = await fetch("./Directed_Graphs/g_00050_01.json");
+  resp = await resp.json();
+  cy.json({ elements: resp });
+  var nodes = cy.nodes();
+  nodes.forEach(function(node){
+    node.data('isDirected', 1);
+  }
+  );
+  var N = nodes.length;
+  var R = document.getElementById("ratio").value;
+  // var M = Math.floor(N * (1-R));
+  var M = N;
+  var D = document.getElementById("depthThreshold").value;
+  resp = await fetch("./Directed_Graphs/g_00050_01.json");
+  resp = await resp.json();
+  //add the suffix to the nodes and edges in resp
+  resp.nodes.forEach(function(node){
+    node.data.id = node.data.id + "_undirected";
+  }
+  );
+  resp.edges.forEach(function(edge){
+    edge.data.id = edge.data.id + "_undirected";
+    edge.data.source = edge.data.source + "_undirected";
+    edge.data.target = edge.data.target + "_undirected";
+  }
+  );
+
+  //add the nodes and edges from the second graph
+  cy.add(resp);
+  
+  //get a random node from the first graph
+  var directedNodes = cy.nodes('[isDirected = 1]');
+  var undirectedNodes = cy.nodes('[isDirected != 1]');
+  
+  
+  internalBFS = function(){
+    //run bfs on the second graph for the levels upto the depth threshold
+    //keep record of the nodes in each level
+    //choose a random node from last level
+    //create an edge from the random node to the node in the first graph
+    var queue = [];
+    var visited = {};
+    var level = 0;
+    var undirectedNodes = cy.nodes('[isDirected != 1]');
+    var random = Math.floor(Math.random() * undirectedNodes.length);
+    var undirectedNode = undirectedNodes[random];
+    queue.push(undirectedNode);
+    queue.push(null);
+    levelNodes = [];
+    lastLevelNodes = [];
+    
+    while(queue.length > 0 && level < D && Object.keys(visited).length < M){
+      lastLevelNodes = [];
+      while(queue[0] != null){
+        
+        var node = queue.shift();
+        if(visited[node.id()]){
+          continue;
+        }
+        visited[node.id()] = true;
+
+        //cy.add({node});
+        lastLevelNodes.push(node);
+        var neighbors = node.neighborhood().nodes('[isDirected != 1]');
+        neighbors.forEach(function(neighbor){
+          queue.push(neighbor);
+        }
+        );
+      }
+      levelNodes.push(lastLevelNodes);
+      queue.shift();
+      if(queue.length != 0){
+        queue.push(null);
+      }
+      level++;
+    }
+    components.push(visited);
+    // return Object.keys(visited)[Math.floor(Math.random()*Object.keys(visited).length)];
+    return lastLevelNodes[Math.floor(Math.random()*lastLevelNodes.length)].id();
+  }
+  var components = [];
+  var visitedNodesLength = 0;
+  while(visitedNodesLength < M){
+    var r = Math.floor(Math.random() * directedNodes.length);
+    var directedNode = directedNodes[r];
+    undirectedNodeID = internalBFS();
+
+    //create an edge between directedNode and undirectedNode
+    cy.add({data: {id: "edge_" + directedNode.id() + "_" + undirectedNodeID, source: directedNode.id(), target: undirectedNodeID}});
+    visitedNodesLength += Object.keys(components[components.length - 1]).length;
+  }
+
+  //remove the nodes that are not in the heirarchy and also not in the visited
+  cy.nodes().forEach(function(node){
+
+    var flag = false;
+    components.forEach(function(component){
+      if(component[node.id()]){
+        flag = true;
+      }
+    });
+    if(!flag && !node.data('isDirected') == 1){
+      node.remove();
+    }
+  }
+  );
+
+  cy.edges().forEach(function(edge){
+    var flag = false;
+    components.forEach(function(component){
+      if(component[edge.source().id()] && component[edge.target().id()]){
+        flag = true;
+      }
+    });
+    if(!flag && (edge.source().data('isDirected') != 1 && edge.target().data('isDirected') != 1)){
+      edge.remove();
+    }
+  }
+  );
+
+}
