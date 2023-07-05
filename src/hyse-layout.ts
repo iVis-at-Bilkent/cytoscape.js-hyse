@@ -359,9 +359,9 @@ export class HySELayout extends CoSELayout {
                   }
                   
                 });
-                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
+                //nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:collidingNode.rect.x + 2*collidingNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  newNode.setRect({x:collidingNode.rect.x + 50+collidingNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
                 
@@ -393,9 +393,9 @@ export class HySELayout extends CoSELayout {
                   }
                   
                 });
-                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
+                //nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:collidingNode.rect.x - 2*newNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+                  newNode.setRect({x:collidingNode.rect.x - 50-newNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
@@ -427,11 +427,11 @@ export class HySELayout extends CoSELayout {
                   
                 });
                 //console.log("up -> nodes to check before",nodesToCheck);
-                nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
+                //nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 //console.log("up -> nodes to check",nodesToCheck);
                 //console.log("up -> colliding",collidingNode);
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - 2*newNode.rect.height},newNode.rect);
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - 50-newNode.rect.height},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
@@ -464,7 +464,7 @@ export class HySELayout extends CoSELayout {
                 });
                 //nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
                 if(colliding && collidingNode != null){
-                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y + 2*collidingNode.rect.height},newNode.rect);
+                  newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y + 50+collidingNode.rect.height},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
                 }
               }
@@ -472,22 +472,22 @@ export class HySELayout extends CoSELayout {
 
             //place the compound node to the correct side of the heirarchy
             if(up){
-              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostTopNode.rect.y - 2*newNode.rect.height },newNode.rect);
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostTopNode.rect.y - 50-newNode.rect.height },newNode.rect);
               placeNewNode(newNode,"up",topCompoundNodes);
               topCompoundNodes.push(newNode);
             }
             else if(down){
-              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostBottomNode.rect.y + 2*newNode.rect.height },newNode.rect);
+              newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:mostBottomNode.rect.y + 50+newNode.rect.height },newNode.rect);
               placeNewNode(newNode,"down",bottomCompoundNodes);
               bottomCompoundNodes.push(newNode);
             }
             else if(left){
-              newNode.setRect({x:mostLeftNode.rect.x - 2*newNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+              newNode.setRect({x:mostLeftNode.rect.x - 50-newNode.rect.width,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
               placeNewNode(newNode,"left",leftCompoundNodes);
               leftCompoundNodes.push(newNode);
             }
             else if(right){
-              newNode.setRect({x:mostRightNode.rect.x + 2*newNode.rect.width ,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
+              newNode.setRect({x:mostRightNode.rect.x + 50+newNode.rect.width ,y:seedCenter.y - (newNode.rect.height/2)},newNode.rect);
               placeNewNode(newNode,"right",rightCompoundNodes);
               rightCompoundNodes.push(newNode);
             }
@@ -763,6 +763,7 @@ export class HySELayout extends CoSELayout {
         this.totalDisplacement = 0;
         this.undirectedDisplacement = 0;
         this.directedDisplacement = 0;
+        let tempIt:number = this.totalIterations;
         this.totalIterations = 0;
         this.directedCoolingFactor = 1;
         for (let i = 0; i < 50; i++) {
@@ -770,6 +771,7 @@ export class HySELayout extends CoSELayout {
           this.calcRepulsionForces();
           this.moveNodes();
         }
+        this.totalIterations = tempIt;
         //console.log("post repulsion"+this.totalDisplacement+" displacement");
       }
 
@@ -900,9 +902,9 @@ export class HySELayout extends CoSELayout {
           return;
         }
         var letDirectedMove = true;
-        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/100 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
-          if(edge.edgeElasticity > 0.20){
-            edge.edgeElasticity = edge.edgeElasticity * 0.95;
+        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/10 && this.totalIterations % 20 == 0 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
+          if(edge.edgeElasticity > 0.3){
+            edge.edgeElasticity = edge.edgeElasticity -= 0.01;
           }
           letDirectedMove = false;
         }
