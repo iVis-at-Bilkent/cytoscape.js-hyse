@@ -39,13 +39,13 @@ export class HySELayout extends CoSELayout {
     directedCoolingFactor = 0.9;
     [x: string]: any;
     constructor(layering, cy) {
-        console.trace();
+        //console.trace();
         super();
         super.initParameters();
         this.layering = layering;
         this.orderedLayers = [];
         const layerSizes = this.layering.map(x => x.length);
-        console.log("min, max layer sizes: ", Math.min(...layerSizes), Math.max(...layerSizes));
+        //console.log("min, max layer sizes: ", Math.min(...layerSizes), Math.max(...layerSizes));
         this.cy = cy;
     }
     
@@ -212,7 +212,7 @@ export class HySELayout extends CoSELayout {
           dfs(node,i);
         }
         
-        console.log(groups);
+        //console.log(groups);
 
         //display ids of nodes in each group
         // for (let i = 0; i < Object.keys(groups).length; i++) {
@@ -303,8 +303,8 @@ export class HySELayout extends CoSELayout {
             let down = distanceDown == min?true:false;
             
             let seedCenter = new layoutBase.PointD(xCenter,yCenter);
-            console.log("start");
-            console.log("id",newNode.id);
+            //console.log("start");
+            //console.log("id",newNode.id);
             // console.log("xCenters",xCenters);
             // console.log("yCenters",yCenters);
             // group.forEach(x=>{
@@ -319,7 +319,7 @@ export class HySELayout extends CoSELayout {
             // console.log("down",down);
             // console.log("left",left);
             // console.log("right",right);
-            console.log("seedCenter",seedCenter);
+            //console.log("seedCenter",seedCenter);
 
             //place the compound node by checking with other compound nodes already placed on that side
             //when going to call recursively, we remove the compound nodes that are already checked and not colliding
@@ -339,7 +339,7 @@ export class HySELayout extends CoSELayout {
                 let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(rectIntersect(newNode.rect,x.rect)){
-                    console.log(newNode.id,"colliding with",x.id);
+                    //console.log(newNode.id,"colliding with",x.id);
                     if(collidingNode != null && collidingNode instanceof HySENode){
                       if(collidingNode.rect.x + collidingNode.rect.width < x.rect.x + x.rect.width){
                         collidingNode = x;
@@ -352,9 +352,9 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    console.log(newNode.id,"not colliding with",x.id);
-                    console.log("newNodeRect",newNode.rect);
-                    console.log("xRect",x.rect);
+                    //console.log(newNode.id,"not colliding with",x.id);
+                    //console.log("newNodeRect",newNode.rect);
+                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -373,7 +373,7 @@ export class HySELayout extends CoSELayout {
                 let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(rectIntersect(newNode.rect,x.rect)){
-                    console.log(newNode.id,"colliding with",x.id);
+                    //console.log(newNode.id,"colliding with",x.id);
                     if(collidingNode != null && collidingNode instanceof HySENode){
                       if(collidingNode.rect.x > x.rect.x){
                         collidingNode = x;
@@ -386,9 +386,9 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    console.log(newNode.id,"not colliding with",x.id);
-                    console.log("newNodeRect",newNode.rect);
-                    console.log("xRect",x.rect);
+                    //console.log(newNode.id,"not colliding with",x.id);
+                    //console.log("newNodeRect",newNode.rect);
+                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -406,7 +406,7 @@ export class HySELayout extends CoSELayout {
                 let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(rectIntersect(newNode.rect,x.rect)){
-                    console.log(newNode.id,"colliding with",x.id);
+                    //console.log(newNode.id,"colliding with",x.id);
                     if(collidingNode != null && collidingNode instanceof HySENode){
                       if(collidingNode.rect.y > x.rect.y){
                         collidingNode = x;
@@ -419,9 +419,9 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    console.log(newNode.id,"not colliding with",x.id);
-                    console.log("newNodeRect",newNode.rect);
-                    console.log("xRect",x.rect);
+                    //console.log(newNode.id,"not colliding with",x.id);
+                    //console.log("newNodeRect",newNode.rect);
+                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -442,7 +442,7 @@ export class HySELayout extends CoSELayout {
                 let nodesPassed:any = [];
                 nodesToCheck.forEach(x=>{
                   if(rectIntersect(newNode.rect,x.rect)){
-                    console.log(newNode.id,"colliding with",x.id);
+                    //console.log(newNode.id,"colliding with",x.id);
                     if(collidingNode != null && collidingNode instanceof HySENode){
                       if(collidingNode.rect.y + collidingNode.rect.height < x.rect.y + x.rect.height){
                         collidingNode = x;
@@ -455,9 +455,9 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    console.log(newNode.id,"not colliding with",x.id);
-                    console.log(newNode.id ,newNode.rect);
-                    console.log(x.id ,x.rect);
+                    //console.log(newNode.id,"not colliding with",x.id);
+                    //console.log(newNode.id ,newNode.rect);
+                    //console.log(x.id ,x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -650,7 +650,7 @@ export class HySELayout extends CoSELayout {
       // will be called by layout-base.js
       layout() {
         
-        const t1 = new Date().getTime();
+        // const t1 = new Date().getTime();
         this.beforeLayout();
         
         //console.log(this.graphManager.getAllNodes());
@@ -663,7 +663,7 @@ export class HySELayout extends CoSELayout {
           //this.postLayoutOverlapRemoval();
           this.postLayoutRepulsionPhase();
         }
-        const t = (new Date().getTime() - t1);
+        // const t = (new Date().getTime() - t1);
         
         //FOR DEBUGGING
         //let beforeLayers = JSON.parse(JSON.stringify(this.orderedLayers,['id','rank','order']));;
@@ -693,11 +693,11 @@ export class HySELayout extends CoSELayout {
         //   console.log("flip");
         // }
         
-        console.log("HySE executed in", t, "ms", this.totalIterations, "/", this.maxIterations, "ticks");
-        if (!window['hyseExecutionTimes']) {
-          window['hyseExecutionTimes'] = [];
-        }
-        window['hyseExecutionTimes'].push(t);
+        //console.log("HySE executed in", t, "ms", this.totalIterations, "/", this.maxIterations, "ticks");
+        // if (!window['hyseExecutionTimes']) {
+        //   window['hyseExecutionTimes'] = [];
+        // }
+        // window['hyseExecutionTimes'].push(t);
         console.log("HyseLayout ended in ", this.totalIterations, " ticks ");
       }
 
@@ -760,13 +760,15 @@ export class HySELayout extends CoSELayout {
       }
 
       postLayoutRepulsionPhase() {
-        this.totalDisplacement = 0;
-        this.undirectedDisplacement = 0;
-        this.directedDisplacement = 0;
+        
         let tempIt:number = this.totalIterations;
         this.totalIterations = 0;
-        this.directedCoolingFactor = 1;
-        for (let i = 0; i < 50; i++) {
+        
+        for (let i = 0; i < 150; i++) {
+          this.totalDisplacement = 0;
+          this.undirectedDisplacement = 0;
+          this.directedDisplacement = 0;
+          this.directedCoolingFactor = 1;
           // this.graphManager.updateBounds();
           this.calcRepulsionForces();
           this.moveNodes();

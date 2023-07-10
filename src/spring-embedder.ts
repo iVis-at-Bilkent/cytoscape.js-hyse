@@ -185,11 +185,11 @@ function processNodes(g, parent, layout, opts) {
     nodesVisited.push(n.id());
     let points = null;
     let dimension = null;
-    console.log("n", n);
+    //console.log("n", n);
     if(n.data("isDirected") !=1 ){
       points = new layoutBase.PointD(0, 0);
       let nbb = n.layoutDimensions(opts);
-      console.log("nbb for ", n.id(), nbb);
+      //console.log("nbb for ", n.id(), nbb);
       dimension = new layoutBase.DimensionD(nbb.w, nbb.h);
       const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), 0);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
@@ -199,7 +199,7 @@ function processNodes(g, parent, layout, opts) {
       }
       hyseNode.noOfChildren = opts.eles.nodes('#' + nodes[i].id()).children().length+1;
       
-      console.log("hyseNode.noOfChildren", opts.eles.nodes('#' + nodes[i].id()).children());
+      //console.log("hyseNode.noOfChildren", opts.eles.nodes('#' + nodes[i].id()).children());
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
         layout.graphManager.add(newGraph, hyseNode);
@@ -232,13 +232,13 @@ function processNodes(g, parent, layout, opts) {
 
 function processEdges(g, gm, opts) {
   const edges = opts.eles.edges();
-  console.log(edges);
+  //console.log(edges);
   const name2vw = {};
   for (let i = 0; i < edges.length; i++) {
     if (!name2vw[edges[i].id()]) {
       name2vw[edges[i].id()] = {};
     }
-    console.log(edges[i]);
+    //console.log(edges[i]);
     const v = edges[i].source().id();
     const w = edges[i].target().id();
     

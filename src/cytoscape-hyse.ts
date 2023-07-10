@@ -10,6 +10,7 @@ export class DagreAndSpringEmbedderLayout {
   }
 
   run() {
+    const t1 = new Date().getTime();
     console.log("running dagre and spring embedder layout");
     let options = this.options;
     let cy = options.cy; // cy is automatically populated for us in the constructor
@@ -93,7 +94,7 @@ export class DagreAndSpringEmbedderLayout {
     });
     for (let i = 0; i < edges.length; i++) {
       let edge = edges[i];
-      console.log(edge);
+      //console.log(edge);
       g.setEdge(edge.source().id(), edge.target().id(), {
         minlen: getVal(edge, options.minLen),
         weight: getVal(edge, options.edgeWeight),
@@ -107,7 +108,7 @@ export class DagreAndSpringEmbedderLayout {
     let gNodeIds = g.nodes();
     for (let i = 0; i < gNodeIds.length; i++) {
       let id = gNodeIds[i];
-      console.log("id", id);
+      // console.log("id", id);
       let n = g.node(id);
       cy.getElementById(id).scratch().dagre = n;
     }
@@ -164,8 +165,8 @@ export class DagreAndSpringEmbedderLayout {
         
       });
     } else {
-        console.log("not force directed");
-        console.log("not f nodes", nodes);
+        //console.log("not force directed");
+        //console.log("not f nodes", nodes);
       nodes.layoutPositions(this, options, function (ele) {
         counter++;
         ele = typeof ele === "object" ? ele : this;
@@ -177,7 +178,15 @@ export class DagreAndSpringEmbedderLayout {
         });
       });
     }
+    
+    const t = (new Date().getTime() - t1);
+    
+    if (!window['hyseExecutionTimes']) {
+      window['hyseExecutionTimes'] = [];
+    }
+    window['hyseExecutionTimes'].push(t);
     console.log(counter);
+    console.log("HySE executed in", t, "ms");
 
     return this; // chaining
   }

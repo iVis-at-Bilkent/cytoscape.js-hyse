@@ -794,9 +794,10 @@ function createTestGraph(){
   filterNodesAndEdges();
 }
 
-async function createTestGraphFromTwoGraphs(){
+async function createTestGraphFromTwoGraphs(directedGraph,undirectedGraph){
   //load the first graph elements in cytoscape
-  var resp = await fetch("./Directed_Graphs/g_00050_01.json");
+  // var resp = await fetch("./Directed_Graphs/g_00060_01.json");
+  var resp = await fetch(directedGraph);
   resp = await resp.json();
   cy.json({ elements: resp });
   var nodes = cy.nodes();
@@ -806,10 +807,10 @@ async function createTestGraphFromTwoGraphs(){
   );
   var N = nodes.length;
   var R = document.getElementById("ratio").value;
-  // var M = Math.floor(N * (1-R));
-  var M = N;
+  var M = Math.floor(N * (1-R));
+  // var M = N;
   var D = document.getElementById("depthThreshold").value;
-  resp = await fetch("./Directed_Graphs/g_00050_01.json");
+  resp = await fetch(undirectedGraph);
   resp = await resp.json();
   //add the suffix to the nodes and edges in resp
   resp.nodes.forEach(function(node){
@@ -884,7 +885,7 @@ async function createTestGraphFromTwoGraphs(){
     undirectedNodeID = internalBFS();
 
     //create an edge between directedNode and undirectedNode
-    cy.add({data: {id: "edge_" + directedNode.id() + "_" + undirectedNodeID, source: directedNode.id(), target: undirectedNodeID}});
+    cy.add({data: {id: "edge_" + directedNode.id() + "_" + undirectedNodeID+"_"+Math.random(), source: directedNode.id(), target: undirectedNodeID}});
     visitedNodesLength += Object.keys(components[components.length - 1]).length;
   }
 
@@ -916,4 +917,75 @@ async function createTestGraphFromTwoGraphs(){
   }
   );
 
+}
+
+
+async function runExperiment2(){
+  const results = {};
+  let cnt = 0;
+  let folder = "./Directed_Graphs/";
+    let graphFiles = [
+      "g_00010",
+      "g_00020",
+      "g_00020",
+      "g_00020",
+      "g_00030",
+      "g_00030",
+      "g_00030",
+      "g_00040",
+      "g_00050",
+      "g_00060",
+      "g_00070",
+      "g_00080",
+      "g_00090",
+      "g_00090",
+      "g_00100",
+      "g_00110",
+      "g_00120",
+      "g_00130",
+      "g_00140",
+      "g_00150",
+      "g_00160",
+      "g_00170",
+      "g_00180",
+      "g_00190",
+      "g_00200",
+      "g_00210",
+      "g_00220",
+      "g_00230",
+      "g_00240",
+      "g_00250",
+      "g_00260",
+      "g_00270",
+      "g_00280",
+      "g_00290",
+      "g_00300",
+      "g_00310",
+      "g_00320",
+      "g_00330",
+      "g_00340",
+      "g_00350",
+      "g_00360",
+      "g_00370",
+      "g_00380",
+      "g_00390",
+      "g_00400",
+    ];
+
+    for (let i = 0; i < graphFiles.length; i++) {
+
+      var fileName = folder + graphFiles[i] + "_03.json";
+      await createTestGraphFromTwoGraphs(fileName,fileName);
+      // run force directed
+      const o = getOptions();
+      o.isForceDirected = true;
+      cy.layout(o).run();
+      var nodesLength = cy.nodes().length;
+      results[nodesLength] = { fd: window.layvo.generalProperties() };
+      results[nodesLength]["fd"] = layvo.generalProperties();
+      results[nodesLength]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+      cnt++;
+    }
+    console.log(results);
+    renderChart(results);
 }
