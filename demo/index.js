@@ -412,14 +412,14 @@ function renderChart(results, title = null) {
     let directedData = [];
     let undirectedData = [];
     let directedUndirectedData = [];
-    let fdData = [];
+    let hyseData = [];
     let dagreData = [];
     for (let g in results) {
       labels.push(g);
-      directedData.push(results[g].Directed[metrics[i]]);
-      undirectedData.push(results[g].Undirected[metrics[i]]);
-      directedUndirectedData.push(results[g].DirectedUndirected[metrics[i]]);
-      fdData.push(results[g].fd[metrics[i]]);
+      directedData.push(results[g].HySE_Directed[metrics[i]]);
+      undirectedData.push(results[g].HySE_Undirected[metrics[i]]);
+      directedUndirectedData.push(results[g]["HySE_Directed-Undirected"][metrics[i]]);
+      hyseData.push(results[g].HySE_Total[metrics[i]]);
       dagreData.push(results[g].dagre[metrics[i]]);
     }
     const fontSize = 32;
@@ -439,26 +439,26 @@ function renderChart(results, title = null) {
         labels: labels,
         datasets: [
           {
-            label: "Directed # " + metrics[i],
+            label: "HySE_Directed # " + metrics[i],
             data: directedData,
             borderColor: "#ff0000",
             backgroundColor: "#ff000080",
           },
           {
-            label: "Undirected # " + metrics[i],
+            label: "HySE_Undirected # " + metrics[i],
             data: undirectedData,
             borderColor: "#00ff00",
             backgroundColor: "#00ffffff",
           },
           {
-            label: "DirectedUndirected # " + metrics[i],
+            label: "HySE_Directed-Undirected # " + metrics[i],
             data: directedUndirectedData,
             borderColor: "#ffff00",
             backgroundColor: "#00808000",
           },
           {
-            label: "FD # " + metrics[i],
-            data: fdData,
+            label: "HySE_Total # " + metrics[i],
+            data: hyseData,
             borderColor: "#0000ff",
             backgroundColor: "#0000ff80",
           },
@@ -547,7 +547,7 @@ function renderChart2(results, title = null) {
             backgroundColor: "#ff000080",
           },
           // {
-          //   label: "FD # " + metrics[i],
+          //   label: "HySE_Total # " + metrics[i],
           //   data: fdData,
           //   borderColor: "#0000ff",
           //   backgroundColor: "#0000ff80",
@@ -597,8 +597,8 @@ async function runExperiment() {
   //   o.isForceDirected = true;
   //   cy.layout(o).run();
   //   results[g] = { fd: window.layvo.generalProperties() };
-  //   // results[g]["fd"] = layvo.generalProperties();
-  //   results[g]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+  //   // results[g]["HySE_Total"] = layvo.generalProperties();
+  //   results[g]["HySE_Total"]["executionTime"] = window.hyseExecutionTimes.pop();
   //   cnt++;
   //   if (cnt === 5) {
   //     break;
@@ -699,8 +699,8 @@ async function runExperiment() {
       o.isForceDirected = true;
       cy.layout(o).run();
       results[i] = { fd: window.layvo.generalProperties() };
-      results[i]["fd"] = layvo.generalProperties();
-      results[i]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+      results[i]["HySE_Total"] = layvo.generalProperties();
+      results[i]["HySE_Total"]["executionTime"] = window.hyseExecutionTimes.pop();
       cnt++;
     }
     console.log(results);
@@ -1111,23 +1111,23 @@ async function runExperiment2(){
         }
       }
       );
-      results[nodesLength] = {Directed : window.layvo.generalProperties(cy.nodes('[isDirected = 1]').toArray(),directedEdges)};
-      results[nodesLength]["Undirected"] = layvo.generalProperties(cy.nodes('[isDirected != 1]').toArray(),undirectedEdges);
-      results[nodesLength]["DirectedUndirected"] = layvo.generalProperties(mixedNodes,mixedEdges);
-      results[nodesLength]["fd"] = layvo.generalProperties();
-      results[nodesLength]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
-      results[nodesLength]["Directed"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
-      results[nodesLength]["Undirected"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
-      results[nodesLength]["DirectedUndirected"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
+      results[nodesLength] = {HySE_Directed : window.layvo.generalProperties(cy.nodes('[isDirected = 1]').toArray(),directedEdges)};
+      results[nodesLength]["HySE_Undirected"] = layvo.generalProperties(cy.nodes('[isDirected != 1]').toArray(),undirectedEdges);
+      results[nodesLength]["HySE_Directed-Undirected"] = layvo.generalProperties(mixedNodes,mixedEdges);
+      results[nodesLength]["HySE_Total"] = layvo.generalProperties();
+      results[nodesLength]["HySE_Total"]["executionTime"] = window.hyseExecutionTimes.pop();
+      results[nodesLength]["HySE_Directed"]["executionTime"] = results[nodesLength]["HySE_Total"]["executionTime"];
+      results[nodesLength]["HySE_Undirected"]["executionTime"] = results[nodesLength]["HySE_Total"]["executionTime"];
+      results[nodesLength]["HySE_Directed-Undirected"]["executionTime"] = results[nodesLength]["HySE_Total"]["executionTime"];
 
       var resp = await fetch(fileName);
       resp = await resp.json();
       cy.json({ elements: resp });
 
       o.name = 'dagre';
-      o.nodeSep = 80;
+      o.nodeSep = 20;
       o.edgeSep = 10;
-      o.rankSep = 80;
+      o.rankSep = 20;
       let time1 = new Date();
       cy.layout(o).run();
       let time2 = new Date();
