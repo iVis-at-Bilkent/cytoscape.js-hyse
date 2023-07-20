@@ -30,6 +30,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.performPostProcessing = opts.performPostProcessing;
   l.displayInitialPositions = opts.displayInitialPositions;
   l.randomizeInitialPositions = opts.randomizeInitialPositions;
+  l.nodeRepulsion = opts.nodeRepulsion;
   coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 

@@ -409,12 +409,18 @@ function renderChart(results, title = null) {
   for (let i = 0; i < metrics.length; i++) {
     const ctx = addCanvas().getContext("2d");
     let labels = [];
-    let dagreData = [];
+    let directedData = [];
+    let undirectedData = [];
+    let directedUndirectedData = [];
     let fdData = [];
+    let dagreData = [];
     for (let g in results) {
       labels.push(g);
-      //dagreData.push(results[g].dagre[metrics[i]]);
+      directedData.push(results[g].Directed[metrics[i]]);
+      undirectedData.push(results[g].Undirected[metrics[i]]);
+      directedUndirectedData.push(results[g].DirectedUndirected[metrics[i]]);
       fdData.push(results[g].fd[metrics[i]]);
+      dagreData.push(results[g].dagre[metrics[i]]);
     }
     const fontSize = 32;
     let chartTitle = {
@@ -432,18 +438,120 @@ function renderChart(results, title = null) {
       data: {
         labels: labels,
         datasets: [
-          // {
-          //   label: "Dagre # " + metrics[i],
-          //   data: dagreData,
-          //   borderColor: "#ff0000",
-          //   backgroundColor: "#ff000080",
-          // },
+          {
+            label: "Directed # " + metrics[i],
+            data: directedData,
+            borderColor: "#ff0000",
+            backgroundColor: "#ff000080",
+          },
+          {
+            label: "Undirected # " + metrics[i],
+            data: undirectedData,
+            borderColor: "#00ff00",
+            backgroundColor: "#00ffffff",
+          },
+          {
+            label: "DirectedUndirected # " + metrics[i],
+            data: directedUndirectedData,
+            borderColor: "#ffff00",
+            backgroundColor: "#00808000",
+          },
           {
             label: "FD # " + metrics[i],
             data: fdData,
             borderColor: "#0000ff",
             backgroundColor: "#0000ff80",
           },
+          {
+            label: "Dagre # " + metrics[i],
+            data: dagreData,
+            borderDash: [5, 5],
+            borderColor: "#aa00aa",
+            backgroundColor: "#aa00aaff",
+          },
+        ],
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+          title: chartTitle,
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: fontSize,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+}
+
+
+function renderChart2(results, title = null) {
+  const metrics = [
+    "numberOfEdgeCrosses",
+    "numberOfNodeOverlaps",
+    "numberOfNodeEdgeOverlaps",
+    "totalArea",
+    "totalEdgeLength",
+    "averageEdgeLength",
+    "executionTime",
+  ];
+  for (let i = 0; i < metrics.length; i++) {
+    const ctx = addCanvas().getContext("2d");
+    let labels = [];
+    let dagreData = [];
+    // let fdData = [];
+    for (let g in results) {
+      labels.push(g);
+      dagreData.push(results[g].dagre[metrics[i]]);
+      // fdData.push(results[g].hyse[metrics[i]]);
+    }
+    const fontSize = 32;
+    let chartTitle = {
+      display: true,
+      text: title,
+      font: {
+        size: fontSize,
+      },
+    };
+    if (!title) {
+      chartTitle = null;
+    }
+    const _ = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Dagre # " + metrics[i],
+            data: dagreData,
+            borderColor: "#ff0000",
+            backgroundColor: "#ff000080",
+          },
+          // {
+          //   label: "FD # " + metrics[i],
+          //   data: fdData,
+          //   borderColor: "#0000ff",
+          //   backgroundColor: "#0000ff80",
+          // },
         ],
       },
       options: {
@@ -974,18 +1082,146 @@ async function runExperiment2(){
 
     for (let i = 0; i < graphFiles.length; i++) {
 
-      var fileName = folder + graphFiles[i] + "_03.json";
+      var fileName = folder + graphFiles[i] + "_04.json";
       await createTestGraphFromTwoGraphs(fileName,fileName);
       // run force directed
       const o = getOptions();
       o.isForceDirected = true;
       cy.layout(o).run();
       var nodesLength = cy.nodes().length;
-      results[nodesLength] = { fd: window.layvo.generalProperties() };
+      let directedEdges = [];
+      let undirectedEdges = [];
+      let mixedEdges = [];
+      let mixedNodes = [];
+      cy.edges().forEach(function(edge){
+        if(edge.source().data('isDirected') == 1 && edge.target().data('isDirected') == 1){
+          directedEdges.push(edge);
+        }
+        else if (edge.source().data('isDirected') != 1 && edge.target().data('isDirected') != 1){
+          undirectedEdges.push(edge);
+        }
+        else{
+          mixedEdges.push(edge);
+          if (mixedNodes.indexOf(edge.source()) == -1){
+            mixedNodes.push(edge.source());
+          }
+          if (mixedNodes.indexOf(edge.target()) == -1){
+            mixedNodes.push(edge.target());
+          }
+        }
+      }
+      );
+      results[nodesLength] = {Directed : window.layvo.generalProperties(cy.nodes('[isDirected = 1]').toArray(),directedEdges)};
+      results[nodesLength]["Undirected"] = layvo.generalProperties(cy.nodes('[isDirected != 1]').toArray(),undirectedEdges);
+      results[nodesLength]["DirectedUndirected"] = layvo.generalProperties(mixedNodes,mixedEdges);
       results[nodesLength]["fd"] = layvo.generalProperties();
       results[nodesLength]["fd"]["executionTime"] = window.hyseExecutionTimes.pop();
+      results[nodesLength]["Directed"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
+      results[nodesLength]["Undirected"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
+      results[nodesLength]["DirectedUndirected"]["executionTime"] = results[nodesLength]["fd"]["executionTime"];
+
+      var resp = await fetch(fileName);
+      resp = await resp.json();
+      cy.json({ elements: resp });
+
+      o.name = 'dagre';
+      o.nodeSep = 80;
+      o.edgeSep = 10;
+      o.rankSep = 80;
+      let time1 = new Date();
+      cy.layout(o).run();
+      let time2 = new Date();
+      results[nodesLength]["dagre"] = window.layvo.generalProperties();
+      results[nodesLength]["dagre"]["executionTime"] = time2 - time1;
+
       cnt++;
     }
     console.log(results);
     renderChart(results);
+}
+
+async function runExperiment3(){
+  
+  const results = {};
+  let cnt = 0;
+  let folder = "./Directed_Graphs/";
+    let graphFiles = [
+      "g_00010",
+      "g_00020",
+      "g_00020",
+      "g_00020",
+      "g_00030",
+      "g_00030",
+      "g_00030",
+      "g_00040",
+      "g_00050",
+      "g_00060",
+      "g_00070",
+      "g_00080",
+      "g_00090",
+      "g_00090",
+      // "g_00100",
+      // "g_00110",
+      // "g_00120",
+      // "g_00130",
+      // "g_00140",
+      // "g_00150",
+      // "g_00160",
+      // "g_00170",
+      // "g_00180",
+      // "g_00190",
+      // "g_00200",
+      // "g_00210",
+      // "g_00220",
+      // "g_00230",
+      // "g_00240",
+      // "g_00250",
+      // "g_00260",
+      // "g_00270",
+      // "g_00280",
+      // "g_00290",
+      // "g_00300",
+      // "g_00310",
+      // "g_00320",
+      // "g_00330",
+      // "g_00340",
+      // "g_00350",
+      // "g_00360",
+      // "g_00370",
+      // "g_00380",
+      // "g_00390",
+      // "g_00400",
+    ];
+
+
+
+    for (let i = 0; i < graphFiles.length; i++) {
+
+      var fileName = folder + graphFiles[i] + "_03.json";
+      //run dagre and get execution time
+      var resp = await fetch(fileName);
+      resp = await resp.json();
+      cy.json({ elements: resp });
+      let nodesLength = cy.nodes().length;
+      //set the node isDirected property to 1 for all nodes
+      let rank = 1;
+      cy.nodes().forEach(function(node){
+        node.data('rank', rank);
+        rank++;
+      }
+      );
+      // run force directed
+      const o = getOptions();
+      o.isForceDirected = false;
+      
+
+      // o.name = 'hyse';
+      // cy.layout(o).run();
+      // results[i]["hyse"] = window.layvo.generalProperties();
+      // results[i]["hyse"]["executionTime"] = window.hyseExecutionTimes.pop();
+
+    }
+    console.log(results);
+    renderChart2(results);
+
 }

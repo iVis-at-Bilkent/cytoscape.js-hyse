@@ -19,6 +19,8 @@
     <script src="./cytoscape-context-menus.js"></script>
     <script src="./file-operations.js"> </script>
     <script src="./experiment-small-graphs.js"> </script>
+    <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+    <script src="./dagre.js"> </script>
     <script src="../dist/cytoscape-hyse.js"> </script>
     <script src="./sampleGraph.js"></script>
     <script src="./cytoscape-layvo.js"></script>
@@ -99,7 +101,7 @@
           
           <div class="row">
             <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
-            <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="5000" oninput="setNodeRepulsionText()">
+            <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
             <p id="nodeRepulsionText"></p>
           </div>
 
@@ -121,7 +123,7 @@
           <div class="row">
             <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
             <label class="form-label" for="uniformNodeDimensions">uniformNodeDimensions</label>
-            <input class="form-check-input" type="checkbox" id="uniformNodeDimensions">
+            <input class="form-check-input" type="checkbox" id="uniformNodeDimensions" checked>
           </div>
 
           <div class="row">
@@ -135,7 +137,7 @@
 
           <div class="row">
             <label title="Ratio of heirarchical nodes to non-heirarchical nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
-            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.3">
+            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.4">
           </div>
 
           <div class="row">
@@ -155,6 +157,19 @@
           <div class="row">
             <label title="Edge Probability Undirected - Undirected" class="form-label" for="edgeUU">Undirected - Undirected edge prob</label>
             <input title="Edge Probability Undirected - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeUU" value="0.8">
+          </div>
+
+          <div class="row">
+            <label class="form-label" for="swapForceLimit"> swapForceLimit </label>
+            <input type="number" class="form-control form-control-sm" id="swapForceLimit" value="15000">
+          </div>
+          <div class="row">
+            <label class="form-label" for="swapPeriod"> swapPeriod </label>
+            <input type="number" class="form-control form-control-sm" id="swapPeriod" value="50">
+          </div>
+          <div class="row">
+            <label class="form-label" for="minPairSwapPeriod"> minPairSwapPeriod </label>
+            <input type="number" class="form-control form-control-sm" id="minPairSwapPeriod" value="10">
           </div>
 
           <div class="row">
@@ -305,7 +320,7 @@
                 <label class="form-label" for="uniformNodeDimensions">uniformNodeDimensions</label>
               </td>
               <td>
-                <input class="form-check-input" type="checkbox" id="uniformNodeDimensions">
+                <input class="form-check-input" type="checkbox" id="uniformNodeDimensions" checked>
               </td>
             </tr>
             <tr>
@@ -344,18 +359,7 @@
               <td><label class="form-label" for="nodeRepulsion"> nodeRepulsion </label></td>
               <td><input type="number" class="form-control form-control-sm" id="nodeRepulsion2" value="5000"></td>
             </tr>
-            <tr>
-              <td><label class="form-label" for="swapForceLimit"> swapForceLimit </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="swapForceLimit" value="300"></td>
-            </tr>
-            <tr>
-              <td><label class="form-label" for="swapPeriod"> swapPeriod </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="swapPeriod" value="5"></td>
-            </tr>
-            <tr>
-              <td><label class="form-label" for="minPairSwapPeriod"> minPairSwapPeriod </label></td>
-              <td><input type="number" class="form-control form-control-sm" id="minPairSwapPeriod" value="3"></td>
-            </tr>
+            
             <tr>
               <td><label class="form-label" for="orderFlipPeriod"> orderFlipPeriod </label></td>
               <td><input type="number" class="form-control form-control-sm" id="orderFlipPeriod" value="5"></td>

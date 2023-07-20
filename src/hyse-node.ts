@@ -105,49 +105,54 @@ export class HySENode extends CoSENode  {
 
     //doing this so that nodes are swapped in the same region
     //instead of directly swapping centers find the point by taking in account the width difference of both nodes
-
-    if(x1<x2){
-      x2=this.rect.x+(this.rect.getWidthHalf()-other.rect.getWidthHalf());
-      x1=other.rect.x+(this.rect.getWidthHalf()-other.rect.getWidthHalf());
+    if(!layoutBase.uniformNodeDimensions){
+      if(x1<x2){
+        x2=this.rect.x+(this.rect.getWidthHalf()-other.rect.getWidthHalf());
+        x1=other.rect.x+(this.rect.getWidthHalf()-other.rect.getWidthHalf());
+      }
+      else{
+        x2=this.rect.x+(other.rect.getWidthHalf()-this.rect.getWidthHalf());
+        x1=other.rect.x+(other.rect.getWidthHalf()-this.rect.getWidthHalf());
+      }
     }
-    else{
-      x2=this.rect.x+(other.rect.getWidthHalf()-this.rect.getWidthHalf());
-      x1=other.rect.x+(other.rect.getWidthHalf()-this.rect.getWidthHalf());
-    }
+    
     this.setLocation(x1, y1);
     other.setLocation(x2, y2);
-    //swap the forces and displacements
-    const tempNode = new HySENode(this.graphManager, null, null, null, "", 0);
-    tempNode.springForceX = this.springForceX;
-    tempNode.springForceY = this.springForceY;
-    tempNode.repulsionForceX = this.repulsionForceX;
-    tempNode.repulsionForceY = this.repulsionForceY;
-    tempNode.gravitationForceX = this.gravitationForceX;
-    tempNode.gravitationForceY = this.gravitationForceY;
-    tempNode.displacementX = this.displacementX;
-    tempNode.displacementY = this.displacementY;
-
-    this.springForceX = other.springForceX;
-    this.springForceY = other.springForceY;
-    this.repulsionForceX = other.repulsionForceX;
-    this.repulsionForceY = other.repulsionForceY;
-    this.gravitationForceX = other.gravitationForceX;
-    this.gravitationForceY = other.gravitationForceY;
-    this.displacementX = other.displacementX;
-    this.displacementY = other.displacementY;
     
-    other.springForceX = tempNode.springForceX;
-    other.springForceY = tempNode.springForceY;
-    other.repulsionForceX = tempNode.repulsionForceX;
-    other.repulsionForceY = tempNode.repulsionForceY;
-    other.gravitationForceX = tempNode.gravitationForceX;
-    other.gravitationForceY = tempNode.gravitationForceY;
-    other.displacementX = tempNode.displacementX;
-    other.displacementY = tempNode.displacementY;
 
     if (isResetForceAndDisplacement) {
       this.resetForcesAndDisplacement();
       other.resetForcesAndDisplacement();
+    }
+    else{
+      //swap the forces and displacements
+      const tempNode = new HySENode(this.graphManager, null, null, null, "", 0);
+      tempNode.springForceX = this.springForceX;
+      tempNode.springForceY = this.springForceY;
+      tempNode.repulsionForceX = this.repulsionForceX;
+      tempNode.repulsionForceY = this.repulsionForceY;
+      tempNode.gravitationForceX = this.gravitationForceX;
+      tempNode.gravitationForceY = this.gravitationForceY;
+      tempNode.displacementX = this.displacementX;
+      tempNode.displacementY = this.displacementY;
+
+      this.springForceX = other.springForceX;
+      this.springForceY = other.springForceY;
+      this.repulsionForceX = other.repulsionForceX;
+      this.repulsionForceY = other.repulsionForceY;
+      this.gravitationForceX = other.gravitationForceX;
+      this.gravitationForceY = other.gravitationForceY;
+      this.displacementX = other.displacementX;
+      this.displacementY = other.displacementY;
+      
+      other.springForceX = tempNode.springForceX;
+      other.springForceY = tempNode.springForceY;
+      other.repulsionForceX = tempNode.repulsionForceX;
+      other.repulsionForceY = tempNode.repulsionForceY;
+      other.gravitationForceX = tempNode.gravitationForceX;
+      other.gravitationForceY = tempNode.gravitationForceY;
+      other.displacementX = tempNode.displacementX;
+      other.displacementY = tempNode.displacementY;
     }
   }
 
