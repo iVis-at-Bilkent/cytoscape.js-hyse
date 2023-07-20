@@ -80,8 +80,13 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
   layout.fullyCalcRep4Ticks = options.fullyCalcRep4Ticks;
   layout.uniformNodeDimensions = options.uniformNodeDimensions;
   layout.maxNodeDisplacement = options.maxNodeDisplacement;
+  layout.expansionCoefficient = options.expansionCoefficient;
   layout.orderGap = options.orderGap;
   layout.performPostProcessing = options.performPostProcessing;
+  layout.displayInitialPositions = options.displayInitialPositions;
+  layout.randomizeInitialPositions = options.randomizeInitialPositions;
+  layout.nodeRepulsion = options.nodeRepulsion;
+  coseBase.CoSEConstants.TILE = false;
   const executeTickFn = () => {
     setTimeout(() => {
       let isLayoutEnded = false;
