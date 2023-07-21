@@ -776,7 +776,7 @@ export class HySELayout extends CoSELayout {
           this.graphManager.updateBounds();
           this.calcRepulsionForcesInRootGraph();
           //this.repulsionForUndirected();
-          super.calcSpringForces();
+          //super.calcSpringForces();
           this.moveNodes();
         }
         this.totalIterations = tempIt;
@@ -1358,19 +1358,19 @@ export class HySELayout extends CoSELayout {
         // }
 
         this.graphManager.rootGraph.nodes.forEach(node => {
-          node.nodeRepulsion = 200;
+          node.nodeRepulsion = this.nodeRepulsion/300;
         });
 
         for (let i = 0; i < this.orderedLayers.length; i++) {
           const currLayer = this.orderedLayers[i];
           for (let j = 0; j < currLayer.length; j++) {
             for (let k = j + 1; k < currLayer.length; k++) {
-              currLayer[j].nodeRepulsion = 55000;
-              currLayer[k].nodeRepulsion = 55000;
+              currLayer[j].nodeRepulsion = this.nodeRepulsion;
+              currLayer[k].nodeRepulsion = this.nodeRepulsion;
               this.calcRepulsionForce(currLayer[j], currLayer[k]);
             }
             let n1 = currLayer[j];
-            n1.nodeRepulsion = 200;
+            n1.nodeRepulsion = this.nodeRepulsion/300;
             for(let a = 0;a<this.topCompoundNodes.length;a++){
               let n2 = this.topCompoundNodes[a];
               this.fdCalculateRepulsionForces(n1, n2);
