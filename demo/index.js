@@ -1078,11 +1078,21 @@ async function runExperiment2(){
       "g_00380",
       "g_00390",
       "g_00400",
+      "g_00410",
+      "g_00420",
+      "g_00430",
+      "g_00440",
+      "g_00450",
+      "g_00460",
+      "g_00470",
+      "g_00480",
+      "g_00490",
+      "g_00500",
     ];
 
     for (let i = 0; i < graphFiles.length; i++) {
 
-      var fileName = folder + graphFiles[i] + "_04.json";
+      var fileName = folder + graphFiles[i] + "_06.json";
       await createTestGraphFromTwoGraphs(fileName,fileName);
       // run force directed
       const o = getOptions();
