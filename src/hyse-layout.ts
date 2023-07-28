@@ -828,6 +828,7 @@ export class HySELayout extends CoSELayout {
         //   }
         // }
 
+        // var nodes = this.graphManager.allNodes.filter(x=>x.isDirected != 1) as HySENode[];
         var nodes = this.graphManager.allNodes as HySENode[];
         for (var i = 0; i < nodes.length; i++) {
           var node1 = nodes[i];
@@ -835,10 +836,11 @@ export class HySELayout extends CoSELayout {
             var node2 = nodes[j];
             //console.log(" node1 id: ", node1.id, " node2 id: ", node2.id);
             if (node1.getOwner() != node2.getOwner() ) {
-              //console.log("not same");
+              // console.log(node1.id,node2.id,  " not same owner");
               continue;
             }
             if (node1.parentId != node2.parentId) {
+              // console.log(node1.id,node2.id,  " not same parent");
               continue;
             }
             //console.log("same");
@@ -917,12 +919,12 @@ export class HySELayout extends CoSELayout {
           return;
         }
         var letDirectedMove = true;
-        if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/10 && this.totalIterations % 20 == 0 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
-          // if(edge.edgeElasticity > 0.3){
-          //   edge.edgeElasticity = edge.edgeElasticity -= 0.01;
-          // }
-          letDirectedMove = false;
-        }
+        // if(this.totalIterations > (this.fullyCalcRep4Ticks * this.maxIterations)/10 && this.totalIterations % 20 == 0 && !(sourceNode.isDirected != 1 && targetNode.isDirected != 1)){
+        //   // if(edge.edgeElasticity > 0.3){
+        //   //   edge.edgeElasticity = edge.edgeElasticity -= 0.01;
+        //   // }
+        //   //letDirectedMove = false;
+        // }
         let springForce = edge.edgeElasticity * (length - idealLength);
         // if (springForce < 0) {
         //   console.log("repulsive spring force !");
@@ -935,17 +937,13 @@ export class HySELayout extends CoSELayout {
     
         // Apply forces on the end nodes
         if(sourceNode.isDirected === 1 && targetNode.isDirected !== 1){
-          if(letDirectedMove){
-            sourceNode.springForceX += springForceX;
-          }
+          sourceNode.springForceX += springForceX;
         }else{
           sourceNode.springForceX += springForceX;
         }
         
         if(targetNode.isDirected === 1 && sourceNode.isDirected !== 1){
-          if(letDirectedMove){
-            targetNode.springForceX -= springForceX;
-          }
+          targetNode.springForceX -= springForceX;
         }
         else{
           targetNode.springForceX -= springForceX;
@@ -963,14 +961,14 @@ export class HySELayout extends CoSELayout {
           //targetNode.springForceX -= springForceX;
           targetNode.springForceY -= springForceY;
         }
-        // if(sourceNode.isDirected == 1 && targetNode.isDirected != 1){
-        //   //targetNode.springForceY += springForceY;
-        //   //targetNode.springForceX += springForceX;
-        // }
-        // if(sourceNode.isDirected != 1 && targetNode.isDirected == 1){
-        //   //sourceNode.springForceY -= springForceY;
-        //   //sourceNode.springForceX -= springForceX;
-        // }
+        if(sourceNode.isDirected == 1 && targetNode.isDirected != 1){
+          targetNode.springForceY += springForceY/2;
+          targetNode.springForceX += springForceX/2;
+        }
+        if(sourceNode.isDirected != 1 && targetNode.isDirected == 1){
+          sourceNode.springForceY -= springForceY/2;
+          sourceNode.springForceX -= springForceX/2;
+        }
         // if((sourceNode.id == "c_21" && targetNode.id == "c_19") || ( targetNode.id == "c_21" && sourceNode.id == "c_19")){
         //   console.log("spring force");
         //   console.log("node1: ", sourceNode.id, " node2: ", targetNode.id);

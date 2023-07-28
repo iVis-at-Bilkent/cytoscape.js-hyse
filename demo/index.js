@@ -214,6 +214,17 @@ function runAnimatedLayout(){
     cy.layout(o).run();
 }
 
+function runDagre() {
+    //run dagre layout
+    const o = getOptions();
+    o.name = 'dagre';
+      o.nodeSep = 20;
+      o.edgeSep = 10;
+      o.rankSep = 20;
+    o.isForceDirected = false;
+    cy.layout(o).run();
+}
+
 function addNodesToHeirarchy(){
     //get the selected nodes
     var selectedNodes = cy.$(':selected');
