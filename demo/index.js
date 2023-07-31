@@ -9,7 +9,10 @@ async function pageLoaded() {
     console.log("page loaded");
     //fill the experiment select box with the experiment graph names in the experiment-small-graphs folder
     var select = document.getElementById("experimentGraphs");
-    var options = ["Select an experiment"];
+    var options = [];
+    for (let i = 1;i<6;i++){
+      options.push("Sample"+i);
+    }
     for (const graph in window.experimentSmallGraphs) {
         options.push(graph);
     }
@@ -20,8 +23,10 @@ async function pageLoaded() {
         el.value = opt;
         select.appendChild(el);
     }
+    //select.remove(0);
 
     var resp = await fetch('./small-sized-compound/g_00200_02_compound.json');
+    // var resp = await fetch('./samples/sample1.graphml');
     
     resp = await resp.json();
 
@@ -126,7 +131,7 @@ function getStyle(){
             },
             //color the nodes in the heirarchy
             {
-                selector: 'node[isDirected = 1]',
+                selector: 'node[isDirected = 1],node[isDirected = "1"]',
                 style: {
                     'background-color': '#eee29b',
                     'border-width': '2px',
@@ -136,7 +141,7 @@ function getStyle(){
             },
             //color the selected nodes in the heirarchy
             {
-                selector: 'node[isDirected = 1]:selected',
+                selector: 'node[isDirected = 1]:selected,node[isDirected = "1"]:selected',
                 style: {
                     'background-color': '#2F2D2C',
                     'border-width': '2px',
@@ -159,6 +164,14 @@ async function runLayout() {
     //get the selected experiment graph name
     var select = document.getElementById("experimentGraphs");
     var selectedGraph = select.options[select.selectedIndex].value;
+
+    if(selectedGraph.startsWith("Sample")){
+      var resp = await fetch('./samples/'+selectedGraph+'.graphml');
+      resp = await resp.text();
+      loadGraphMLFromStr(resp);
+      return;
+    }
+
     //get the selected experiment graph
     var graph = window.experimentSmallGraphs[selectedGraph];
     //set the graph elements
@@ -368,8 +381,9 @@ function getOptions() {
 
     
     cy.layout({name:'preset'}).run();
-    console.log(getStyle());
     cy.style().fromJson(getStyle()).update();
+    //cy.nodes('[isDirected = 1]').style({style:getStyle()}).update();
+
     
     //insertDummyNodesIfNeeded();
   }
