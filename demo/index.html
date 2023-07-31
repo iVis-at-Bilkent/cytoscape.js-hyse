@@ -9,6 +9,7 @@
     <meta charset="utf-8">
     <title>Cytoscape - HySE</title>
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./accordion.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js" integrity="sha512-gEWKnYYa1/1c3jOuT9PR7NxiVI1bwn02DeJGsl+lMVQ1fWMNvtjkjxIApTdbJ/wcDjQmbf+McWahXwipdC9bGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/cytoscape-graphml/cytoscape-graphml.js"></script>
     <script src="https://unpkg.com/layout-base/layout-base.js"></script>
@@ -45,141 +46,156 @@
           </select>
           </div>
           <!--create a dropdown showing sample graphs-->
+          <button class="accordion">Save/Load</button>
+          <div class="panel">
+            <div class="row">
+              <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
+            
+              <input type="file" id="fileInput" accept=".graphml" hidden>
+              <button title="Load Graph From File" onclick="loadGraph()">Load</button>
+        
+              <button title="Save Graph To File" onclick="saveGraph()">Save</button>
+            </div>
+          </div>
           
-          <div class="row">
-            <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
+          <button class="accordion">HySE</button>
+          <div class="panel">
+            <div class="row">
+              <input class="form-check-input" type="checkbox" id="performPostProcessing" checked>
+              <label class="form-label" for="performPostProcessing">Perform Post Processing</label>
+            </div>
+  
+            <div class="row">
+              <input class="form-check-input" type="checkbox" id="displayInitialPositions">
+              <label class="form-label" for="displayInitialPositions">Display Initial Positions</label>
+            </div>
+  
+            <div class="row">
+              <input class="form-check-input" type="checkbox" id="randomizeInitialPositions" checked>
+              <label class="form-label" for="randomizeInitialPositions">Randomize Initial Positions</label>
+            </div>
+
+            <div class="row">
+              <input title="Are the nodes uniform in shape/size?" class="form-check-input" type="checkbox" id="uniformNodeDimensions" checked>
+              <label title="Are the nodes uniform in shape/size?" class="form-label" for="uniformNodeDimensions">Uniform Node Dimensions</label>
+            </div>
+  
+            <div class="row">
+              <label title="Distance between ranks in heirarchy + maximum node height" class="form-label" for="rankGap"> Rank Gap </label>
+              <input title="Distance between ranks in heirarchy + maximum node height" type="number" class="form-control form-control-sm" id="rankGap" value="20">
+            </div>
+            
+            <div class="row">
+              <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
+              <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
+              <p id="nodeRepulsionText"></p>
+            </div>
+  
+            <div class="row">
+              <label title="Ideal Edge Length" class="form-label" for="idealEdgeLength"> Ideal Edge Length </label>
+              <input title="Ideal Edge Length" type="number" class="form-control form-control-sm" id="idealEdgeLength" value="50">
+            </div>
+  
+            <div class="row">
+              <label title="Force Threshold above which nodes would be swapped in heirarchy" class="form-label" for="swapForceLimit"> Swap Force Limit </label>
+              <input title="Force Threshold above which nodes would be swapped in heirarchy" type="number" class="form-control form-control-sm" id="swapForceLimit" value="15000">
+            </div>
+            <div class="row">
+              <label title="Iterations after which swapping function is called" class="form-label" for="swapPeriod"> Swap Period </label>
+              <input title="Iterations after which swapping function is called" type="number" class="form-control form-control-sm" id="swapPeriod" value="50">
+            </div>
+            <div class="row">
+              <label title="Hold period for nodes after being swapped" class="form-label" for="minPairSwapPeriod"> Min Pair Swap Period </label>
+              <input title="Hold period for nodes after being swapped" type="number" class="form-control form-control-sm" id="minPairSwapPeriod" value="10">
+            </div>
+  
+            <div class="row">
+              <label title="Animation Tick Delay" class="label">Animation Tick Delay</label>
+              <input title="Animation Tick Delay" type="number" class="number-input" id="tickDelay" value="100">
+            </div>
+            
+            <div class="row">
+              <label title="Ticks Per Frame" class="label">Ticks Per Frame</label>
+              <input title="Ticks Per Frame" type="number" class="number-input" id="ticksPerFrame" value="5">
+            </div>
+            
+            <div class="row">
+              <button title="Re-Layout" onclick="rerun()">HySE</button>
+              <button title="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
+            </div>
+          </div>
           
-            <input type="file" id="fileInput" accept=".graphml" hidden>
-            <button title="Load Graph From File" onclick="loadGraph()">Load</button>
+          <button class="accordion">Graph Ops</button>
+          <div class="panel">
+            <div class="row">
+              <button title="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
+            </div>
+  
+            <div class="row" style="display: none;">
+              <label title="Probability of adding a node to heirarchical part" class="form-label" for="prob"> Add To Heirarchy Prob </label>
+              <input title="Probability of adding a node to heirarchical part" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="prob" value="1">
+            </div>
+            <div class="row">
+              <button title="Experiment" onclick="createRandomGraph()">Add Nodes to heirarchy randomly</button>
+            </div>
+
+            <div class="row">
+              <button title="Delete Selected Items" onclick="deleteSelected()">Delete Selected</button>
+            </div>
+  
+            <div class="row">
+              <label title="Max Width and Height Value" class="form-label" for="maxWH">Max Random Width/Height </label>
+              <input title="Max Width and Height Value" type="number" class="form-control form-control-sm" id="maxWH" value="100">
+            </div>
       
-            <button title="Save Graph To File" onclick="saveGraph()">Save</button>
+            <div class="row">
+              <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
+            </div>
+          </div>
+
+          <button class="accordion">Cose/Dagre</button>
+          <div class="panel">
+            <div class="row">
+              <button title="Run Cose" onclick="runCose()">CoSE</button>
+              <button title="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
+              <button title="Run Dagre" onclick="runDagre()">Dagre</button>
+            </div>
           </div>
           
-          <div class="row">
-            <button title="Add Selected To Heirarchy and Re-Layout" onclick="addNodesToHeirarchy()">Add To Heirarchy</button>
+          <button class="accordion">Experiment/Test</button>
+          
+          <div class="panel">
+            <div class="row">
+              <button title="Experiment" onclick="runExperiment2()">Run Experiment</button>
+            </div>
+  
+            <div class="row">
+              <label title="Ratio of heirarchical nodes to non-heirarchical nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
+              <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.4">
+            </div>
+            <div class="row">
+              <label title="Depth Of Undirected Parts" class="form-label" for="depthThreshold">Depth</label>
+              <input title="Depth Of Undirected Parts" type="number" class="form-control form-control-sm" id="depthThreshold" value="2">
+            </div>
+  
+            <div class="row" style="display: none;">
+              <label title="Edge Probability Directed - Undirected" class="form-label" for="edgeDU">Directed - Undirected edge prob</label>
+              <input title="Edge Probability Directed - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeDU" value="0.2">
+            </div>
+  
+            <div class="row" style="display: none;">
+              <label title="Edge Probability Undirected - Undirected" class="form-label" for="edgeUU">Undirected - Undirected edge prob</label>
+              <input title="Edge Probability Undirected - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeUU" value="0.8">
+            </div>
+  
+            <div class="row">
+              <button onclick="createTestGraph()">Create Test Graph</button>
+            </div>
           </div>
           
-          <div class="row">
-            <label class="form-label" for="performPostProcessing">Perform Post Processing</label>
-            <input class="form-check-input" type="checkbox" id="performPostProcessing" checked>
-          </div>
-
-          <div class="row">
-            <label class="form-label" for="displayInitialPositions">Display Initial Positions</label>
-            <input class="form-check-input" type="checkbox" id="displayInitialPositions">
-          </div>
-
-          <div class="row">
-            <label class="form-label" for="randomizeInitialPositions">Randomize Initial Positions</label>
-            <input class="form-check-input" type="checkbox" id="randomizeInitialPositions" checked>
-          </div>
-
-          <div class="row">
-            <button title="Delete Selected Items" onclick="deleteSelected()">Delete Selected</button>
-          </div>
-          
-          
-          <div class="row">
-            <button title="Re-Layout" onclick="rerun()">HySE</button>
-            <button title="Run Animated Layout" onclick="runAnimatedLayout()">HySE Animated</button>
-          </div>
-          
-          <div class="row">
-            <label title="Tick Delay" class="label">Tick Delay</label>
-            <input title="Tick Delay" type="number" class="number-input" id="tickDelay" value="100">
-          </div>
-          
-          <div class="row">
-            <label title="Ticks Per Frame" class="label">Ticks Per Frame</label>
-            <input title="Ticks Per Frame" type="number" class="number-input" id="ticksPerFrame" value="5">
-          </div>
-          
-          <div class="row">
-            <label title="Distance between ranks in heirarchy + maximum node height" class="form-label" for="rankGap"> Rank Gap </label>
-            <input title="Distance between ranks in heirarchy + maximum node height" type="number" class="form-control form-control-sm" id="rankGap" value="20">
-          </div>
-          
-          <div class="row">
-            <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
-            <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
-            <p id="nodeRepulsionText"></p>
-          </div>
-
-          <div class="row">
-            <label title="Ideal Edge Length" class="form-label" for="idealEdgeLength"> Ideal Edge Length </label>
-            <input title="Ideal Edge Length" type="number" class="form-control form-control-sm" id="idealEdgeLength" value="50">
-          </div>
-    
-          <div class="row">
-            <button title="Run Cose" onclick="runCose()">CoSE</button>
-            <button title="Run Cose Animated" onclick="runCoseAnimated()">CoSE Animated</button>
-            <button title="Run Dagre" onclick="runDagre()">Dagre</button>
-          </div>
-
-          <div class="row">
-            <label title="Max Width and Height Value" class="form-label" for="maxWH">Max Random Width/Height </label>
-            <input title="Max Width and Height Value" type="number" class="form-control form-control-sm" id="maxWH" value="100">
-          </div>
-    
-          <div class="row">
-            <button title="Assign Random Width and Height to Nodes" onclick="assignRandomWidthAndHeight()">Randomize Width and Height</button>
-            <label class="form-label" for="uniformNodeDimensions">uniformNodeDimensions</label>
-            <input class="form-check-input" type="checkbox" id="uniformNodeDimensions" checked>
-          </div>
-
-          <div class="row">
-            <button title="Experiment" onclick="runExperiment2()">Run Experiment</button>
-          </div>
-
-          <div class="row">
-            <label title="Probability of adding a node to heirarchical part" class="form-label" for="prob"> Add To Heirarchy Prob </label>
-            <input title="Probability of adding a node to heirarchical part" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="prob" value="1">
-          </div>
-
-          <div class="row">
-            <label title="Ratio of heirarchical nodes to non-heirarchical nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
-            <input title="Ratio of heirarchical nodes to non-heirarchical nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.4">
-          </div>
-
-          <div class="row">
-            <button title="Experiment" onclick="createRandomGraph()">Add Nodes to heirarchy randomly</button>
-          </div>
-
-          <div class="row">
-            <label title="Depth Of Undirected Parts" class="form-label" for="depthThreshold">Depth</label>
-            <input title="Depth Of Undirected Parts" type="number" class="form-control form-control-sm" id="depthThreshold" value="2">
-          </div>
-
-          <div class="row">
-            <label title="Edge Probability Directed - Undirected" class="form-label" for="edgeDU">Directed - Undirected edge prob</label>
-            <input title="Edge Probability Directed - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeDU" value="0.2">
-          </div>
-
-          <div class="row">
-            <label title="Edge Probability Undirected - Undirected" class="form-label" for="edgeUU">Undirected - Undirected edge prob</label>
-            <input title="Edge Probability Undirected - Undirected" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="edgeUU" value="0.8">
-          </div>
-
-          <div class="row">
-            <label class="form-label" for="swapForceLimit"> swapForceLimit </label>
-            <input type="number" class="form-control form-control-sm" id="swapForceLimit" value="15000">
-          </div>
-          <div class="row">
-            <label class="form-label" for="swapPeriod"> swapPeriod </label>
-            <input type="number" class="form-control form-control-sm" id="swapPeriod" value="50">
-          </div>
-          <div class="row">
-            <label class="form-label" for="minPairSwapPeriod"> minPairSwapPeriod </label>
-            <input type="number" class="form-control form-control-sm" id="minPairSwapPeriod" value="10">
-          </div>
-
-          <div class="row">
-            <button onclick="createTestGraph()">Create Test Graph</button>
-          </div>
-
-          <div>
+          <!-- <div>
             <button onclick="createTestGraphFromTwoGraphs()">Create Test Graph 2</button>
-          </div>
+          </div> -->
           
         </div>
       </div>
@@ -452,6 +468,9 @@
         </div>
       </div>
     </div>
+
+    <script src="./accordion.js"></script>
+
     
 </body>
 
