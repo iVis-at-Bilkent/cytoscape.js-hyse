@@ -85,7 +85,7 @@ async function pageLoaded() {
     //window.cy = cy;
     window.layvo = cy.layvo("get");
 
-    var resp = await fetch('./samples/unix.graphml');
+    var resp = await fetch('./samples/unix-family-tree.graphml');
     //console.log(resp.text());
     var graphText = await resp.text();
     loadGraphMLFromStr(graphText);
@@ -115,14 +115,16 @@ function getStyle(){
             {
                 selector: 'node',
                 style: {
+                    
+                    'background-color': '#a3a3a3',
+                    'label': node => node.data('label') ? node.data('label') : node.data('id'),
+                    'text-wrap': 'wrap',
                     'width': function (ele) {
                       return ele.data('width')*1 || 30;
                     },
                     'height': function (ele) {
                       return ele.data('height')*1 || 30;
                     },
-                    'background-color': '#a3a3a3',
-                    'label': node => node.data('label') ? node.data('label') : node.data('id'),
                 }
             },
             {
@@ -151,6 +153,8 @@ function getStyle(){
                     'border-width': '2px',
                     'border-color': '#eee29b',
                     'label': node => node.data('label') ? node.data('label') : node.data('id'),
+                    //"text-valign" : "center",
+                    //"text-halign" : "center"
                 }
             },
             //color the selected nodes in the heirarchy
