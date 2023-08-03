@@ -10,6 +10,7 @@ async function pageLoaded() {
     //fill the experiment select box with the experiment graph names in the experiment-small-graphs folder
     var select = document.getElementById("experimentGraphs");
     var options = [];
+    options.push("python-call-stack");
     for (let i = 1;i<6;i++){
       options.push("Sample"+i);
     }
@@ -25,15 +26,16 @@ async function pageLoaded() {
     }
     //select.remove(0);
 
-    var resp = await fetch('./small-sized-compound/g_00200_02_compound.json');
+    //var resp = await fetch('./samples/unix.graphml');
+    // var resp = await fetch('./small-sized-compound/g_00200_02_compound.json');
     // var resp = await fetch('./samples/sample1.graphml');
     
-    resp = await resp.json();
+    //resp = await resp.json();
 
     //initialize cytoscapes
     const cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
-        elements: resp,
+        elements: [],
         wheelSensitivity: 0.2,
         style: getStyle(),
     }).on('cxttap', 'node', function (evt) {
@@ -78,12 +80,24 @@ async function pageLoaded() {
     
 
 
+
+    
+    //window.cy = cy;
+    window.layvo = cy.layvo("get");
+
+    var resp = await fetch('./samples/unix.graphml');
+    //console.log(resp.text());
+    var graphText = await resp.text();
+    loadGraphMLFromStr(graphText);
+
+    cy.nodes().forEach(function(node){
+        node.data('isDirected', 1);
+    }
+    );
     //run cytoscape layout
     const o = getOptions();
     o.isForceDirected = true;
     cy.layout(o).run();
-    //window.cy = cy;
-    window.layvo = cy.layvo("get");
 
 };
 
@@ -108,7 +122,7 @@ function getStyle(){
                       return ele.data('height')*1 || 30;
                     },
                     'background-color': '#a3a3a3',
-                    'label': 'data(id)'
+                    'label': node => node.data('label') ? node.data('label') : node.data('id'),
                 }
             },
             {
@@ -136,7 +150,7 @@ function getStyle(){
                     'background-color': '#eee29b',
                     'border-width': '2px',
                     'border-color': '#eee29b',
-                    'label': 'data(id)'
+                    'label': node => node.data('label') ? node.data('label') : node.data('id'),
                 }
             },
             //color the selected nodes in the heirarchy
@@ -166,6 +180,12 @@ async function runLayout() {
     var selectedGraph = select.options[select.selectedIndex].value;
 
     if(selectedGraph.startsWith("Sample")){
+      var resp = await fetch('./samples/'+selectedGraph+'.graphml');
+      resp = await resp.text();
+      loadGraphMLFromStr(resp);
+      return;
+    }
+    else if(select.selectedIndex < 2){
       var resp = await fetch('./samples/'+selectedGraph+'.graphml');
       resp = await resp.text();
       loadGraphMLFromStr(resp);
