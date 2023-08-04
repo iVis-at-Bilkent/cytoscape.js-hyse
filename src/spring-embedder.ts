@@ -105,6 +105,13 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
       } else {
         if(layout.performPostProcessing){
           layout.postLayoutRepulsionPhase();
+          nodes.positions((ele) => {
+            const lNode = id2LNode[ele.id()]
+            return {
+              x: lNode.getRect().x,
+              y: lNode.getRect().y
+            };
+          });
         }
         console.log("Ended in ", layout.totalIterations, " ticks ");
         if (options.stop && typeof options.stop == "function") {
