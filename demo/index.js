@@ -90,10 +90,10 @@ async function pageLoaded() {
     var graphText = await resp.text();
     loadGraphMLFromStr(graphText);
 
-    cy.nodes().forEach(function(node){
-        node.data('isDirected', 1);
-    }
-    );
+    // cy.nodes().forEach(function(node){
+    //     node.data('isDirected', 1);
+    // }
+    // );
     //run cytoscape layout
     const o = getOptions();
     o.isForceDirected = true;
