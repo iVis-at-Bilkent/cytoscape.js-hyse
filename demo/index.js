@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", pageLoaded);
 
 function setNodeRepulsionText(){
-  document.getElementById("nodeRepulsionText").innerText = document.getElementById("nodeRepulsion").value;
+  document.getElementById("nodeRepulsionText").innerText = document.getElementById("defaultNodeRepulsion").value;
   console.log("running");
 }
 
@@ -55,9 +55,7 @@ async function pageLoaded() {
                     var node = event.target;
                     node.data('isDirected', 1);
                     //run the layout
-                    const o = getOptions();
-                    o.isForceDirected = true;
-                    cy.layout(o).run();
+                    rerun();
                 },  
                 hasTrailingDivider: true
             },
@@ -95,9 +93,7 @@ async function pageLoaded() {
     // }
     // );
     //run cytoscape layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    cy.layout(o).run();
+    rerun();
 
 };
 
@@ -210,16 +206,23 @@ async function runLayout() {
       cy.json({ elements: resp });
     }
     //run cytoscape layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    o.isAnimated = false;
-    cy.layout(o).run();
+    rerun();
 }
 
 function rerun(){
     //run cytoscape layout
     //remove all nodes whose id starts with compound
     //cy.remove('node[id ^= "compound"]');
+    let nodesLength = cy.nodes().length;
+    if (nodesLength < 250) {
+      var nodeRepulsion = document.getElementById("defaultNodeRepulsion").value;
+      nodeRepulsion = nodeRepulsion * 0.4;
+      document.getElementById("nodeRepulsion").value = nodeRepulsion;
+      document.getElementById("swapForceLimit").value = 1500;
+      document.getElementById("swapPeriod").value = 5;
+      document.getElementById("minPairSwapPeriod").value = 5;
+    }
+      
     const o = getOptions();
     o.isForceDirected = true;
     cy.layout(o).run();
@@ -270,9 +273,7 @@ function addNodesToHeirarchy(){
         node.data('isDirected', 1);
     });
     //run the layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    cy.layout(o).run();
+    rerun();
 }
 
 function reset(){
@@ -282,9 +283,7 @@ function reset(){
         node.data('isDirected', 0);
     });
     //run cytoscape layout
-    const o = getOptions();
-    o.isForceDirected = true;
-    cy.layout(o).run();
+    rerun();
 }
 
 
@@ -744,9 +743,7 @@ async function runExperiment() {
 
       console.log("directed nodes length ",cy.nodes('[isDirected = 1]').length);
       // run force directed
-      const o = getOptions();
-      o.isForceDirected = true;
-      cy.layout(o).run();
+      rerun();
       results[i] = { fd: window.layvo.generalProperties() };
       results[i]["HySE_Total"] = layvo.generalProperties();
       results[i]["HySE_Total"]["executionTime"] = window.hyseExecutionTimes.pop();
@@ -1144,9 +1141,7 @@ async function runExperiment2(){
       var fileName = folder + graphFiles[i] + "_06.json";
       await createTestGraphFromTwoGraphs(fileName,fileName);
       // run force directed
-      const o = getOptions();
-      o.isForceDirected = true;
-      cy.layout(o).run();
+      rerun();
       var nodesLength = cy.nodes().length;
       let directedEdges = [];
       let undirectedEdges = [];

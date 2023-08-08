@@ -88,8 +88,9 @@
             </div>
             
             <div class="row">
-              <label title="Repulsion force between nodes" class="form-label" for="nodeRepulsion"> Repulsion Force </label>
-              <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
+              <label title="Repulsion force between nodes" class="form-label" for="defaultNodeRepulsion"> Repulsion Force </label>
+              <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="defaultNodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
+              <input type="number" value="55000" id="nodeRepulsion" hidden/>
               <p id="nodeRepulsionText"></p>
             </div>
   
