@@ -42,15 +42,14 @@
       <div class="button-column">
         <div class="head-buttons">
           <button hidden onclick="addNode()">Add Node</button>
-          <div class="row">
-            <select id="experimentGraphs">
-              <option value="unix-family-tree">unix-family-tree</option>
-          </select>
-          </div>
+          
           <!--create a dropdown showing sample graphs-->
           <button class="accordion active">Save/Load</button>
           <div class="panel" style="display: block;">
             <div class="row">
+              <select id="experimentGraphs">
+                <option value="unix-family-tree">unix-family-tree</option>
+              </select>
               <button title="Load and Layout Sample" onclick="runLayout()">Load Sample</button>
             
               <input type="file" id="fileInput" accept=".graphml" hidden>
