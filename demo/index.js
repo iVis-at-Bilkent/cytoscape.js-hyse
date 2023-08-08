@@ -216,11 +216,17 @@ function rerun(){
     let nodesLength = cy.nodes().length;
     if (nodesLength < 250) {
       var nodeRepulsion = document.getElementById("defaultNodeRepulsion").value;
-      nodeRepulsion = nodeRepulsion * 0.4;
+      nodeRepulsion = nodeRepulsion * 0.1;
       document.getElementById("nodeRepulsion").value = nodeRepulsion;
       document.getElementById("swapForceLimit").value = 1500;
       document.getElementById("swapPeriod").value = 5;
       document.getElementById("minPairSwapPeriod").value = 5;
+    }
+    else{
+      document.getElementById("nodeRepulsion").value = document.getElementById("defaultNodeRepulsion").value;;
+      document.getElementById("swapForceLimit").value = 15000;
+      document.getElementById("swapPeriod").value = 50;
+      document.getElementById("minPairSwapPeriod").value = 10;
     }
       
     const o = getOptions();
