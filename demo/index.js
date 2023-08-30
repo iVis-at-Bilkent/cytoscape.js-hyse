@@ -106,6 +106,15 @@ function assignRandomWidthAndHeight(){
     });
 }
 
+function getEdgeArrowShape(edge){
+  if(edge.source().data('isDirected')*1 == 1 && edge.target().data('isDirected')*1 == 1){
+    return "triangle";
+  }
+  else{
+    return "none";
+  }
+}
+
 function getStyle(){
   return  [
             {
@@ -129,7 +138,7 @@ function getStyle(){
                     'width': 3,
                     'line-color': '#ccc',
                     "curve-style": "bezier",
-                    "target-arrow-shape": "triangle"
+                    "target-arrow-shape": getEdgeArrowShape,
                 }
             },
             //color the selected nodes
