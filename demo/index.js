@@ -1193,6 +1193,7 @@ async function runExperiment2(){
       resp = await resp.json();
       cy.json({ elements: resp });
 
+      const o = getOptions();
       o.name = 'dagre';
       o.nodeSep = 20;
       o.edgeSep = 10;

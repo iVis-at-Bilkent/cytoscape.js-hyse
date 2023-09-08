@@ -170,8 +170,8 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
       
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
-        layout.graphManager.add(newGraph, hyseNode);
-        addChildren(g, newGraph, layout, opts, nodesVisited, n, hyseNode);
+        let updatedG = layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
       }
       if(opts.eles.nodes('#' + n.id()).data("parent")){
         hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
@@ -215,8 +215,8 @@ function processNodes(g, parent, layout, opts) {
       //console.log("hyseNode.noOfChildren", opts.eles.nodes('#' + nodes[i].id()).children());
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
-        layout.graphManager.add(newGraph, hyseNode);
-        addChildren(g, newGraph, layout, opts, nodesVisited, n, hyseNode);
+        let updatedG = layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
       }
       if(opts.eles.nodes('#' + nodes[i].id()).data("parent")){
         hyseNode.parentId = opts.eles.nodes('#' + nodes[i].id()).data("parent");
