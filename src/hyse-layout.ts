@@ -69,27 +69,16 @@ export class HySELayout extends CoSELayout {
         super.initSpringEmbedder();
         this.maxNodeDisplacement = maxNodeDispParam;
         this.uniformLeafNodeSizes = this.uniformNodeDimensions;
-        this.useFRGridVariant = false;
-        
-        //console.log("beforeLayout");
-        //console.log("uniformLeafNodeSizes: ", this.uniformLeafNodeSizes);
-        //console.log("useFRGridVariant: ", this.useFRGridVariant);
-
         
         const nodes = this.graphManager.getAllNodes();
         for (let i = 0; i < nodes.length; i++) {
           this.id2LNode[nodes[i].id] = nodes[i];
         }
-        //console.log("id2LNode: ", this.id2LNode);
 
-        //this.graphManager.graphs[2].shift({x: 1000, y: 1000});
-
-        //console.log("orderedLayers: ", this.orderedLayers);
         if(this.layering.length > 0){
           this.prepareOrderedLayers();
         }
         
-    
         this.prepareCompoundNodes();
 
         this.dummyCompoundNodes.forEach(node => {
@@ -97,36 +86,8 @@ export class HySELayout extends CoSELayout {
           this.graphManager.allNodes.push(node);
         });
 
-        // let graphs = this.graphManager.getGraphs();
-        // for(let i = 0; i < graphs.length; i++){
-        //   if(graphs[i].parent.id){
-        //     //add the parent node to the root graph
-        //     if(this.graphManager.getRoot() && this.graphManager.getRoot().indexOf(graphs[i].parent) == -1){
-        //       this.graphManager.getRoot().add(graphs[i].parent);
-        //     }
-        //     //if (this.graphManager.allNodes.indexOf(graphs[i].parent) == -1){
-        //       this.graphManager.allNodes.push(graphs[i].parent);
-        //     //}
-        //   }
-        //   console.log("graphs: ", graphs[i]);
-        // }
-
-        
-        // let edges = this.graphManager.getAllEdges();
-        // for(let i = 0; i < edges.length; i++){
-        //   let edge = edges[i];
-        //   let source = edge.getSource();
-        //   let target = edge.getTarget();
-        //   if(source.owner != target.owner){
-        //     this.edgesBetweenGraphs.push(edge);
-        //   }
-        // }
-
         this.graphManager.getRoot().calcEstimatedSize();
-        //this.calcIdealEdgeLengths();
-        //this.cy.nodes().css('border-color', 'blue');
-        //this.cy.nodes().css('border-width', '1px');
-        //color the nodes in different graphs as different colors
+        
         let colorIndex = 0;
         
         for(let i = 0;i<nodes.length;i++){
@@ -135,9 +96,7 @@ export class HySELayout extends CoSELayout {
         }
 
         for(let i = 0; i < this.dummyCompoundNodes.length; i++){
-          // if(!graphs[i].parent.id){
-          //   continue;
-          // }
+          
           let nodes = this.dummyCompoundNodes[i].child.getNodes();
           for(let j = 0; j < nodes.length; j++){
             
@@ -160,9 +119,6 @@ export class HySELayout extends CoSELayout {
 
         this.graphManager.getRoot().nodes.push(...this.dummyCompoundNodes);
         this.graphManager.updateBounds();
-
-        //console.log("undirectedNodes: ", this.undirectedNodes);
-        console.log("root graph ", this.graphManager.getRoot());
 
       }
 
@@ -232,16 +188,6 @@ export class HySELayout extends CoSELayout {
           dfs(node,i);
         }
         
-        //console.log(groups);
-
-        //display ids of nodes in each group
-        // for (let i = 0; i < Object.keys(groups).length; i++) {
-        //   console.log("group",i);
-        //   groups[Object.keys(groups)[i]].forEach(x=>console.log(x.id));
-          
-        // }
-
-
         //find the most left and most right nodes in graph manager nodes
         let mostLeftNode = this.graphManager.allNodes[0];
         let mostRightNode = this.graphManager.allNodes[0];
@@ -357,9 +303,6 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    //console.log(newNode.id,"not colliding with",x.id);
-                    //console.log("newNodeRect",newNode.rect);
-                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -391,9 +334,6 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    //console.log(newNode.id,"not colliding with",x.id);
-                    //console.log("newNodeRect",newNode.rect);
-                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -424,17 +364,10 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    //console.log(newNode.id,"not colliding with",x.id);
-                    //console.log("newNodeRect",newNode.rect);
-                    //console.log("xRect",x.rect);
                     nodesPassed.push(x);
                   }
                   
                 });
-                //console.log("up -> nodes to check before",nodesToCheck);
-                //nodesToCheck = nodesToCheck.filter(x=>!nodesPassed.includes(x));
-                //console.log("up -> nodes to check",nodesToCheck);
-                //console.log("up -> colliding",collidingNode);
                 if(colliding && collidingNode != null){
                   newNode.setRect({x:seedCenter.x - (newNode.rect.width/2),y:collidingNode.rect.y - 50-newNode.rect.height},newNode.rect);
                   placeNewNode(newNode,side,nodesToCheck);
@@ -460,9 +393,6 @@ export class HySELayout extends CoSELayout {
                     }
                   }
                   else{
-                    //console.log(newNode.id,"not colliding with",x.id);
-                    //console.log(newNode.id ,newNode.rect);
-                    //console.log(x.id ,x.rect);
                     nodesPassed.push(x);
                   }
                   
@@ -610,24 +540,12 @@ export class HySELayout extends CoSELayout {
               //newNode.getChild().add(x);
             });
             this.dummyCompoundNodes.push(newNode);
-            // this.cy.add({
-            //   group: 'nodes',
-            //   data: { id: newNode.id },
-            //   position: { x: newNode.rect.x, y: newNode.rect.y },
-            //   style: {  'background-opacity': '0.5', 'background-color': '#eee29b', 'border-color': '#eee29b', 'border-width': '1px', 'width': newNode.rect.width, 'height': newNode.rect.height },
-
-            //   classes: 'compoundNode'
-            // });
+            
             //newNode.child.updateBounds();
             //console.log("new Nodes",newNode);  
           
         }
         
-        //update bounds for each graph in graph manager
-        //this.graphManager.graphs.forEach(graph=>{
-          //graph.parent.updateBounds();
-        //});
-
       }
 
       
@@ -726,14 +644,10 @@ export class HySELayout extends CoSELayout {
     
       tick() {
         this.totalIterations++; // defined inside parent class
-        // if (this.totalIterations > 0) {
-        //   return true;
-        // }
         if (this.totalIterations % CoSEConstants.CONVERGENCE_CHECK_PERIOD == 0) {
           // console.log("totalDisplacement: ", this.totalDisplacement, " coolingFactor: ", this.coolingFactor);
           
           if ((this.isDirectedConverged() ) || this.totalIterations > this.maxIterations) {
-            //this.setPositionsFromLayering();
             return true;
           }
           if (this.isFastCooling) {
@@ -741,18 +655,11 @@ export class HySELayout extends CoSELayout {
           } else {
             this.coolingFactor = this.initialCoolingFactor * ((this.maxIterations - this.totalIterations) / this.maxIterations);
           }
-          //this.directedCoolingFactor = 0.7 * this.directedCoolingFactor;
           if (this.coolingFactor < 0) { 
             this.coolingFactor = 0;
           }
-          // if (this.directedCoolingFactor < 0) {
-          //   this.directedCoolingFactor = 0;
-          // }
-          //console.log("this.coolingFactor: ", this.coolingFactor);
         }
         this.totalDisplacement = 0; // defined inside parent class
-        //this.undirectedDisplacement = 0;
-        //this.directedDisplacement = 0;
         this.graphManager.updateBounds();
         super.calcSpringForces();
         this.calcRepulsionForces();
@@ -778,12 +685,9 @@ export class HySELayout extends CoSELayout {
           this.directedCoolingFactor = 1;
           this.graphManager.updateBounds();
           this.calcRepulsionForcesInRootGraph();
-          //this.repulsionForUndirected();
-          //super.calcSpringForces();
           this.moveNodes();
         }
         this.totalIterations = tempIt;
-        //console.log("post repulsion"+this.totalDisplacement+" displacement");
       }
 
       postLayoutOverlapRemoval() {
@@ -836,19 +740,6 @@ export class HySELayout extends CoSELayout {
               }
               var n1 = graph.nodes[i];
               var n2 = graph.nodes[j];
-              // if(n1.isDirected == 1 && n2.isDirected == 1){
-              //   //console.log(node1.id,node2.id,  " both directed");
-              //   continue;
-              // }
-              // if (n1.parentId != n2.parentId) {
-              //   //console.log(node1.id,node2.id,  " not same parent");
-              //   continue;
-              // }
-              // //console.log(" node1 id: ", node1.id, " node2 id: ", node2.id);
-              // if (n1.getOwner() != n2.getOwner() ) {
-              //   //console.log(node1.id,node2.id,  " not same owner");
-              //   continue;
-              // }
               this.fdCalculateRepulsionForces(n1,n2);
               if(n1.child){
                 this.repulsionForUndirected(n1.child);
@@ -858,59 +749,6 @@ export class HySELayout extends CoSELayout {
               }
             }
           }
-
-        //var nodes = this.undirectedNodes;
-        //var nodes = this.graphManager.allNodes as HySENode[];
-
-        // for(var i = 0; i < this.directedNodes.length; i++){
-        //   for(var j = 0; j < this.dummyCompoundNodes.length; j++){
-        //     var n1 = this.directedNodes[i];
-        //     var n2 = this.dummyCompoundNodes[j];
-        //     this.fdCalculateRepulsionForces(n1,n2);
-        //   }
-        // }
-
-        // for (var i = 0; i < nodes.length; i++) {
-        //   var node1 = nodes[i];
-        //   for (var j = i+1; j < nodes.length; j++) {
-        //     var node2 = nodes[j];
-        //     if(node1.isDirected == 1 && node2.isDirected == 1){
-        //       //console.log(node1.id,node2.id,  " both directed");
-        //       continue;
-        //     }
-        //     // if(node1.id == "cb1" || node1.id == "cb2" || node1.id == "cb5"){
-        //     //   debugger;
-        //     // }
-        //     if (node1.parentId != node2.parentId) {
-        //       //console.log(node1.id,node2.id,  " not same parent");
-        //       continue;
-        //     }
-        //     //console.log(" node1 id: ", node1.id, " node2 id: ", node2.id);
-        //     if (node1.getOwner() != node2.getOwner() ) {
-        //       //console.log(node1.id,node2.id,  " not same owner");
-        //       continue;
-        //     }
-            
-            
-        //     //console.log("same");
-        //     //super.calcRepulsionForce(node1, node2);
-        //     // if(node1.id == "cb5" || node2.id == "cb5"){
-        //     //   //console.log("repulsion force");
-        //     //   console.log("node1: ", node1.id, " node2: ", node2.id);
-        //     // }
-            
-        //     this.fdCalculateRepulsionForces(node1, node2);
-            
-        //     // if((node1.id == "c_21" && node2.id == "c_19") || (node1.id == "c_19" && node2.id == "c_21")){
-        //     //   console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcex: ", node1.repulsionForceX, " node2.nodeRepulsionForcex: ", node2.repulsionForceX);
-        //     //   console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcey: ", node1.repulsionForceY, " node2.nodeRepulsionForcey: ", node2.repulsionForceY);
-        //     // }
-        //     // console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcex: ", node1.repulsionForceX, " node2.nodeRepulsionForcex: ", node2.repulsionForceX);
-        //     // console.log("node1: ", node1.id, " node2: ", node2.id, " node1.nodeRepulsionForcey: ", node1.repulsionForceY, " node2.nodeRepulsionForcey: ", node2.repulsionForceY);
-        //   }
-        // }
-
-
       }
 
 
@@ -926,50 +764,21 @@ export class HySELayout extends CoSELayout {
           }
         }
         
-        //console.log("sourceNode: ", sourceNode.id, " targetNode: ", targetNode.id);
-        //console.log("idealLength: ", idealLength);
-        // if((sourceNode.isDirected == 1 && targetNode.isDirected == 0) || (sourceNode.isDirected == 0 && targetNode.isDirected == 1)){
-        //   return;
-        // }
-
-        // if(sourceNode.isDirected != 1 && targetNode.isDirected != 1){
-        //   super.calcSpringForce(edge, idealLength);
-        //   return;
-        // }
-
-        // if one of the nodes has a parent, then the source node is the parent
-        // if (sourceNode.parent != null) {
-        //   sourceNode = sourceNode.parent;
-        // }
-        // if (targetNode.parent != null) {
-        //   targetNode = targetNode.parent;
-        // }
-
         // Update edge length
         if (this.uniformLeafNodeSizes && sourceNode.getChild() == null && targetNode.getChild() == null) {
           edge.updateLengthSimple();
         } else {
           edge.updateLength();
           if (edge.isOverlapingSourceAndTarget) {
-            if(sourceNode.id == "cb1" || targetNode.id == "cb1"){
-              //console.log("repulsion force");
-              console.log("edge overlapping ","node1: ", sourceNode.id, " node2: ", targetNode.id);
-            }
             return;
           }
         }
     
         let length = edge.getLength();
-        // if(sourceNode.id == "cb1" || targetNode.id == "cb1"){
-        //   //console.log("repulsion force");
-        //   console.log("edge length ", length ," node1: ", sourceNode.id, " node2: ", targetNode.id);
-        // }
         if (length == 0) {
           return;
         }
-        // if(sourceNode.id == "c_5" || targetNode.id == "c_5"){
-        //   console.log("edge length: ", length, " idealLength: ", idealLength);
-        // }
+        
         // Calculate spring forces
         
         // if(this.totalIterations < (this.fullyCalcRep4Ticks * this.maxIterations)/2){
@@ -983,9 +792,6 @@ export class HySELayout extends CoSELayout {
         //   //letDirectedMove = false;
         // }
         let springForce = edge.edgeElasticity * (length - idealLength);
-        // if (springForce < 0) {
-        //   console.log("repulsive spring force !");
-        // }
     
         // Project force onto x and y axes
         //console.log("force: ",springForce,"length: ",edge.length, "edge.lengthX: ", edge.lengthX, " edge.lengthY: ", edge.lengthY);
@@ -1026,15 +832,7 @@ export class HySELayout extends CoSELayout {
           sourceNode.springForceY -= springForceY/2;
           sourceNode.springForceX -= springForceX/2;
         }
-        // if((sourceNode.id == "c_21" && targetNode.id == "c_19") || ( targetNode.id == "c_21" && sourceNode.id == "c_19")){
-        //   console.log("spring force");
-        //   console.log("node1: ", sourceNode.id, " node2: ", targetNode.id);
-        //   console.log("springForceX: ", springForceX, " springForceY: ", springForceY);
-        //   console.log("edge.lengthX: ", edge.lengthX, " edge.lengthY: ", edge.lengthY);
-        //   console.log("spring force",springForce);
-        //   console.log("edge Length",length);
-        // }
-
+       
       }
     
       // overrides layout-base.js method
@@ -1099,10 +897,6 @@ export class HySELayout extends CoSELayout {
       
         if (rectA.intersects(rectB))// two nodes overlap
         {
-          // if(nodeA.id == "cb5" || nodeB.id == "cb5"){
-          //   //console.log("repulsion force");
-          //   console.log("intersection ","node1: ", nodeA.id, " node2: ", nodeB.id);
-          // }
           // calculate separation amount in x and y directions
           layoutBase.IGeometry.calcSeparationAmount(rectA,
                   rectB,
@@ -1122,10 +916,6 @@ export class HySELayout extends CoSELayout {
         }
         else// no overlap
         {
-          // if(nodeA.id == "cb5" || nodeB.id == "cb5"){
-          //   //console.log("repulsion force");
-          //   console.log("no overlap ","node1: ", nodeA.id, " node2: ", nodeB.id);
-          // }
           // calculate distance
       
           if (this.uniformLeafNodeSizes &&
@@ -1294,9 +1084,6 @@ export class HySELayout extends CoSELayout {
         }
         pairs.sort((a, b) => { return b.swapForce - a.swapForce; }); // start swapping from the most willingly
         
-        // while(pairs.length > 1) {
-        //   pairs.pop();
-        // }
         const connectedSwap = {};
         
         
@@ -1332,10 +1119,7 @@ export class HySELayout extends CoSELayout {
             connectedSwap[e2[i].source.id] = true;
             connectedSwap[e2[i].target.id] = true;
           }
-          // const cross2 = this.countCrosses();
-          // if (cross2 > cross1) {
-          //   console.log('crosses increase!', cross1, cross2);
-          // }
+          
         }
       }
     
@@ -1372,10 +1156,7 @@ export class HySELayout extends CoSELayout {
               for (let k = j + 1; k < currLayer.length; k++) {
                 const n1 = currLayer[j];
                 const n2 = currLayer[k];
-                //if any of these is child then don't calculate repulsion
-                // if (n1.isChild || n2.isChild) {
-                //     continue;
-                // }
+                
                 this.calcRepulsionForce(currLayer[j], currLayer[k]);
               }
             }
