@@ -31,6 +31,8 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.displayInitialPositions = opts.displayInitialPositions;
   l.randomizeInitialPositions = opts.randomizeInitialPositions;
   l.nodeRepulsion = opts.nodeRepulsion;
+  l.useFRGridVariantHySE = opts.useFRGridVariant;
+  l.idealEdgeLength = opts.idealEdgeLength;
   coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 
@@ -86,6 +88,8 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
   layout.displayInitialPositions = options.displayInitialPositions;
   layout.randomizeInitialPositions = options.randomizeInitialPositions;
   layout.nodeRepulsion = options.nodeRepulsion;
+  layout.useFRGridVariantHySE = options.useFRGridVariant;
+  layout.idealEdgeLength = options.idealEdgeLength;
   coseBase.CoSEConstants.TILE = false;
   const executeTickFn = () => {
     setTimeout(() => {

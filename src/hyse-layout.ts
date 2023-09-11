@@ -46,6 +46,9 @@ export class HySELayout extends CoSELayout {
     [x: string]: any;
     undirectedNodes: HySENode[] = [];
     directedNodes: HySENode[] = [];
+    useFRGridVariantHySE: boolean = true;
+    idealEdgeLength: number = 50;
+    forceUpdateGrid: boolean = false;
     constructor(layering, cy) {
         //console.trace();
         super();
@@ -69,6 +72,9 @@ export class HySELayout extends CoSELayout {
         super.initSpringEmbedder();
         this.maxNodeDisplacement = maxNodeDispParam;
         this.uniformLeafNodeSizes = this.uniformNodeDimensions;
+        this.useFRGridVariant = this.useFRGridVariantHySE;
+        this.LEVEL = 0;
+        this.IDEAL_EDGE_LENGTH = this.idealEdgeLength;
         
         const nodes = this.graphManager.getAllNodes();
         for (let i = 0; i < nodes.length; i++) {
@@ -659,18 +665,187 @@ export class HySELayout extends CoSELayout {
             this.coolingFactor = 0;
           }
         }
+        
         this.totalDisplacement = 0; // defined inside parent class
         this.graphManager.updateBounds();
+        
         super.calcSpringForces();
-        this.calcRepulsionForces();
-        //this.repulsionForUndirected(this.graphManager.getRoot());
-        this.repulsionTopLevel();
+        if(this.useFRGridVariant){
+          this.gridRepulsion();
+        }
+        else{
+          this.calcRepulsionForces();
+          //this.repulsionForUndirected(this.graphManager.getRoot());
+          this.repulsionTopLevel();
+        }
+        
         this.swapAndFlip();
         this.moveNodes();
         
         
         return false;
       }
+
+      //add a grid repulsion function
+      gridRepulsion(){
+        var nodeA = null;
+        var nodeB = null;
+        var lNodes = this.graphManager.getAllNodes();
+        var processedNodeSet;
+        
+        if ((this.totalIterations % layoutBase.FDLayoutConstants.GRID_CALCULATION_CHECK_PERIOD == 1) || this.forceUpdateGrid)
+        {       
+          this.updateGrid();
+        }
+
+        processedNodeSet = new Set();
+        
+        // calculate repulsion forces between each nodes and its surrounding
+        for (let i = 0; i < lNodes.length; i++)
+        {
+          nodeA = lNodes[i];
+          this.calculateRepulsionForceOfANode(nodeA, processedNodeSet);
+          processedNodeSet.add(nodeA);
+        }
+        this.forceUpdateGrid = false;
+      }
+
+      calculateRepulsionForceOfANode (nodeA, processedNodeSet){
+  
+        if ((this.totalIterations % layoutBase.FDLayoutConstants.GRID_CALCULATION_CHECK_PERIOD == 1) || this.forceUpdateGrid)
+        {
+          var surrounding = new Set();
+          nodeA.surrounding = new Array();
+          var nodeB;
+          var grid = this.grid;
+          
+          for (var i = (nodeA.startX - 1); i < (nodeA.finishX + 2); i++)
+          {
+            for (var j = (nodeA.startY - 1); j < (nodeA.finishY + 2); j++)
+            {
+              if (!((i < 0) || (j < 0) || (i >= grid.length) || (j >= grid[0].length)))
+              {  
+                for (var k = 0; k < grid[i][j].length; k++) {
+                  nodeB = grid[i][j][k];
+      
+                  // If both nodes are not members of the same graph, 
+                  // or both nodes are the same, skip.
+                  if ((nodeA.getOwner() != nodeB.getOwner()) || (nodeA == nodeB))
+                  {
+                    continue;
+                  }
+                  
+                  // check if the repulsion force between
+                  // nodeA and nodeB has already been calculated
+                  if (!processedNodeSet.has(nodeB) && !surrounding.has(nodeB))
+                  {
+                    var distanceX = Math.abs(nodeA.getCenterX()-nodeB.getCenterX()) - 
+                          ((nodeA.getWidth()/2) + (nodeB.getWidth()/2));
+                    var distanceY = Math.abs(nodeA.getCenterY()-nodeB.getCenterY()) - 
+                          ((nodeA.getHeight()/2) + (nodeB.getHeight()/2));
+                  
+                    // if the distance between nodeA and nodeB 
+                    // is less then calculation range
+                    if ((distanceX <= this.repulsionRange) && (distanceY <= this.repulsionRange))
+                    {
+                      //then add nodeB to surrounding of nodeA
+                      surrounding.add(nodeB);
+                    }              
+                  }    
+                }
+              }          
+            }
+          }
+      
+          nodeA.surrounding = [...surrounding];
+        
+        }
+        for (i = 0; i < nodeA.surrounding.length; i++)
+        {
+          this.calcRepulsionForceForGridNodes(nodeA, nodeA.surrounding[i]);
+        }	
+      };
+
+      calcRepulsionForceForGridNodes  (nodeA, nodeB) {
+        var rectA = nodeA.getRect();
+        var rectB = nodeB.getRect();
+        var overlapAmount = new Array(2);
+        var clipPoints = new Array(4);
+        var distanceX;
+        var distanceY;
+        var distanceSquared;
+        var distance;
+        var repulsionForce;
+        var repulsionForceX;
+        var repulsionForceY;
+
+        if (rectA.intersects(rectB))// two nodes overlap
+        {
+          // calculate separation amount in x and y directions
+          layoutBase.IGeometry.calcSeparationAmount(rectA,
+                  rectB,
+                  overlapAmount,
+                  layoutBase.FDLayoutConstants.DEFAULT_EDGE_LENGTH / 2.0);
+
+          repulsionForceX = 2 * overlapAmount[0];
+          repulsionForceY = 2 * overlapAmount[1];
+          
+          var childrenConstant = nodeA.noOfChildren * nodeB.noOfChildren / (nodeA.noOfChildren + nodeB.noOfChildren);
+          
+          // Apply forces on the two nodes
+          nodeA.repulsionForceX -= childrenConstant * repulsionForceX;
+          nodeA.repulsionForceY -= childrenConstant * repulsionForceY;
+          nodeB.repulsionForceX += childrenConstant * repulsionForceX;
+          nodeB.repulsionForceY += childrenConstant * repulsionForceY;
+        }
+        else// no overlap
+        {
+          // calculate distance
+
+          if (this.uniformLeafNodeSizes &&
+                  nodeA.getChild() == null && nodeB.getChild() == null)// simply base repulsion on distance of node centers
+          {
+            distanceX = rectB.getCenterX() - rectA.getCenterX();
+            distanceY = rectB.getCenterY() - rectA.getCenterY();
+          }
+          else// use clipping points
+          {
+            layoutBase.IGeometry.getIntersection(rectA, rectB, clipPoints);
+
+            distanceX = clipPoints[2] - clipPoints[0];
+            distanceY = clipPoints[3] - clipPoints[1];
+          }
+
+          // No repulsion range. FR grid variant should take care of this.
+          if (Math.abs(distanceX) < layoutBase.FDLayoutConstants.MIN_REPULSION_DIST)
+          {
+            distanceX = layoutBase.IMath.sign(distanceX) *
+            layoutBase.FDLayoutConstants.MIN_REPULSION_DIST;
+          }
+
+          if (Math.abs(distanceY) < layoutBase.FDLayoutConstants.MIN_REPULSION_DIST)
+          {
+            distanceY = layoutBase.IMath.sign(distanceY) *
+            layoutBase.FDLayoutConstants.MIN_REPULSION_DIST;
+          }
+
+          distanceSquared = distanceX * distanceX + distanceY * distanceY;
+          distance = Math.sqrt(distanceSquared);
+          
+          // Here we use half of the nodes' repulsion values for backward compatibility
+          repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
+
+          // Project force onto x and y axes
+          repulsionForceX = repulsionForce * distanceX / distance;
+          repulsionForceY = repulsionForce * distanceY / distance;
+          
+          // Apply forces on the two nodes    
+          nodeA.repulsionForceX -= repulsionForceX;
+          nodeA.repulsionForceY -= repulsionForceY;
+          nodeB.repulsionForceX += repulsionForceX;
+          nodeB.repulsionForceY += repulsionForceY;
+        }
+      };
 
       postLayoutRepulsionPhase() {
         this.postLayout = true;
@@ -1082,6 +1257,9 @@ export class HySELayout extends CoSELayout {
             }
           }
         }
+        if(pairs.length > 0){
+          this.forceUpdateGrid = true;
+        }
         pairs.sort((a, b) => { return b.swapForce - a.swapForce; }); // start swapping from the most willingly
         
         const connectedSwap = {};
@@ -1313,7 +1491,7 @@ export class HySELayout extends CoSELayout {
       // this method is used to override layout-base.js
       calcRepulsionRange = function () {
         // formula is 2 x (level + 1) x idealEdgeLength
-        return (2 * (this.LEVEL + 1) * this.IDEAL_EDGE_LENGTH);
+        return (2 * (this.LEVEL + 1) * this.idealEdgeLength);
       };
     
       /** tries to fix node overlaps with a simple logic
