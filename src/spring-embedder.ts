@@ -163,7 +163,7 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
       points = new layoutBase.PointD(0, 0);
       let nbb = n.layoutDimensions(opts);
       dimension = new layoutBase.DimensionD(nbb.w, nbb.h);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), 0);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), -1);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
       hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length+1;
@@ -204,7 +204,7 @@ function processNodes(g, parent, layout, opts) {
       let nbb = n.layoutDimensions(opts);
       //console.log("nbb for ", n.id(), nbb);
       dimension = new layoutBase.DimensionD(nbb.w, nbb.h);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), 0);
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), -1);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = 0;
       if(hyseNode.isDirected == undefined){

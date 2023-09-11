@@ -302,7 +302,7 @@ export class HySELayout extends CoSELayout {
             
             let points = new layoutBase.PointD(0, 0);
             let dimension = new layoutBase.DimensionD(newGraph.getEstimatedSize(),newGraph.getEstimatedSize());
-            let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,0);
+            let newNode = new HySENode(this.graphManager,points,dimension,null, "compoundNode"+id,-1);
             newNode.isDirected = 0;
             newNode.nodeRepulsion = this.nodeRepulsion;
             newNode.noOfChildren = numberOfChildren;

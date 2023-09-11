@@ -126,7 +126,7 @@ export class HySENode extends CoSENode  {
     }
     else{
       //swap the forces and displacements
-      const tempNode = new HySENode(this.graphManager, null, null, null, "", 0);
+      const tempNode = new HySENode(this.graphManager, null, null, null, "", -1);
       tempNode.springForceX = this.springForceX;
       tempNode.springForceY = this.springForceY;
       tempNode.repulsionForceX = this.repulsionForceX;
