@@ -130,7 +130,18 @@ function getStyle(){
                     'height': function (ele) {
                       return ele.data('height')*1 || 30;
                     },
+                    'text-max-width' : function(ele){
+                      return 30;
+                    }
                 }
+            },
+            {
+              selector: ":parent",
+              css: {
+                'background-opacity' : '0.2',
+                //shape: 'cutrectangle',
+                //shape: 'roundrectangle',
+              }
             },
             {
                 selector: 'edge',
@@ -223,7 +234,7 @@ function rerun(){
     //remove all nodes whose id starts with compound
     //cy.remove('node[id ^= "compound"]');
     let nodesLength = cy.nodes().length;
-    if (nodesLength < 250) {
+    if (nodesLength < 150) {
       var nodeRepulsion = document.getElementById("defaultNodeRepulsion").value;
       nodeRepulsion = nodeRepulsion * 0.1;
       document.getElementById("nodeRepulsion").value = nodeRepulsion;
@@ -1097,17 +1108,12 @@ async function runExperiment2(){
     let graphFiles = [
       "g_00010",
       "g_00020",
-      "g_00020",
-      "g_00020",
-      "g_00030",
-      "g_00030",
       "g_00030",
       "g_00040",
       "g_00050",
       "g_00060",
       "g_00070",
       "g_00080",
-      "g_00090",
       "g_00090",
       "g_00100",
       "g_00110",
@@ -1150,6 +1156,9 @@ async function runExperiment2(){
       "g_00480",
       "g_00490",
       "g_00500",
+      "g_01000",
+      "g_02000",
+      "g_03000",
     ];
 
     for (let i = 0; i < graphFiles.length; i++) {
