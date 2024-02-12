@@ -11,7 +11,7 @@ async function pageLoaded() {
     var select = document.getElementById("experimentGraphs");
     var options = [];
     options.push("python-call-stack");
-    for (let i = 1;i<6;i++){
+    for (let i = 1;i<7;i++){
       options.push("Sample"+i);
     }
     for (const graph in window.experimentSmallGraphs) {
@@ -1217,6 +1217,16 @@ async function runExperiment2(){
       cnt++;
     }
     console.log(results);
+    //download the results as json
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(results));
+    var file = new Blob([JSON.stringify(results)], {type: 'application/json'});
+    // var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    var dlAnchorElem = document.createElement('a');
+    // dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.href = URL.createObjectURL(file);
+    dlAnchorElem.download= "results.json";
+    dlAnchorElem.click();
+    
     renderChart(results);
 }
 
