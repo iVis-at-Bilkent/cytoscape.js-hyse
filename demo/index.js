@@ -71,7 +71,69 @@ async function pageLoaded() {
                   createRandomGraph(node.id());
               },  
               hasTrailingDivider: true
-          }
+            },
+            {
+              id: 'add-edge-between-nodes',
+              content: 'Add edge between nodes',
+              tooltipText: 'Add edge between nodes',
+              selector: 'node',
+              onClickFunction: function (event) {
+                  var targetNode = event.target;
+                  var selectedNodes = cy.$('node:selected');
+                  
+                  if (selectedNodes.length === 2) {
+                    var sourceNode = selectedNodes[0];
+                    var targetNode = selectedNodes[1];
+                    
+                    cy.add({
+                      group: 'edges',
+                      data: {
+                        id: sourceNode.id() + '-' + targetNode.id(),
+                        source: sourceNode.id(),
+                        target: targetNode.id()
+                      }
+                    });          
+                  } 
+              },  
+              hasTrailingDivider: true
+            },
+            {
+              id: 'create-a-parent-node',
+              content: 'Create a parent node',
+              tooltipText: 'Create a parent node',
+              selector: 'node',
+              onClickFunction: function (event) {
+                  var selectedNodes = cy.$('node:selected');
+                  selectedNodes.push(event.target);
+                  var parent = cy.add({
+                    group: 'nodes',
+                    data: {
+                      id: 'p-' + Math.floor(Math.random() * 1000),
+                      parent: selectedNodes[0].parent().id(),
+                      isParent: true
+                    }
+                  });
+                  selectedNodes.move({ parent: parent.id() });
+              },  
+              hasTrailingDivider: true
+            },
+            {
+              id: 'add-a-child-node',
+              content: 'Add a child node',
+              tooltipText: 'Add a child node',
+              selector: 'node',
+              onClickFunction: function (event) {
+                  var parent = event.target;
+                  var child = cy.add({
+                    group: 'nodes',
+                    data: {
+                      id: 'c-' + Math.floor(Math.random() * 1000),
+                      parent: parent.id()
+                    }
+                  });
+              },  
+              hasTrailingDivider: true
+            },
           ]
     });
 
