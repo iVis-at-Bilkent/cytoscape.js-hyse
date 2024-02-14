@@ -533,6 +533,15 @@ function deleteSelected(){
   cy.$(':selected').remove();
 }
 
+function removeLabels(){
+  cy.style()
+          .selector('node')
+          .style({
+            'label': '', // Removing the label style
+          })
+          .update();
+}
+
 function renderChart(results, title = null) {
   const metrics = [
     "numberOfEdgeCrosses",
