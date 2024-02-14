@@ -1285,7 +1285,7 @@ export class HySELayout extends CoSELayout {
           this.swapOnOrderedLayers(p.layerId, p.order1, p.order2);
           this.swappedPairs[pairId] = this.totalIterations;
           this.banned2SwapPairs[pairId] = true;
-          this.highlightPair(pairId, false);
+          this.highlightPair(pairId, true);
     
           const e1 = this.id2LNode[p.n1].edges;
           const e2 = this.id2LNode[p.n2].edges;
