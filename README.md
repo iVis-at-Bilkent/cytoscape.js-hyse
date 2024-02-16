@@ -4,7 +4,8 @@
 
 HySE (**Hy**brid **S**pring **E**mbedder), is a layout algorithm designed for laying out a hybrid graph with a "central" main directed part and "satellite" connected undirected parts (e.g., a hybrid UML diagram where the class inheritance hierarchy forms the directed part and other types of associations form the remaining undirected parts of the diagram). The algorithm uses a holistic spring embedder approach, where, as crossing minimization and final positioning of the hierarchy are polished, the undirected part is also beautified simultaneously.
 
-<kbd><img alt="image" width=340 src="https://github.com/iVis-at-Bilkent/cytoscape.js-hyse/assets/3874988/7aad112c-9e5f-459c-b062-04e4da1609e1"></kbd>
+<kbd>![image](https://github.com/iVis-at-Bilkent/cytoscape.js-hyse/assets/3874988/dec2d8ab-2061-4ac0-8f3d-65d3020dbf96)
+</kbd>
 &emsp;
 <kbd>![ezgif com-crop](https://github.com/iVis-at-Bilkent/cytoscape.js-hyse/assets/3874988/1224dc0b-01db-49ce-901f-796a061718c1)</kbd>
 
