@@ -10,6 +10,14 @@ HySE (**Hy**brid **S**pring **E**mbedder), is a layout algorithm designed for la
 
 ## Demo
 
+Here is a demo of HySE layout algorithm:
+
+<p align="center">
+<a href="https://ivis-at-bilkent.github.io/cytoscape.js-hyse/demo/demo.html" title="HySE Demo"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a> &emsp;
+</p>
+
+To locally build the demo, follow these steps:
+
 1. Download the source codes or clone the repository with `git clone https://github.com/iVis-at-Bilkent/cytoscape.js-hyse.git`
 2. Go to the root folder `cd cytoscape.js-hyse`
 3. Run `npm install` to install the dependencies
