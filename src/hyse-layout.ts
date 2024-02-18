@@ -265,9 +265,9 @@ export class HySELayout extends CoSELayout {
             let yCenter = yCenters.reduce((a,b)=>a+b)/yCenters.length;
 
             //find which side is the closest to the xCenter and yCenter
-            let distanceUp = Math.abs(yCenter);
+            let distanceUp = Math.abs(Math.abs(yCenter) - Math.abs(mostTopNode.rect.y));
             let distanceDown = Math.abs(mostBottomNode.rect.y+mostBottomNode.rect.height-yCenter);
-            let distanceLeft = Math.abs(xCenter);
+            let distanceLeft = Math.abs(Math.abs(xCenter) - Math.abs(mostLeftNode.rect.x));
             let distanceRight = Math.abs(mostRightNode.rect.x+mostRightNode.rect.width-xCenter);
 
             let min = Math.min(distanceUp,distanceDown,distanceLeft,distanceRight);
