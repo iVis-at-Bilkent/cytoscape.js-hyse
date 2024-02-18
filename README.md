@@ -13,7 +13,7 @@ HySE (**Hy**brid **S**pring **E**mbedder), is a layout algorithm designed for la
 Here is a demo of HySE layout algorithm:
 
 <p align="center">
-<a href="https://ivis-at-bilkent.github.io/cytoscape.js-hyse/demo/demo.html" title="HySE Demo"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a> &emsp;
+<a href="https://ivis-at-bilkent.github.io/cytoscape.js-hyse/demo/index.html" title="HySE Demo"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo2.png" height=42px></a> &emsp;
 </p>
 
 To locally build the demo, follow these steps:
