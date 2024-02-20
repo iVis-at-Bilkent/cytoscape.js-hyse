@@ -12,7 +12,7 @@ async function pageLoaded() {
     var options = [];
     options.push("python-call-stack");
     for (let i = 1;i<7;i++){
-      options.push("Sample"+i);
+      options.push("sample"+i);
     }
     for (const graph in window.experimentSmallGraphs) {
         options.push(graph);
