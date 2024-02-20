@@ -105,6 +105,7 @@ function runTickByTickAnimated(layout: HySELayout, nodes, options) {
         };
       });
       if (!isLayoutEnded) {
+        window['cy'].fit();
         requestAnimationFrame(executeTickFn);
       } else {
         if(layout.performPostProcessing){
