@@ -261,7 +261,7 @@ async function runLayout() {
     var select = document.getElementById("experimentGraphs");
     var selectedGraph = select.options[select.selectedIndex].value;
 
-    if(selectedGraph.startsWith("Sample")){
+    if(selectedGraph.startsWith("sample")){
       var resp = await fetch('./samples/'+selectedGraph+'.graphml');
       resp = await resp.text();
       loadGraphMLFromStr(resp);
