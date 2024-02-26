@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", pageLoaded);
 
 function setNodeRepulsionText(){
-  document.getElementById("nodeRepulsionText").innerText = document.getElementById("defaultNodeRepulsion").value;
-  console.log("running");
+  document.getElementById("nodeRepulsionText").innerText = document.getElementById("nodeRepulsion").value;
 }
 
 async function pageLoaded() {
@@ -137,11 +136,6 @@ async function pageLoaded() {
           ]
     });
 
-    
-
-
-
-    
     //window.cy = cy;
     window.layvo = cy.layvo("get");
 
@@ -293,24 +287,6 @@ async function runLayout() {
 
 function rerun(){
     //run cytoscape layout
-    //remove all nodes whose id starts with compound
-    //cy.remove('node[id ^= "compound"]');
-    let nodesLength = cy.nodes().length;
-    if (nodesLength < 150) {
-      var nodeRepulsion = document.getElementById("defaultNodeRepulsion").value;
-      nodeRepulsion = nodeRepulsion * 0.1;
-      document.getElementById("nodeRepulsion").value = nodeRepulsion;
-      document.getElementById("swapForceLimit").value = 1500;
-      document.getElementById("swapPeriod").value = 5;
-      document.getElementById("minPairSwapPeriod").value = 5;
-    }
-    else{
-      document.getElementById("nodeRepulsion").value = document.getElementById("defaultNodeRepulsion").value;;
-      document.getElementById("swapForceLimit").value = 15000;
-      document.getElementById("swapPeriod").value = 50;
-      document.getElementById("minPairSwapPeriod").value = 10;
-    }
-      
     const o = getOptions();
     o.isForceDirected = true;
     cy.layout(o).run();
@@ -442,6 +418,7 @@ function getOptions() {
       "displayInitialPositions",
       "randomizeInitialPositions",
       "useFRGridVariant",
+      "colorSwappedPair"
     ];
     const o = { name: "hyse" };
     for (let i = 0; i < opts.length; i++) {
@@ -1227,18 +1204,32 @@ async function runExperiment2(){
       "g_00480",
       "g_00490",
       "g_00500",
-      "g_01000",
-      "g_02000",
-      "g_03000",
+      // "g_01000",
+      // "g_02000",
+      // "g_03000",
     ];
 
     for (let i = 0; i < graphFiles.length; i++) {
 
       var fileName = folder + graphFiles[i] + "_06.json";
       await createTestGraphFromTwoGraphs(fileName,fileName);
+
+      let nodesLength = cy.nodes().length;
+      if (nodesLength < 150) {
+        document.getElementById("nodeRepulsion").value = 4500;
+        document.getElementById("swapForceLimit").value = 500;
+        document.getElementById("swapPeriod").value = 5;
+        document.getElementById("minPairSwapPeriod").value = 5;
+      }
+      else{
+        document.getElementById("nodeRepulsion").value = 55000;
+        document.getElementById("swapForceLimit").value = 1500;
+        document.getElementById("swapPeriod").value = 50;
+        document.getElementById("minPairSwapPeriod").value = 10;
+      }
+      
       // run force directed
       rerun();
-      var nodesLength = cy.nodes().length;
       let directedEdges = [];
       let undirectedEdges = [];
       let mixedEdges = [];

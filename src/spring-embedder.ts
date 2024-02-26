@@ -33,6 +33,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   l.nodeRepulsion = opts.nodeRepulsion;
   l.useFRGridVariantHySE = opts.useFRGridVariant;
   l.idealEdgeLength = opts.idealEdgeLength;
+  l.colorSwappedPair = !opts.colorSwappedPair;
   coseBase.CoSEConstants.TILE = false;
   console.log("opts: " ,opts);
 
@@ -57,7 +58,6 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
         else{
           window['cy'].nodes('#' + n.id).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
         }
-        
       }
     }
     if (opts.isRelayer) {

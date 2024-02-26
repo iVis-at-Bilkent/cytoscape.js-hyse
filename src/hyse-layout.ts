@@ -49,6 +49,7 @@ export class HySELayout extends CoSELayout {
     useFRGridVariantHySE: boolean = true;
     idealEdgeLength: number = 50;
     forceUpdateGrid: boolean = false;
+    colorSwappedPair: boolean = true;
     constructor(layering, cy) {
         //console.trace();
         super();
@@ -1285,7 +1286,7 @@ export class HySELayout extends CoSELayout {
           this.swapOnOrderedLayers(p.layerId, p.order1, p.order2);
           this.swappedPairs[pairId] = this.totalIterations;
           this.banned2SwapPairs[pairId] = true;
-          this.highlightPair(pairId, true);
+          this.highlightPair(pairId, this.colorSwappedPair);
     
           const e1 = this.id2LNode[p.n1].edges;
           const e2 = this.id2LNode[p.n2].edges;

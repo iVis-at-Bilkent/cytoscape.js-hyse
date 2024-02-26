@@ -8616,6 +8616,7 @@
             _this.useFRGridVariantHySE = true;
             _this.idealEdgeLength = 50;
             _this.forceUpdateGrid = false;
+            _this.colorSwappedPair = true;
             // this method is used to override layout-base.js
             _this.calcRepulsionRange = function () {
                 // formula is 2 x (level + 1) x idealEdgeLength
@@ -9685,7 +9686,7 @@
                 this.swapOnOrderedLayers(p.layerId, p.order1, p.order2);
                 this.swappedPairs[pairId] = this.totalIterations;
                 this.banned2SwapPairs[pairId] = true;
-                this.highlightPair(pairId, true);
+                this.highlightPair(pairId, this.colorSwappedPair);
                 var e1 = this.id2LNode[p.n1].edges;
                 var e2 = this.id2LNode[p.n2].edges;
                 for (var i_1 = 0; i_1 < e1.length; i_1++) {
@@ -35906,6 +35907,7 @@
         l.nodeRepulsion = opts.nodeRepulsion;
         l.useFRGridVariantHySE = opts.useFRGridVariant;
         l.idealEdgeLength = opts.idealEdgeLength;
+        l.colorSwappedPair = !opts.colorSwappedPair;
         coseBase.CoSEConstants.TILE = false;
         console.log("opts: ", opts);
         var gm = l.newGraphManager();
