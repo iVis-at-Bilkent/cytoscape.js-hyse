@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <graph>
+    <node xmlns="" id="n0">
+      <data type="data" key="label">p1</data>
+      <data type="data" key="level">3</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">160</data>
+      <data type="position" key="y">0</data>
+    </node>
+    <node xmlns="" id="n2">
+      <data type="data" key="label">p4</data>
+      <data type="data" key="level">1</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">129.4501001030391</data>
+      <data type="position" key="y">101</data>
+    </node>
+    <node xmlns="" id="n3">
+      <data type="data" key="label">p2</data>
+      <data type="data" key="level">3</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">73.00502933435845</data>
+      <data type="position" key="y">101</data>
+    </node>
+    <node xmlns="" id="n12">
+      <data type="data" key="label">p3</data>
+      <data type="data" key="level">2</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">190.54989989696097</data>
+      <data type="position" key="y">101</data>
+    </node>
+    <node xmlns="" id="n14">
+      <data type="data" key="label">p7</data>
+      <data type="data" key="level">3</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">106.04965448252862</data>
+      <data type="position" key="y">202</data>
+    </node>
+    <node xmlns="" id="n6">
+      <data type="data" key="label">p5</data>
+      <data type="data" key="level">0</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">246.99497066564157</data>
+      <data type="position" key="y">101</data>
+    </node>
+    <node xmlns="" id="n17">
+      <data type="data" key="label">p6</data>
+      <data type="data" key="level">2</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">213.95034551747136</data>
+      <data type="position" key="y">202</data>
+    </node>
+    <node xmlns="" id="n11">
+      <data type="data" key="label">p6</data>
+      <data type="data" key="level">3</data>
+      <data type="data" key="isDirected">1</data>
+      <data type="position" key="x">160</data>
+      <data type="position" key="y">202</data>
+    </node>
+    <node xmlns="" id="p-932">
+      <data type="data" key="label"> </data>
+      <data type="data" key="isParent">true</data>
+      <data type="position" key="x">-160.2669645628893</data>
+      <data type="position" key="y">18.9831596263914</data>
+      <graph id="p-932:">
+        <node id="Michael">
+          <data type="data" key="label">Michael</data>
+          <data type="position" key="x">-96.96305755827983</data>
+          <data type="position" key="y">6.793590020006853</data>
+        </node>
+        <node id="R3">
+          <data type="data" key="label">R3</data>
+          <data type="position" key="x">-223.57087156749878</data>
+          <data type="position" key="y">-4.9407927418231665</data>
+        </node>
+        <node id="A3">
+          <data type="data" key="label">A3</data>
+          <data type="position" key="x">-167.36935412926005</data>
+          <data type="position" key="y">59.90711199460598</data>
+        </node>
+      </graph>
+    </node>
+    <node xmlns="" id="p-875">
+      <data type="data" key="label"> </data>
+      <data type="data" key="isParent">true</data>
+      <data type="position" key="x">-85.14027162099737</data>
+      <data type="position" key="y">208.58608109385568</data>
+      <graph id="p-875:">
+        <node id="p-784">
+          <data type="data" key="label">R2</data>
+          <data type="position" key="x">-42.61433739822486</data>
+          <data type="position" key="y">255.06842529662134</data>
+        </node>
+        <node id="p-60">
+          <data type="data" key="label">Emily</data>
+          <data type="position" key="x">-132.16620584376986</data>
+          <data type="position" key="y">218.6300788256754</data>
+        </node>
+        <node id="p-775">
+          <data type="data" key="label">A2</data>
+          <data type="position" key="x">-50.64312560368755</data>
+          <data type="position" key="y">179.10373689109005</data>
+        </node>
+      </graph>
+    </node>
+    <node xmlns="" id="p-689">
+      <data type="data" key="label">l3</data>
+      <data type="position" key="x">0</data>
+      <data type="position" key="y">0</data>
+    </node>
+    <node xmlns="" id="p-154">
+      <data type="data" key="label"> </data>
+      <data type="data" key="isParent">true</data>
+      <data type="position" key="x">374.57384973946944</data>
+      <data type="position" key="y">191.29330649747456</data>
+      <graph id="p-154:">
+        <node id="p-918">
+          <data type="data" key="label">l2</data>
+          <data type="position" key="x">324.85712277487374</data>
+          <data type="position" key="y">247.03963709115865</data>
+        </node>
+        <node id="p-745">
+          <data type="data" key="label">George</data>
+          <data type="position" key="x">424.2905767040651</data>
+          <data type="position" key="y">211.2188897129407</data>
+        </node>
+        <node id="p-876">
+          <data type="data" key="label">A1</data>
+          <data type="position" key="x">415.64418940587444</data>
+          <data type="position" key="y">152.5469759037905</data>
+        </node>
+      </graph>
+    </node>
+    <node xmlns="" id="p-860">
+      <data type="data" key="label"> </data>
+      <data type="data" key="isParent">true</data>
+      <data type="position" key="x">433.86336264134746</data>
+      <data type="position" key="y">-21.77838049364978</data>
+      <graph id="p-860:">
+        <node id="p-787">
+          <data type="data" key="label">Joe</data>
+          <data type="position" key="x">402.6746084585887</data>
+          <data type="position" key="y">-13.58718004001373</data>
+        </node>
+        <node id="p-774">
+          <data type="data" key="label">R1</data>
+          <data type="position" key="x">465.05211682410624</data>
+          <data type="position" key="y">-12.969580947285834</data>
+        </node>
+      </graph>
+    </node>
+    <node xmlns="" id="p-47">
+      <data type="data" key="label"> </data>
+      <data type="data" key="isParent">true</data>
+      <data type="position" key="x">115.4910303401167</data>
+      <data type="position" key="y">319.7539177848771</data>
+      <graph id="p-47:">
+        <node id="p-895">
+          <data type="data" key="label">l1</data>
+          <data type="position" key="x">148.2237822546952</data>
+          <data type="position" key="y">330.41551460942475</data>
+        </node>
+        <node id="p-981">
+          <data type="data" key="label">Kelly</data>
+          <data type="position" key="x">82.75827842553818</data>
+          <data type="position" key="y">326.09232096032946</data>
+        </node>
+      </graph>
+    </node>
+    <node xmlns="" id="p-764">
+      <data type="data" key="label">p6</data>
+      <data type="position" key="x">287.183578118472</data>
+      <data type="position" key="y">14.20477913274164</data>
+    </node>
+    <edge xmlns="" id="n12-n11" source="n12" target="n11" >
+    </edge>
+    <edge xmlns="" id="n0-n12" source="n0" target="n12" ></edge>
+    <edge xmlns="" id="n2-n17" source="n2" target="n17" ></edge>
+    <edge xmlns="" id="n2-n11" source="n2" target="n11" ></edge>
+    <edge xmlns="" id="n0-n2" label="hehe" source="n0" target="n2" ></edge>
+    <edge xmlns="" id="n0-n3" source="n0" target="n3" ></edge>
+    <edge xmlns="" id="n0-n6" source="n0" target="n6" ></edge>
+    <edge xmlns="" id="n2-n14" source="n2" target="n14" ></edge>
+    <edge xmlns="" id="n12-n17" source="n12" target="n17" ></edge>
+    <edge xmlns="" id="n12-n14" source="n12" target="n14" ></edge>
+    <edge xmlns="" id="Michael-A3" source="Michael" target="A3" >
+      <!-- <data type="data" key="label">assigned</data> -->
+    </edge>
+    <edge xmlns="" id="R3-A3" source="R3" target="A3" >
+      <!-- <data type="data" key="label">for</data> -->
+    </edge>
+    <edge xmlns="" id="Michael-R3" source="Michael" target="R3" >
+      <!-- <data type="data" key="label">completed</data> -->
+    </edge>
+    <edge xmlns="" id="p-784-p-775" source="p-784" target="p-775" ></edge>
+    <edge xmlns="" id="p-784-p-60" source="p-784" target="p-60" ></edge>
+    <edge xmlns="" id="p-60-p-775" source="p-60" target="p-775" ></edge>
+    <edge xmlns="" id="Michael-p-689" source="Michael" target="p-689" ></edge>
+    <edge xmlns="" id="p-775-p-689" source="p-775" target="p-689" ></edge>
+    <edge xmlns="" id="n3-p-689" source="n3" target="p-689" ></edge>
+    <edge xmlns="" id="p-745-p-876" source="p-745" target="p-876" ></edge>
+    <edge xmlns="" id="p-918-p-745" source="p-918" target="p-745" ></edge>
+    <edge xmlns="" id="p-918-p-876" source="p-918" target="p-876" ></edge>
+    <edge xmlns="" id="p-787-p-774" source="p-787" target="p-774" ></edge>
+    <edge xmlns="" id="p-895-p-981" source="p-895" target="p-981" ></edge>
+    <edge xmlns="" id="n17-p-918" source="n17" target="p-918" ></edge>
+    <edge xmlns="" id="p-876-p-787" source="p-876" target="p-787" ></edge>
+    <edge xmlns="" id="n6-p-764" source="n6" target="p-764" ></edge>
+    <edge xmlns="" id="p-895-p-764" source="p-895" target="p-764" ></edge>
+  </graph>
+</graphml>

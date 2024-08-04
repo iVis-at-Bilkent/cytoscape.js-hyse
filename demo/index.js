@@ -10,6 +10,8 @@ async function pageLoaded() {
     var select = document.getElementById("experimentGraphs");
     var options = [];
     options.push("python-call-stack");
+    options.push("paper");
+    options.push("bom");
     for (let i = 1;i<7;i++){
       options.push("sample"+i);
     }
@@ -261,7 +263,7 @@ async function runLayout() {
       loadGraphMLFromStr(resp);
       return;
     }
-    else if(select.selectedIndex < 2){
+    else if(select.selectedIndex < 4){
       var resp = await fetch('./samples/'+selectedGraph+'.graphml');
       resp = await resp.text();
       loadGraphMLFromStr(resp);
