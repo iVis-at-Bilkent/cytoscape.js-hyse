@@ -13,7 +13,7 @@ async function pageLoaded() {
     options.push("class");
     options.push("bom");
     options.push("knowledge-graph");
-    for (let i = 1;i<9;i++){
+    for (let i = 1;i<10;i++){
       options.push("sample"+i);
     }
     for (const graph in window.experimentSmallGraphs) {
