@@ -92,12 +92,12 @@
   
             <div class="row">
               <label title="Distance between ranks in heirarchy + maximum node height" class="form-label" for="rankGap"> Rank Gap </label>
-              <input title="Distance between ranks in heirarchy + maximum node height" type="number" class="form-control form-control-sm" id="rankGap" value="50">
+              <input title="Distance between ranks in heirarchy + maximum node height" type="number" class="form-control form-control-sm" id="rankGap" value="20">
             </div>
             
             <div class="row">
               <label title="Repulsion force between nodes" class="form-label" for="defaultNodeRepulsion"> Repulsion Force </label>
-              <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="5500" oninput="setNodeRepulsionText()">
+              <input title="Repulsion force between nodes" type="range" min="50" max="100000" class="form-control form-control-sm" id="nodeRepulsion" value="55000" oninput="setNodeRepulsionText()">
               <p id="nodeRepulsionText"></p>
             </div>
   
@@ -108,11 +108,11 @@
   
             <div class="row">
               <label title="Force threshold above which nodes would be swapped in heirarchy" class="form-label" for="swapForceLimit"> Swap Force Limit </label>
-              <input title="Force threshold above which nodes would be swapped in heirarchy" type="number" class="form-control form-control-sm" id="swapForceLimit" value="500">
+              <input title="Force threshold above which nodes would be swapped in heirarchy" type="number" class="form-control form-control-sm" id="swapForceLimit" value="15000">
             </div>
             <div class="row">
               <label title="Iterations after which swapping function is called" class="form-label" for="swapPeriod"> Swap Period </label>
-              <input title="Iterations after which swapping function is called" type="number" class="form-control form-control-sm" id="swapPeriod" value="5">
+              <input title="Iterations after which swapping function is called" type="number" class="form-control form-control-sm" id="swapPeriod" value="50">
             </div>
             <div class="row">
               <label title="Hold period for nodes after being swapped" class="form-label" for="minPairSwapPeriod"> Min Pair Swap Period </label>
@@ -185,7 +185,7 @@
   
             <div class="row">
               <label title="Ratio of Heirarchical Nodes to Non-Heirarchical Nodes" class="form-label" for="ratio"> Directed : Undirected (Ratio) </label>
-              <input title="Ratio of Heirarchical Nodes to Non-Heirarchical Nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.4">
+              <input title="Ratio of Heirarchical Nodes to Non-Heirarchical Nodes" type="number" min="0" max="1" step="0.1" class="form-control form-control-sm" id="ratio" value="0.6">
             </div>
             <div class="row">
               <label title="Depth Of Undirected Parts" class="form-label" for="depthThreshold">Depth</label>
