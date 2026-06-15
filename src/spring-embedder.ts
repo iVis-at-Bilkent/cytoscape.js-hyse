@@ -51,7 +51,11 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
       const n = gm.getAllNodes()[i];
       // console.log(counter++);
       if (!opts.isRelayer) {
-        // console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
+        const nodeId = n.id instanceof Object ? n.id.id() : n.id;
+        const cyNode = cy.getElementById(nodeId);
+        if (cyNode && cyNode.length > 0 && cyNode.isParent()) {
+          continue;
+        }
         if(n.id instanceof Object){
           window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
         }
@@ -158,7 +162,7 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
   for(let i =0;i<node.children().length;i ++){
     let n = node.children()[i];
     if(nodesVisited.includes(n.id())){
-      return;
+      continue;
     }
     nodesVisited.push(n.id());
     let points = null;
@@ -173,6 +177,35 @@ function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
       hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
       hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length+1;
       
+      if (hyseNode.noOfChildren > 1) {
+        let newGraph = layout.newGraph();
+        let updatedG = layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
+      }
+      if (opts.eles.nodes('#' + n.id()).data("parent")) {
+        hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
+      }
+      if (hyseNode.noOfChildren >= 2) {
+        hyseNode.noOfChildren -= 1;
+      }
+      const lNode = hyseParent.getChild().add(hyseNode);
+      id2LNode[n.id()] = lNode;
+    } else {
+      const nDagre = g.node(n.id());
+      let w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+      let h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      let x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
+      let y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+
+      points = new layoutBase.PointD(x, y);
+      dimension = new layoutBase.DimensionD(w, h);
+      const rank = nDagre ? nDagre.rank : -1;
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), rank);
+      hyseNode.nodeRepulsion = opts.nodeRepulsion;
+      hyseNode.isDirected = 1;
+      hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length + 1;
+
+
       if(hyseNode.noOfChildren > 1){
         let newGraph = layout.newGraph();
         let updatedG = layout.graphManager.add(newGraph, hyseNode);
@@ -234,13 +267,31 @@ function processNodes(g, parent, layout, opts) {
       id2LNode[nodes[i].id()] = lNode;
     }
     else{
-      n= g.node(n.id());
-      points = new layoutBase.PointD(n.x, n.y);
-      dimension = new layoutBase.DimensionD(n.width, n.height);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), n.rank);
+      const nDagre = g.node(n.id());
+      let w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+      let h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      let x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
+      let y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+
+      points = new layoutBase.PointD(x, y);
+      dimension = new layoutBase.DimensionD(w, h);
+      const rank = nDagre ? nDagre.rank : -1;
+      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), rank);
       hyseNode.nodeRepulsion = opts.nodeRepulsion;
       hyseNode.isDirected = 1;
-      //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
+
+      hyseNode.noOfChildren = opts.eles.nodes('#' + nodes[i].id()).children().length + 1;
+      if (hyseNode.noOfChildren > 1) {
+        let newGraph = layout.newGraph();
+        let updatedG = layout.graphManager.add(newGraph, hyseNode);
+        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
+      }
+      if (opts.eles.nodes('#' + nodes[i].id()).data("parent")) {
+        hyseNode.parentId = opts.eles.nodes('#' + nodes[i].id()).data("parent");
+      }
+      if (hyseNode.noOfChildren >= 2) {
+        hyseNode.noOfChildren -= 1;
+      }
       const lNode = parent.add(hyseNode);
       id2LNode[nodes[i].id()] = lNode;
     }

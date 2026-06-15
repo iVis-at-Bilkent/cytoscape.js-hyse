@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml
+    xmlns="http://graphml.graphdrawing.org/xmlns"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+    <graph>
+        <node xmlns="" id="n_root">
+            <data type="data" key="label">Root Entry</data>
+            <data type="data" key="level">0</data>
+            <data type="data" key="isDirected">1</data>
+            <data type="position" key="x">150</data>
+            <data type="position" key="y">0</data>
+        </node>
+
+        <node xmlns="" id="p_parent_compound">
+            <data type="data" key="label">Outer Compound</data>
+            <data type="data" key="isParent">true</data>
+            <data type="data" key="isDirected">1</data>
+            <graph id="p_parent_compound:">
+                
+                <node xmlns="" id="n_nest1">
+                    <data type="data" key="label">Outer Child A</data>
+                    <data type="data" key="level">1</data>
+                    <data type="data" key="isDirected">1</data>
+                    <data type="position" key="x">80</data>
+                    <data type="position" key="y">80</data>
+                </node>
+
+                <node xmlns="" id="p_child_compound">
+                    <data type="data" key="label">Inner Compound</data>
+                    <data type="data" key="isParent">true</data>
+                    <data type="data" key="isDirected">1</data>
+                    <graph id="p_child_compound:">
+                        
+                        <node xmlns="" id="n_nest2">
+                            <data type="data" key="label">Inner Deep Child 1</data>
+                            <data type="data" key="level">2</data>
+                            <data type="data" key="isDirected">1</data>
+                            <data type="position" key="x">120</data>
+                            <data type="position" key="y">150</data>
+                        </node>
+                        <node xmlns="" id="n_nest3">
+                            <data type="data" key="label">Inner Deep Child 2</data>
+                            <data type="data" key="level">2</data>
+                            <data type="data" key="isDirected">1</data>
+                            <data type="position" key="x">180</data>
+                            <data type="position" key="y">150</data>
+                        </node>
+                    </graph>
+                </node>
+                
+            </graph>
+        </node>
+
+        <node xmlns="" id="p_isolated_group">
+            <data type="data" key="label"></data>
+            <data type="data" key="isParent">true</data>
+            <data type="position" key="x">-50</data>
+            <data type="position" key="y">50</data>
+            <graph id="p_isolated_group:">
+                <node id="Node_SideA">
+                    <data type="data" key="label">Side Node A</data>
+                    <data type="position" key="x">-30</data>
+                    <data type="position" key="y">60</data>
+                </node>
+                <node id="Node_SideB">
+                    <data type="data" key="label">Side Node B</data>
+                    <data type="position" key="x">-70</data>
+                    <data type="position" key="y">90</data>
+                </node>
+            </graph>
+        </node>
+
+        <edge xmlns="" id="e1" source="n_root" target="n_nest1"/>
+        <edge xmlns="" id="e2" source="n_nest1" target="n_nest2"/>
+        <edge xmlns="" id="e3" source="n_nest2" target="n_nest3"/>
+        <edge xmlns="" id="e4" source="n_nest3" target="Node_SideA"/>
+        <edge xmlns="" id="e5" source="Node_SideA" target="Node_SideB"/>
+    </graph>
+</graphml>

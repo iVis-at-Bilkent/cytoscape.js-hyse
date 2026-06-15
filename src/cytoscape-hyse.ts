@@ -43,29 +43,50 @@ export class DagreAndSpringEmbedderLayout {
     //only add those nodes which are in the heirachical layout
 
     let nodes = eles.nodes().filter(function (ele) {
-      return  ele.data("isDirected") == 1;
+      return ele.data("isDirected") == 1;
     });
     //let nodes = eles.nodes();
     let maxHeight = 0;
     let maxWidth = 0;
+    let directedCompoundExists = false;
     for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
       
       let nbb = node.layoutDimensions(options);
 
-      g.setNode(node.id(), {
-        width: nbb.w,
-        height: nbb.h,
+      let nodeConfig: any = {
         name: node.id(),
-        isDirected:node.data("isDirected"),
-      });
-      if(nbb.h > maxHeight){
-        maxHeight = nbb.h;
+        isDirected: node.data("isDirected"),
+      };
+
+      if (!node.isParent()) {
+        nodeConfig.width = nbb.w;
+        nodeConfig.height = nbb.h;
+
+        if (nbb.h > maxHeight) {
+          maxHeight = nbb.h;
+        }
+        if (nbb.w > maxWidth) {
+          maxWidth = nbb.w;
+        }
       }
-      if(nbb.w > maxWidth){
-        maxWidth = nbb.w;
+
+      if (node.isParent() && node.data("isDirected") == 1) {
+        directedCompoundExists = true;
       }
-      // console.log( g.node(node.id()) );
+      g.setNode(node.id(), nodeConfig);
+    }
+
+    if (directedCompoundExists) {
+      for (let i = 0; i < nodes.length; i++) {
+        let node = nodes[i];
+        if (node.isChild()) {
+          let parent = node.parent();
+          if (parent && parent.length > 0 && parent.data("isDirected") == 1) {
+            g.setParent(node.id(), parent.id());
+          }
+        }
+      }
     }
 
     options.rankGap+=maxHeight;

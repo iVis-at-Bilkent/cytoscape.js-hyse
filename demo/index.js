@@ -16,6 +16,9 @@ async function pageLoaded() {
     for (let i = 1;i<10;i++){
       options.push("sample"+i);
     }
+    for (let i = 1;i<8;i++){
+      options.push("compound_graph_"+i);
+    }
     for (const graph in window.experimentSmallGraphs) {
         options.push(graph);
     }
@@ -258,7 +261,7 @@ async function runLayout() {
     var select = document.getElementById("experimentGraphs");
     var selectedGraph = select.options[select.selectedIndex].value;
 
-    if(selectedGraph.startsWith("sample")){
+    if(selectedGraph.startsWith("sample") || selectedGraph.startsWith("compound_graph_")){
       var resp = await fetch('./samples/'+selectedGraph+'.graphml');
       resp = await resp.text();
       loadGraphMLFromStr(resp);
@@ -341,6 +344,50 @@ function addNodesToHeirarchy(){
     });
     //run the layout
     rerun();
+}
+
+// Moves a selected directed simple node into a selected directed compound node and reruns the layout
+function addToDirectedCompound() {
+  var selectedNodes = cy.nodes(':selected');
+  if (selectedNodes.length !== 2) {
+      alert("Error: Please select exactly two nodes (one simple node and one compound node) in the directed subgraph.");
+      return;
+  }
+
+  var node1 = selectedNodes[0];
+  var node2 = selectedNodes[1];
+
+  function isCompound(node) {
+      return node.isParent() || node.data('isParent') === true || node.data('isParent') === 1;
+  }
+
+  var simpleNode = null;
+  var compoundNode = null;
+
+  if (!isCompound(node1) && isCompound(node2)) {
+      simpleNode = node1;
+      compoundNode = node2;
+  } else if (isCompound(node1) && !isCompound(node2)) {
+      simpleNode = node2;
+      compoundNode = node1;
+  } else {
+      alert("Error: Selection must contain exactly one simple node and one compound node.");
+      return;
+  }
+
+  if (simpleNode.data('isDirected') * 1 !== 1) {
+      alert("Error: The selected simple node is not part of the directed subgraph.");
+      return;
+  }
+
+  if (compoundNode.data('isDirected') * 1 !== 1) {
+      alert("Error: The selected compound node is not part of the directed subgraph.");
+      return;
+  }
+
+  simpleNode.move({ parent: compoundNode.id() });
+
+  rerun();
 }
 
 function reset(){

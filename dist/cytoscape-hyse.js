@@ -1,4 +1,5 @@
 
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
@@ -8744,21 +8745,33 @@
             var mostRightNode = this.graphManager.allNodes[0];
             var mostTopNode = this.graphManager.allNodes[0];
             var mostBottomNode = this.graphManager.allNodes[0];
-            //get the bounds of heirarchical nodes
-            this.graphManager.allNodes.filter(function (x) { return x.isDirected == 1; }).forEach(function (node) {
-                if (mostLeftNode.isDirected != 1 || node.rect.x < mostLeftNode.rect.x) {
-                    mostLeftNode = node;
-                }
-                if (mostRightNode.isDirected != 1 || node.rect.x + node.rect.width > mostRightNode.rect.x + mostRightNode.rect.width) {
-                    mostRightNode = node;
-                }
-                if (mostTopNode.isDirected != 1 || node.rect.y < mostTopNode.rect.y) {
-                    mostTopNode = node;
-                }
-                if (mostBottomNode.isDirected != 1 || node.rect.y + node.rect.height > mostBottomNode.rect.y + mostBottomNode.rect.height) {
-                    mostBottomNode = node;
-                }
+            // get the bounds of hierarchical nodes
+            var directedLeafNodes = this.graphManager.allNodes.filter(function (x) {
+                if (x.isDirected != 1)
+                    return false;
+                var cyNode = _this.cy.getElementById(x.id);
+                return !(cyNode && cyNode.length > 0 && cyNode.isParent());
             });
+            if (directedLeafNodes.length > 0) {
+                mostLeftNode = directedLeafNodes[0];
+                mostRightNode = directedLeafNodes[0];
+                mostTopNode = directedLeafNodes[0];
+                mostBottomNode = directedLeafNodes[0];
+                directedLeafNodes.forEach(function (node) {
+                    if (node.rect.x < mostLeftNode.rect.x) {
+                        mostLeftNode = node;
+                    }
+                    if (node.rect.x + node.rect.width > mostRightNode.rect.x + mostRightNode.rect.width) {
+                        mostRightNode = node;
+                    }
+                    if (node.rect.y < mostTopNode.rect.y) {
+                        mostTopNode = node;
+                    }
+                    if (node.rect.y + node.rect.height > mostBottomNode.rect.y + mostBottomNode.rect.height) {
+                        mostBottomNode = node;
+                    }
+                });
+            }
             var _loop_1 = function (i) {
                 var id = Object.keys(groups)[i];
                 var group = groups[Object.keys(groups)[i]];
@@ -9167,6 +9180,7 @@
             _super.prototype.calcSpringForces.call(this);
             if (this.useFRGridVariant) {
                 this.gridRepulsion();
+                this.calcRepulsionForDirectedCompounds();
             }
             else {
                 this.calcRepulsionForces();
@@ -9235,6 +9249,9 @@
             }
         };
         HySELayout.prototype.calcRepulsionForceForGridNodes = function (nodeA, nodeB) {
+            if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) {
+                return;
+            }
             var rectA = nodeA.getRect();
             var rectB = nodeB.getRect();
             var overlapAmount = new Array(2);
@@ -9351,6 +9368,36 @@
                     this.fdCalculateRepulsionForces(this.directedNodes[j], this.dummyCompoundNodes[i]);
                 }
             }
+            this.calcRepulsionForDirectedCompounds();
+        };
+        HySELayout.prototype.calcRepulsionForDirectedCompounds = function (isRootGraph) {
+            if (isRootGraph === void 0) { isRootGraph = false; }
+            var directedCompounds = this.directedNodes.filter(function (n) { return n.child; });
+            for (var i = 0; i < directedCompounds.length; i++) {
+                var comp = directedCompounds[i];
+                var oldCompRep = comp.nodeRepulsion;
+                if (isRootGraph) {
+                    comp.nodeRepulsion = this.nodeRepulsion;
+                }
+                for (var j = 0; j < this.directedNodes.length; j++) {
+                    var other = this.directedNodes[j];
+                    if (comp === other)
+                        continue;
+                    if (this.shareRank(comp, other)) {
+                        var oldOtherRep = other.nodeRepulsion;
+                        if (isRootGraph) {
+                            other.nodeRepulsion = this.nodeRepulsion;
+                        }
+                        this.calcRepulsionForce(comp, other);
+                        if (isRootGraph) {
+                            other.nodeRepulsion = oldOtherRep;
+                        }
+                    }
+                }
+                if (isRootGraph) {
+                    comp.nodeRepulsion = oldCompRep;
+                }
+            }
         };
         HySELayout.prototype.repulsionForUndirected = function (graph) {
             for (var i = 0; i < graph.nodes.length; i++) {
@@ -9446,6 +9493,9 @@
         };
         // overrides layout-base.js method
         HySELayout.prototype.calcRepulsionForce = function (nodeA, nodeB) {
+            if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) {
+                return;
+            }
             var rectA = nodeA.getRect();
             var rectB = nodeB.getRect();
             var repulsionForceX;
@@ -9489,6 +9539,9 @@
         };
         HySELayout.prototype.fdCalculateRepulsionForces = function (nodeA, nodeB, childConst) {
             if (childConst === void 0) { childConst = true; }
+            if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) {
+                return;
+            }
             var rectA = nodeA.getRect();
             var rectB = nodeB.getRect();
             var overlapAmount = new Array(2);
@@ -9640,25 +9693,60 @@
                 highIdx--;
             }
         };
+        HySELayout.prototype.getNodesInColumn = function (colId) {
+            var nodes = this.graphManager.allNodes;
+            return nodes.filter(function (n) {
+                if (n.isDirected !== 1)
+                    return false;
+                var parentId = n.parentId;
+                return (parentId === colId) || (!parentId && n.id === colId);
+            });
+        };
+        HySELayout.prototype.getColumnForceX = function (colId) {
+            var colNodes = this.getNodesInColumn(colId);
+            var totalForce = 0;
+            for (var i = 0; i < colNodes.length; i++) {
+                var id = colNodes[i].id;
+                if (this.id2TotalForceX[id] !== undefined) {
+                    totalForce += this.id2TotalForceX[id];
+                }
+            }
+            return totalForce;
+        };
         /** swap adjacent nodes to reduce crossings if there is a strong force
          */
         HySELayout.prototype.swapAdjacentsIfNeed = function () {
             var layers = this.orderedLayers;
             var pairs = [];
             for (var i = 0; i < layers.length; i++) {
-                var layerId = i;
                 for (var j = 0; j < layers[i].length - 1; j++) {
-                    var n1 = layers[i][j].id;
-                    var n2 = layers[i][j + 1].id;
-                    var pairId = [n1, n2].sort().join('|');
-                    // check if swapped too recently
-                    if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
-                        continue;
+                    var node1 = layers[i][j];
+                    var node2 = layers[i][j + 1];
+                    var col1 = node1.parentId ? node1.parentId : node1.id;
+                    var col2 = node2.parentId ? node2.parentId : node2.id;
+                    if (col1 === col2) {
+                        var n1 = node1.id;
+                        var n2 = node2.id;
+                        var pairId = [n1, n2].sort().join('|');
+                        if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
+                            continue;
+                        }
+                        var swapForce = Math.abs(this.id2TotalForceX[n1] - this.id2TotalForceX[n2]);
+                        if (swapForce > this.swapForceLimit) {
+                            pairs.push({ type: 'local', pairId: pairId, swapForce: swapForce, layerId: i, n1: n1, n2: n2, order1: j, order2: j + 1 });
+                        }
                     }
-                    var connectedEdgeCount = layers[i][j].edges.length + layers[i][j + 1].edges.length;
-                    var swapForce = Math.abs(this.id2TotalForceX[n1] - this.id2TotalForceX[n2]);
-                    if (swapForce > this.swapForceLimit) {
-                        pairs.push({ pairId: pairId, swapForce: swapForce, layerId: layerId, n1: n1, n2: n2, order1: j, order2: j + 1, connectedEdgeCount: connectedEdgeCount });
+                    else {
+                        var pairId = [col1, col2].sort().join('|');
+                        if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
+                            continue;
+                        }
+                        var force1 = this.getColumnForceX(col1);
+                        var force2 = this.getColumnForceX(col2);
+                        var swapForce = force1 - force2;
+                        if (swapForce > this.swapForceLimit) {
+                            pairs.push({ type: 'column', pairId: pairId, swapForce: Math.abs(swapForce), layerId: i, col1: col1, col2: col2 });
+                        }
                     }
                 }
             }
@@ -9667,36 +9755,78 @@
             }
             pairs.sort(function (a, b) { return b.swapForce - a.swapForce; }); // start swapping from the most willingly
             var connectedSwap = {};
-            for (var i = 0; i < pairs.length; i++) {
+            var _loop_2 = function (i) {
                 var p = pairs[i];
-                var pairId = p.pairId;
-                // don't let swapping the related elements
-                if (connectedSwap[p.n1] || connectedSwap[p.n2]) {
-                    continue;
+                if (p.type === 'local') {
+                    var n1 = p.n1;
+                    var n2 = p.n2;
+                    var order1 = p.order1;
+                    var order2 = p.order2;
+                    if (connectedSwap[n1] || connectedSwap[n2]) {
+                        return "continue";
+                    }
+                    var xDistance = Math.abs(this_2.id2LNode[n1].getRect().getCenterX() - this_2.id2LNode[n2].getRect().getCenterX());
+                    this_2.totalDisplacement += xDistance;
+                    this_2.id2LNode[n1].swapPositionWith(this_2.id2LNode[n2]);
+                    this_2.swapOnOrderedLayers(p.layerId, order1, order2);
+                    this_2.swappedPairs[p.pairId] = this_2.totalIterations;
+                    this_2.highlightPair(p.pairId, this_2.colorSwappedPair);
+                    var e1 = this_2.id2LNode[n1].edges;
+                    var e2 = this_2.id2LNode[n2].edges;
+                    for (var idx = 0; idx < e1.length; idx++) {
+                        connectedSwap[e1[idx].source.id] = true;
+                        connectedSwap[e1[idx].target.id] = true;
+                    }
+                    for (var idx = 0; idx < e2.length; idx++) {
+                        connectedSwap[e2[idx].source.id] = true;
+                        connectedSwap[e2[idx].target.id] = true;
+                    }
                 }
-                // const cross1 = this.countCrosses();
-                this.banned2SwapPairs[pairId] = false;
-                this.highlightPair(pairId, true);
-                // swap if both nodes request swapping
-                // console.log('swap ', pairId);
-                //get the distance between the two nodes and add it to the total displacement
-                var xDistance = Math.abs(this.id2LNode[p.n1].getRect().getCenterX() - this.id2LNode[p.n2].getRect().getCenterX());
-                this.totalDisplacement += xDistance;
-                this.id2LNode[p.n1].swapPositionWith(this.id2LNode[p.n2]);
-                this.swapOnOrderedLayers(p.layerId, p.order1, p.order2);
-                this.swappedPairs[pairId] = this.totalIterations;
-                this.banned2SwapPairs[pairId] = true;
-                this.highlightPair(pairId, this.colorSwappedPair);
-                var e1 = this.id2LNode[p.n1].edges;
-                var e2 = this.id2LNode[p.n2].edges;
-                for (var i_1 = 0; i_1 < e1.length; i_1++) {
-                    connectedSwap[e1[i_1].source.id] = true;
-                    connectedSwap[e1[i_1].target.id] = true;
+                else {
+                    var col1_1 = p.col1;
+                    var col2_1 = p.col2;
+                    if (connectedSwap[col1_1] || connectedSwap[col2_1]) {
+                        return "continue";
+                    }
+                    var swappedAny = false;
+                    var _loop_3 = function (k) {
+                        var nodes1 = layers[k].filter(function (node) { return (node.parentId === col1_1) || (!node.parentId && node.id === col1_1); });
+                        var nodes2 = layers[k].filter(function (node) { return (node.parentId === col2_1) || (!node.parentId && node.id === col2_1); });
+                        if (nodes1.length > 0 && nodes2.length > 0) {
+                            var idxs = __spreadArray(__spreadArray([], __read(nodes1), false), __read(nodes2), false).map(function (n) { return layers[k].indexOf(n); });
+                            var sortedIdxs = idxs.sort(function (a, b) { return a - b; });
+                            var avgOrder1 = nodes1.reduce(function (sum, n) { return sum + n.order; }, 0) / nodes1.length;
+                            var avgOrder2 = nodes2.reduce(function (sum, n) { return sum + n.order; }, 0) / nodes2.length;
+                            var newSegment = avgOrder1 < avgOrder2 ? __spreadArray(__spreadArray([], __read(nodes2), false), __read(nodes1), false) : __spreadArray(__spreadArray([], __read(nodes1), false), __read(nodes2), false);
+                            var center1 = nodes1.reduce(function (sum, n) { return sum + n.getRect().getCenterX(); }, 0) / nodes1.length;
+                            var center2 = nodes2.reduce(function (sum, n) { return sum + n.getRect().getCenterX(); }, 0) / nodes2.length;
+                            var dx_1 = center2 - center1;
+                            nodes1.forEach(function (n) { return n.moveBy(dx_1, 0); });
+                            nodes2.forEach(function (n) { return n.moveBy(-dx_1, 0); });
+                            for (var m = 0; m < sortedIdxs.length; m++) {
+                                layers[k][sortedIdxs[m]] = newSegment[m];
+                            }
+                            for (var j = 0; j < layers[k].length; j++) {
+                                layers[k][j].order = j;
+                            }
+                            this_2.totalDisplacement += Math.abs(dx_1);
+                            swappedAny = true;
+                        }
+                    };
+                    for (var k = 0; k < layers.length; k++) {
+                        _loop_3(k);
+                    }
+                    if (swappedAny) {
+                        this_2.swappedPairs[p.pairId] = this_2.totalIterations;
+                        this_2.highlightPair(p.pairId, this_2.colorSwappedPair);
+                        connectedSwap[col1_1] = true;
+                        connectedSwap[col2_1] = true;
+                    }
                 }
-                for (var i_2 = 0; i_2 < e2.length; i_2++) {
-                    connectedSwap[e2[i_2].source.id] = true;
-                    connectedSwap[e2[i_2].target.id] = true;
-                }
+            };
+            var this_2 = this;
+            for (var i = 0; i < pairs.length; i++) {
+                _loop_2(i);
             }
         };
         /** highlight the swapped to show on animation
@@ -9794,6 +9924,7 @@
                     }
                 }
             }
+            this.calcRepulsionForDirectedCompounds(true);
         };
         HySELayout.prototype.moveNodes = function () {
             var nodes = this.graphManager.allNodes;
@@ -9894,13 +10025,13 @@
         HySELayout.prototype.countCrosses = function () {
             var _this = this;
             var cnt = 0;
-            var _loop_2 = function (i) {
+            var _loop_4 = function (i) {
                 var edgesOnLayer = [];
-                var _loop_3 = function (j) {
-                    edgesOnLayer = edgesOnLayer.concat(this_2.orderedLayers[i][j].edges.filter(function (x) { return x.source.id == _this.orderedLayers[i][j].id; }));
+                var _loop_5 = function (j) {
+                    edgesOnLayer = edgesOnLayer.concat(this_3.orderedLayers[i][j].edges.filter(function (x) { return x.source.id == _this.orderedLayers[i][j].id; }));
                 };
-                for (var j = 0; j < this_2.orderedLayers[i].length; j++) {
-                    _loop_3(j);
+                for (var j = 0; j < this_3.orderedLayers[i].length; j++) {
+                    _loop_5(j);
                 }
                 for (var j = 0; j < edgesOnLayer.length; j++) {
                     var currE = edgesOnLayer[j];
@@ -9916,9 +10047,9 @@
                     }
                 }
             };
-            var this_2 = this;
+            var this_3 = this;
             for (var i = 0; i < this.orderedLayers.length; i++) {
-                _loop_2(i);
+                _loop_4(i);
             }
             return cnt;
         };
@@ -9939,6 +10070,9 @@
          * @param  {HySENode} node
          */
         HySELayout.prototype.maintainLayers = function (node) {
+            if (node.layerIdx === -1) {
+                return;
+            }
             var nextIdx = node.displacementX > 0 ? node.order + 1 : node.order - 1;
             var next = this.orderedLayers[node.layerIdx][nextIdx];
             if (node.displacementX > 0) {
@@ -9963,7 +10097,7 @@
             var mapperFn = typeof this.layering[0][0] === 'string' ? function (x) { return _this.id2LNode[x]; } : function (x) { return _this.id2LNode[x.id()]; };
             this.orderedLayers = [];
             for (var i = 0; i < this.layering.length; i++) {
-                var currLayer = this.layering[i].map(mapperFn).sort(function (a, b) { return a.rect.x - b.rect.x; });
+                var currLayer = this.layering[i].map(mapperFn).filter(function (x) { return x !== undefined; }).sort(function (a, b) { return a.rect.x - b.rect.x; });
                 for (var j = 0; j < currLayer.length; j++) {
                     currLayer[j].layerIdx = i;
                     currLayer[j].order = j;
@@ -9983,6 +10117,57 @@
             this.orderedLayers[layerIdx][j] = tmp;
             this.orderedLayers[layerIdx][i].order = i;
             this.orderedLayers[layerIdx][j].order = j;
+        };
+        // Checks if nodeA is an ancestor of nodeB.
+        HySELayout.prototype.isAncestor = function (ancestor, node) {
+            if (!ancestor || !node)
+                return false;
+            var curr = node;
+            while (curr) {
+                if (curr.parentId === ancestor.id || (curr.owner && curr.owner.parent === ancestor)) {
+                    return true;
+                }
+                curr = curr.owner ? curr.owner.parent : null;
+            }
+            return false;
+        };
+        // Recursively retrieve all ranks occupied by a node or its children.
+        HySELayout.prototype.getRanks = function (node) {
+            var ranks = new Set();
+            var dfs = function (n) {
+                if (!n.child) {
+                    if (n.rank !== undefined && n.rank !== -1) {
+                        ranks.add(n.rank);
+                    }
+                }
+                else {
+                    n.child.nodes.forEach(dfs);
+                }
+            };
+            dfs(node);
+            return ranks;
+        };
+        // Checks if two nodes share any ranks
+        HySELayout.prototype.shareRank = function (nodeA, nodeB) {
+            var e_1, _a;
+            var ranksA = this.getRanks(nodeA);
+            var ranksB = this.getRanks(nodeB);
+            try {
+                for (var ranksA_1 = __values(ranksA), ranksA_1_1 = ranksA_1.next(); !ranksA_1_1.done; ranksA_1_1 = ranksA_1.next()) {
+                    var r = ranksA_1_1.value;
+                    if (ranksB.has(r)) {
+                        return true;
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (ranksA_1_1 && !ranksA_1_1.done && (_a = ranksA_1.return)) _a.call(ranksA_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return false;
         };
         return HySELayout;
     }(coseBase$1.exports.CoSELayout));
@@ -34496,7 +34681,12 @@
         }
       });
       lodash$1.exports.forEach(g.edges(), function (e) {
-        simplified.setEdge(e, g.edge(e));
+        var sourceLabel = g.node(e.v);
+        var targetLabel = g.node(e.w);
+        var source = (sourceLabel && sourceLabel.borderBottom) ? sourceLabel.borderBottom : e.v;
+        var target = (targetLabel && targetLabel.borderTop) ? targetLabel.borderTop : e.w;
+        var edgeLabel = g.edge(e);
+        simplified.setEdge({ v: source, w: target, name: e.name }, edgeLabel);
       });
       return simplified;
     }
@@ -35920,7 +36110,11 @@
                 var n = gm.getAllNodes()[i];
                 // console.log(counter++);
                 if (!opts.isRelayer) {
-                    // console.log("setting position of "+n.id.id()+" to "+n.rect.x+","+n.rect.y);
+                    var nodeId = n.id instanceof Object ? n.id.id() : n.id;
+                    var cyNode = cy.getElementById(nodeId);
+                    if (cyNode && cyNode.length > 0 && cyNode.isParent()) {
+                        continue;
+                    }
                     if (n.id instanceof Object) {
                         window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
                     }
@@ -36025,7 +36219,7 @@
         for (var i = 0; i < node.children().length; i++) {
             var n = node.children()[i];
             if (nodesVisited.includes(n.id())) {
-                return;
+                continue;
             }
             nodesVisited.push(n.id());
             var points = null;
@@ -36038,6 +36232,33 @@
                 var hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), -1);
                 hyseNode.nodeRepulsion = opts.nodeRepulsion;
                 hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
+                hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length + 1;
+                if (hyseNode.noOfChildren > 1) {
+                    var newGraph = layout.newGraph();
+                    var updatedG = layout.graphManager.add(newGraph, hyseNode);
+                    addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
+                }
+                if (opts.eles.nodes('#' + n.id()).data("parent")) {
+                    hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
+                }
+                if (hyseNode.noOfChildren >= 2) {
+                    hyseNode.noOfChildren -= 1;
+                }
+                var lNode = hyseParent.getChild().add(hyseNode);
+                id2LNode[n.id()] = lNode;
+            }
+            else {
+                var nDagre = g.node(n.id());
+                var w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+                var h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+                var x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
+                var y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+                points = new coseBase$1.exports.layoutBase.PointD(x, y);
+                dimension = new coseBase$1.exports.layoutBase.DimensionD(w, h);
+                var rank = nDagre ? nDagre.rank : -1;
+                var hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), rank);
+                hyseNode.nodeRepulsion = opts.nodeRepulsion;
+                hyseNode.isDirected = 1;
                 hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length + 1;
                 if (hyseNode.noOfChildren > 1) {
                     var newGraph = layout.newGraph();
@@ -36097,13 +36318,29 @@
                 id2LNode[nodes[i].id()] = lNode;
             }
             else {
-                n = g.node(n.id());
-                points = new coseBase$1.exports.layoutBase.PointD(n.x, n.y);
-                dimension = new coseBase$1.exports.layoutBase.DimensionD(n.width, n.height);
-                var hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), n.rank);
+                var nDagre = g.node(n.id());
+                var w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+                var h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+                var x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
+                var y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+                points = new coseBase$1.exports.layoutBase.PointD(x, y);
+                dimension = new coseBase$1.exports.layoutBase.DimensionD(w, h);
+                var rank = nDagre ? nDagre.rank : -1;
+                var hyseNode = new HySENode(layout.graphManager, points, dimension, null, nodes[i].id(), rank);
                 hyseNode.nodeRepulsion = opts.nodeRepulsion;
                 hyseNode.isDirected = 1;
-                //hyseNode.parentId = opts.eles.nodes('#' + nodes[i]).parent().id();
+                hyseNode.noOfChildren = opts.eles.nodes('#' + nodes[i].id()).children().length + 1;
+                if (hyseNode.noOfChildren > 1) {
+                    var newGraph = layout.newGraph();
+                    var updatedG = layout.graphManager.add(newGraph, hyseNode);
+                    addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
+                }
+                if (opts.eles.nodes('#' + nodes[i].id()).data("parent")) {
+                    hyseNode.parentId = opts.eles.nodes('#' + nodes[i].id()).data("parent");
+                }
+                if (hyseNode.noOfChildren >= 2) {
+                    hyseNode.noOfChildren -= 1;
+                }
                 var lNode = parent.add(hyseNode);
                 id2LNode[nodes[i].id()] = lNode;
             }
@@ -36554,22 +36791,39 @@
             //let nodes = eles.nodes();
             var maxHeight = 0;
             var maxWidth = 0;
+            var directedCompoundExists = false;
             for (var i = 0; i < nodes.length; i++) {
                 var node = nodes[i];
                 var nbb = node.layoutDimensions(options);
-                g.setNode(node.id(), {
-                    width: nbb.w,
-                    height: nbb.h,
+                var nodeConfig = {
                     name: node.id(),
                     isDirected: node.data("isDirected"),
-                });
-                if (nbb.h > maxHeight) {
-                    maxHeight = nbb.h;
+                };
+                if (!node.isParent()) {
+                    nodeConfig.width = nbb.w;
+                    nodeConfig.height = nbb.h;
+                    if (nbb.h > maxHeight) {
+                        maxHeight = nbb.h;
+                    }
+                    if (nbb.w > maxWidth) {
+                        maxWidth = nbb.w;
+                    }
                 }
-                if (nbb.w > maxWidth) {
-                    maxWidth = nbb.w;
+                if (node.isParent() && node.data("isDirected") == 1) {
+                    directedCompoundExists = true;
                 }
-                // console.log( g.node(node.id()) );
+                g.setNode(node.id(), nodeConfig);
+            }
+            if (directedCompoundExists) {
+                for (var i = 0; i < nodes.length; i++) {
+                    var node = nodes[i];
+                    if (node.isChild()) {
+                        var parent_1 = node.parent();
+                        if (parent_1 && parent_1.length > 0 && parent_1.data("isDirected") == 1) {
+                            g.setParent(node.id(), parent_1.id());
+                        }
+                    }
+                }
             }
             options.rankGap += maxHeight;
             if (options.orderGap < 20 + maxWidth) {

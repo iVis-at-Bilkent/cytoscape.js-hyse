@@ -49,7 +49,12 @@ export function asNonCompoundGraph(g) {
     }
   });
   _.forEach(g.edges(), function (e) {
-    simplified.setEdge(e, g.edge(e));
+    var sourceLabel = g.node(e.v);
+    var targetLabel = g.node(e.w);
+    var source = (sourceLabel && sourceLabel.borderBottom) ? sourceLabel.borderBottom : e.v;
+    var target = (targetLabel && targetLabel.borderTop) ? targetLabel.borderTop : e.w;
+    var edgeLabel = g.edge(e);
+    simplified.setEdge({ v: source, w: target, name: e.name }, edgeLabel);
   });
   return simplified;
 }
