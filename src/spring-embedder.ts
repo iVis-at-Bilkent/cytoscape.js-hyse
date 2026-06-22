@@ -12,7 +12,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
 
   const nodes = opts.eles.nodes();
   let filteredLayers = filterDummyNodesFromLayers(layering);
-  randomizeOrderInLayers(filteredLayers);
+  randomizeOrderInLayers(filteredLayers, cy);
   const l = new HySELayout(filteredLayers, cy);
   assignInitialPositions(g, filteredLayers, opts);
   l.swapPeriod = opts.swapPeriod;
@@ -347,8 +347,46 @@ function filterDummyNodesFromLayers(layering: any[][]) {
   return l2;
 }
 
-function randomizeOrderInLayers(layering: any[][]) {
+function randomizeOrderInLayers(layering: any[][], cy: any) {
   for (let i = 0; i < layering.length; i++) {
-    layering[i].sort(() => Math.random() - 0.5);
-  }
+    const groups: { [parentId: string]: any[] } = {};
+    const independents: any[] = [];
+
+    for (const nodeId of layering[i]) {
+        const cyNode = cy ? cy.getElementById(nodeId) : null;
+        const isDirected = (cyNode && cyNode.length > 0) ? (cyNode.data("isDirected") == 1) : false;
+        const parentId = (cyNode && cyNode.length > 0) ? cyNode.data("parent") : undefined;
+
+        if (isDirected && parentId) {
+            if (!groups[parentId]) {
+                groups[parentId] = [];
+            }
+            groups[parentId].push(nodeId);
+        } else {
+            independents.push(nodeId);
+        }
+    }
+
+    const allGroupsList: any[][] = [];
+    for (const parentId in groups) {
+        const group = groups[parentId];
+        group.sort(() => Math.random() - 0.5);
+        allGroupsList.push(group);
+    }
+
+    for (const nodeId of independents) {
+        allGroupsList.push([nodeId]);
+    }
+
+    allGroupsList.sort(() => Math.random() - 0.5);
+
+    const result: any[] = [];
+    for (const group of allGroupsList) {
+        for (const nodeId of group) {
+            result.push(nodeId);
+        }
+    }
+
+    layering[i] = result;
+}
 }
