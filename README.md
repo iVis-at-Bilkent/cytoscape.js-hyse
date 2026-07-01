@@ -8,6 +8,10 @@ HySE (**Hy**brid **S**pring **E**mbedder), is a layout algorithm designed for la
 &emsp;
 <kbd>![ezgif com-crop](https://github.com/iVis-at-Bilkent/cytoscape.js-hyse/assets/3874988/1224dc0b-01db-49ce-901f-796a061718c1)</kbd>
 
+Please cite the following when you use this layout:
+
+U. Dogrusoz, H. Islam, and H. Balci, "HySE: a force-directed layout algorithm for directed and mixed graphs," in Computer Graphics Forum, 2026, to appear.
+
 ## Demo
 
 Here is a demo of HySE layout algorithm:
