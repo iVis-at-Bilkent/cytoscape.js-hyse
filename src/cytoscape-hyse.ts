@@ -71,7 +71,7 @@ export class DagreAndSpringEmbedderLayout {
         }
       }
 
-      if (node.isParent() && node.data("isDirected") == 1) {
+      if (node.isParent() && node.data("isDirected") == 1 && !directedCompoundExists) {
         directedCompoundExists = true;
       }
       g.setNode(node.id(), nodeConfig);
@@ -82,8 +82,9 @@ export class DagreAndSpringEmbedderLayout {
         let node = nodes[i];
         if (node.isChild()) {
           let parent = node.parent();
-          if (parent && parent.length > 0 && parent.data("isDirected") == 1) {
-            g.setParent(node.id(), parent.id());
+          let parentId = parent.id();
+          if (parent && parent.length > 0 && parent.data("isDirected") == 1 && g.hasNode(parentId)) {
+            g.setParent(node.id(), parentId);
           }
         }
       }
@@ -167,9 +168,14 @@ export class DagreAndSpringEmbedderLayout {
         return p;
       }
     };
+
+    let leafNodes = nodes.filter(function (ele) {
+      return !ele.isParent();
+    });
+
     let counter = 0;
     if (options.isForceDirected && !options.isRelayer) {
-      nodes.layoutPositions(this, options, function (ele) {
+      leafNodes.layoutPositions(this, options, function (ele) {
         counter++;
         ele = typeof ele === "object" ? ele : this;
         if(ele != undefined){
@@ -186,9 +192,9 @@ export class DagreAndSpringEmbedderLayout {
         
       });
     } else {
-        //console.log("not force directed");
-        //console.log("not f nodes", nodes);
-      nodes.layoutPositions(this, options, function (ele) {
+      //console.log("not force directed");
+      //console.log("not f nodes", nodes);
+      leafNodes.layoutPositions(this, options, function (ele) {
         counter++;
         ele = typeof ele === "object" ? ele : this;
         let dModel = ele.scratch().dagre;

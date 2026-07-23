@@ -12,7 +12,7 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
 
   const nodes = opts.eles.nodes();
   let filteredLayers = filterDummyNodesFromLayers(layering);
-  randomizeOrderInLayers(filteredLayers, cy);
+  // randomizeOrderInLayers(filteredLayers);
   const l = new HySELayout(filteredLayers, cy);
   assignInitialPositions(g, filteredLayers, opts);
   l.swapPeriod = opts.swapPeriod;
@@ -42,7 +42,6 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
   processNodes(g, gm.addRoot(), l, opts);
   processEdges(g, gm, opts);
 
-
   if(opts.animate != "during"){
     l.runLayout();
     console.log("setting positions");
@@ -51,11 +50,6 @@ export function runSpringEmbedder(g, layering: string[][], opts, cy) {
       const n = gm.getAllNodes()[i];
       // console.log(counter++);
       if (!opts.isRelayer) {
-        const nodeId = n.id instanceof Object ? n.id.id() : n.id;
-        const cyNode = cy.getElementById(nodeId);
-        if (cyNode && cyNode.length > 0 && cyNode.isParent()) {
-          continue;
-        }
         if(n.id instanceof Object){
           window['cy'].nodes('#' + n.id.id()).scratch("force_directed_pos", { x: n.rect.x, y: n.rect.y });
         }
@@ -157,75 +151,76 @@ function assignInitialPositions(g, layering, opts) {
   }
 }
 
-function addChildren(g, parent, layout, opts ,nodesVisited,node,hyseParent) {
+function addChildren(g, parent, layout, opts, nodesVisited, node, hyseParent) {
 
-  for(let i =0;i<node.children().length;i ++){
+  for (let i = 0; i < node.children().length; i++) {
     let n = node.children()[i];
-    if(nodesVisited.includes(n.id())){
+    if (nodesVisited.includes(n.id())) {
       continue;
     }
     nodesVisited.push(n.id());
+
     let points = null;
     let dimension = null;
-    console.log("n", n);
-    if(n.data("isDirected") !=1 ){
+    let hyseNode: HySENode;
+
+    let isDirected = n.data("isDirected") == 1;
+
+    if (!isDirected) {
       points = new layoutBase.PointD(0, 0);
       let nbb = n.layoutDimensions(opts);
       dimension = new layoutBase.DimensionD(nbb.w, nbb.h);
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), -1);
-      hyseNode.nodeRepulsion = opts.nodeRepulsion;
-      hyseNode.isDirected = opts.eles.nodes('#' + n.id()).data('isDirected');
-      hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length+1;
-      
-      if (hyseNode.noOfChildren > 1) {
-        let newGraph = layout.newGraph();
-        let updatedG = layout.graphManager.add(newGraph, hyseNode);
-        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
-      }
-      if (opts.eles.nodes('#' + n.id()).data("parent")) {
-        hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
-      }
-      if (hyseNode.noOfChildren >= 2) {
-        hyseNode.noOfChildren -= 1;
-      }
-      const lNode = hyseParent.getChild().add(hyseNode);
-      id2LNode[n.id()] = lNode;
+
+      hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), -1);
+      hyseNode.isDirected = 0;
     } else {
       const nDagre = g.node(n.id());
-      let w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
-      let h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      let w = 0;
+      let h = 0;
       let x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
       let y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+
+      if (n.isParent()) {
+        let nbb = n.layoutDimensions(opts);
+        w = nbb.w;
+        h = nbb.h;
+      } else {
+        w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+        h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      }
 
       points = new layoutBase.PointD(x, y);
       dimension = new layoutBase.DimensionD(w, h);
       const rank = nDagre ? nDagre.rank : -1;
-      const hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), rank);
-      hyseNode.nodeRepulsion = opts.nodeRepulsion;
+
+      hyseNode = new HySENode(layout.graphManager, points, dimension, null, n.id(), rank);
       hyseNode.isDirected = 1;
-      hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length + 1;
-
-
-      if(hyseNode.noOfChildren > 1){
-        let newGraph = layout.newGraph();
-        let updatedG = layout.graphManager.add(newGraph, hyseNode);
-        addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
-      }
-      if(opts.eles.nodes('#' + n.id()).data("parent")){
-        hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
-      }
-      if (hyseNode.noOfChildren >= 2) {
-        hyseNode.noOfChildren -= 1;
-      }
-      const lNode = hyseParent.getChild().add(hyseNode);
-      id2LNode[n.id()] = lNode;
     }
+
+    hyseNode.nodeRepulsion = opts.nodeRepulsion;
+    hyseNode.noOfChildren = opts.eles.nodes('#' + n.id()).children().length + 1;
+
+    if (hyseNode.noOfChildren > 1) {
+      let newGraph = layout.newGraph();
+      let updatedG = layout.graphManager.add(newGraph, hyseNode);
+      addChildren(g, updatedG, layout, opts, nodesVisited, n, hyseNode);
+    }
+
+    if (opts.eles.nodes('#' + n.id()).data("parent")) {
+      hyseNode.parentId = opts.eles.nodes('#' + n.id()).data("parent");
+    }
+    if (hyseNode.noOfChildren >= 2) {
+      hyseNode.noOfChildren -= 1;
+    }
+
+    const lNode = hyseParent.getChild().add(hyseNode);
+    id2LNode[n.id()] = lNode;
   }
 }
 
 
 function processNodes(g, parent, layout, opts) {
-  const nodes = opts.eles.nodes().filter(x => !x.id().startsWith('_d'));
+  const nodes = opts.eles.nodes().filter(x => !x.id().startsWith('_d') && !x.id().startsWith('_b'));
   // node ların sol üst köşesinin koordinatları veriliyor
   let nodesVisited:string[] = [];
   for (let i = 0; i < nodes.length; i++) {
@@ -268,10 +263,19 @@ function processNodes(g, parent, layout, opts) {
     }
     else{
       const nDagre = g.node(n.id());
-      let w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
-      let h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      let w = 0;
+      let h = 0;
       let x = (nDagre && nDagre.x !== undefined) ? nDagre.x : 0;
       let y = (nDagre && nDagre.y !== undefined) ? nDagre.y : 0;
+
+      if (nodes[i].isParent()) {
+        let nbb = nodes[i].layoutDimensions(opts);
+        w = nbb.w;
+        h = nbb.h;
+      } else {
+        w = (nDagre && nDagre.width !== undefined) ? nDagre.width : 0;
+        h = (nDagre && nDagre.height !== undefined) ? nDagre.height : 0;
+      }
 
       points = new layoutBase.PointD(x, y);
       dimension = new layoutBase.DimensionD(w, h);
@@ -311,10 +315,10 @@ function processEdges(g, gm, opts) {
     const v = edges[i].source().id();
     const w = edges[i].target().id();
     
-    if (!v.startsWith('_d')) {
+    if (!v.startsWith('_d') && !v.startsWith('_b')) {
       name2vw[edges[i].id()].v = v;
     }
-    if (!w.startsWith('_d')) {
+    if (!w.startsWith('_d') && !w.startsWith('_b')) {
       name2vw[edges[i].id()].w = w;
     }
   }
@@ -335,7 +339,7 @@ function filterDummyNodesFromLayers(layering: any[][]) {
   for (let i = 0; i < layering.length; i++) {
     const currLayer: string[] = [];
     for (let j = 0; j < layering[i].length; j++) {
-      if (layering[i][j].startsWith('_d')) {
+      if (layering[i][j].startsWith('_d') || layering[i][j].startsWith('_b')) {
         continue;
       }
       currLayer.push(layering[i][j]);
@@ -347,46 +351,8 @@ function filterDummyNodesFromLayers(layering: any[][]) {
   return l2;
 }
 
-function randomizeOrderInLayers(layering: any[][], cy: any) {
+function randomizeOrderInLayers(layering: any[][]) {
   for (let i = 0; i < layering.length; i++) {
-    const groups: { [parentId: string]: any[] } = {};
-    const independents: any[] = [];
-
-    for (const nodeId of layering[i]) {
-        const cyNode = cy ? cy.getElementById(nodeId) : null;
-        const isDirected = (cyNode && cyNode.length > 0) ? (cyNode.data("isDirected") == 1) : false;
-        const parentId = (cyNode && cyNode.length > 0) ? cyNode.data("parent") : undefined;
-
-        if (isDirected && parentId) {
-            if (!groups[parentId]) {
-                groups[parentId] = [];
-            }
-            groups[parentId].push(nodeId);
-        } else {
-            independents.push(nodeId);
-        }
-    }
-
-    const allGroupsList: any[][] = [];
-    for (const parentId in groups) {
-        const group = groups[parentId];
-        group.sort(() => Math.random() - 0.5);
-        allGroupsList.push(group);
-    }
-
-    for (const nodeId of independents) {
-        allGroupsList.push([nodeId]);
-    }
-
-    allGroupsList.sort(() => Math.random() - 0.5);
-
-    const result: any[] = [];
-    for (const group of allGroupsList) {
-        for (const nodeId of group) {
-            result.push(nodeId);
-        }
-    }
-
-    layering[i] = result;
-}
+    layering[i].sort(() => Math.random() - 0.5);
+  }
 }

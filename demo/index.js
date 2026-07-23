@@ -346,48 +346,41 @@ function addNodesToHeirarchy(){
     rerun();
 }
 
-// Moves a selected directed simple node into a selected directed compound node and reruns the layout
-function addToDirectedCompound() {
-  var selectedNodes = cy.nodes(':selected');
+// Moves a selected directed simple node into a selected directed compound node
+function addNodeToCompound() {
+  var selectedNodes = cy.$(':selected');
   if (selectedNodes.length !== 2) {
-      alert("Error: Please select exactly two nodes (one simple node and one compound node) in the directed subgraph.");
-      return;
+    alert("Please select exactly one child node and one parent compound node.");
+    return;
   }
 
-  var node1 = selectedNodes[0];
-  var node2 = selectedNodes[1];
+  var parentNode = selectedNodes.filter(function (node) {
+    return node.data('isParent') === true || node.data('isParent') === "true" || node.isParent();
+  })[0];
 
-  function isCompound(node) {
-      return node.isParent() || node.data('isParent') === true || node.data('isParent') === 1;
-  }
-
-  var simpleNode = null;
-  var compoundNode = null;
-
-  if (!isCompound(node1) && isCompound(node2)) {
-      simpleNode = node1;
-      compoundNode = node2;
-  } else if (isCompound(node1) && !isCompound(node2)) {
-      simpleNode = node2;
-      compoundNode = node1;
+  var childNode;
+  if (parentNode) {
+    childNode = selectedNodes.not(parentNode)[0];
   } else {
-      alert("Error: Selection must contain exactly one simple node and one compound node.");
-      return;
+    parentNode = selectedNodes[1];
+    childNode = selectedNodes[0];
   }
 
-  if (simpleNode.data('isDirected') * 1 !== 1) {
-      alert("Error: The selected simple node is not part of the directed subgraph.");
-      return;
+  if (childNode.isParent()) {
+    alert("The chosen child node is already a compound node. Nesting compounds inside compounds in this action is not supported.");
+    return;
   }
 
-  if (compoundNode.data('isDirected') * 1 !== 1) {
-      alert("Error: The selected compound node is not part of the directed subgraph.");
-      return;
-  }
+  childNode.move({ parent: parentNode.id() });
 
-  simpleNode.move({ parent: compoundNode.id() });
+  window.cy = cy;
 
-  rerun();
+  childNode.data('isDirected', 1);
+  childNode.data('isParent', false);
+  parentNode.data('isDirected', 1);
+  parentNode.data('isParent', true);
+
+  // rerun();
 }
 
 function reset(){

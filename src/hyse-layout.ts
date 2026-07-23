@@ -135,6 +135,8 @@ export class HySELayout extends CoSELayout {
         let groups = {};
         let seeds = {};
         let visited = new Set();
+        const compoundBoundsCache: { [id: string]: { x: number, y: number } } = {};
+
         let dfs = function (node:HySENode,group) {
           if (visited.has(node)) {
             return;
@@ -183,12 +185,25 @@ export class HySELayout extends CoSELayout {
           return [];
         };
         
+        const getLeafNodes = function (node: HySENode): HySENode[] {
+          const leaves: HySENode[] = [];
+          const dfs = (n: HySENode) => {
+            if (!n.child) {
+              leaves.push(n);
+            } else {
+              n.child.nodes.forEach(dfs);
+            }
+          };
+          dfs(node);
+          return leaves;
+        };
         
         //get all blue nodes i-e non-heirachical nodes
         //excluding the ones with no children
         let nodesToVisit = this.graphManager.allNodes.filter(function (ele) {
           return ele.isDirected != 1;
         });
+
         //run dfs on each node
         for (let i = 0; i < nodesToVisit.length; i++) {
           let node = nodesToVisit[i];
@@ -202,33 +217,20 @@ export class HySELayout extends CoSELayout {
         let mostBottomNode = this.graphManager.allNodes[0];
         
         // get the bounds of hierarchical nodes
-        let directedLeafNodes = this.graphManager.allNodes.filter(x => {
-          if (x.isDirected != 1) return false;
-          let cyNode = this.cy.getElementById(x.id);
-          return !(cyNode && cyNode.length > 0 && cyNode.isParent());
-        }) as HySENode[];
-
-        if (directedLeafNodes.length > 0) {
-          mostLeftNode = directedLeafNodes[0];
-          mostRightNode = directedLeafNodes[0];
-          mostTopNode = directedLeafNodes[0];
-          mostBottomNode = directedLeafNodes[0];
-    
-          directedLeafNodes.forEach(node => {
-            if (node.rect.x < mostLeftNode.rect.x) {
-              mostLeftNode = node;
-            }
-            if (node.rect.x + node.rect.width > mostRightNode.rect.x + mostRightNode.rect.width) {
-              mostRightNode = node;
-            }
-            if (node.rect.y < mostTopNode.rect.y) {
-              mostTopNode = node;
-            }
-            if (node.rect.y + node.rect.height > mostBottomNode.rect.y + mostBottomNode.rect.height) {
-              mostBottomNode = node;
-            }
-          });
-        }
+        this.graphManager.allNodes.filter(x => x.isDirected == 1 && !x.child).forEach(node => {
+          if (mostLeftNode.isDirected != 1 || node.rect.x < mostLeftNode.rect.x) {
+            mostLeftNode = node;
+          }
+          if (mostRightNode.isDirected != 1 || node.rect.x + node.rect.width > mostRightNode.rect.x + mostRightNode.rect.width) {
+            mostRightNode = node;
+          }
+          if (mostTopNode.isDirected != 1 || node.rect.y < mostTopNode.rect.y) {
+            mostTopNode = node;
+          }
+          if (mostBottomNode.isDirected != 1 || node.rect.y + node.rect.height > mostBottomNode.rect.y + mostBottomNode.rect.height) {
+            mostBottomNode = node;
+          }
+        });
 
         //create a compound node for each group
         for (let i = 0; i < Object.keys(groups).length; i++) {
@@ -247,9 +249,36 @@ export class HySELayout extends CoSELayout {
               xCenters.push(mostRightNode.rect.x+mostRightNode.rect.width);
             }
             else{
-              seedNodes.forEach(seed=>{
-                xCenters.push(seed.rect.x);
-                yCenters.push(seed.rect.y);
+              seedNodes.forEach(seed => {
+                if (seed.child) {
+                  const seedId = seed.id instanceof Object ? seed.id.id() : seed.id;
+      
+                  if (compoundBoundsCache[seedId]) {
+                    // Cache hit: Use pre-calculated values
+                    xCenters.push(compoundBoundsCache[seedId].x);
+                    yCenters.push(compoundBoundsCache[seedId].y);
+                  } else {
+                    // Cache miss: Calculate bounds from leaf children
+                    const leaves = getLeafNodes(seed);
+                    if (leaves.length > 0) {
+                      const minX = Math.min(...leaves.map(n => n.rect.x));
+                      const minY = Math.min(...leaves.map(n => n.rect.y));
+      
+                      // Save to cache
+                      compoundBoundsCache[seedId] = { x: minX, y: minY };
+      
+                      xCenters.push(minX);
+                      yCenters.push(minY);
+                    } else {
+                      xCenters.push(seed.rect.x);
+                      yCenters.push(seed.rect.y);
+                    }
+                  }
+                } else {
+                  // Seed is a leaf node
+                  xCenters.push(seed.rect.x);
+                  yCenters.push(seed.rect.y);
+                }
               });
             }
             
@@ -685,7 +714,6 @@ export class HySELayout extends CoSELayout {
         super.calcSpringForces();
         if(this.useFRGridVariant){
           this.gridRepulsion();
-          this.calcRepulsionForDirectedCompounds();
         }
         else{
           this.calcRepulsionForces();
@@ -781,10 +809,6 @@ export class HySELayout extends CoSELayout {
       };
 
       calcRepulsionForceForGridNodes  (nodeA, nodeB) {
-        if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) { 
-          return; 
-        }
-
         var rectA = nodeA.getRect();
         var rectB = nodeB.getRect();
         var overlapAmount = new Array(2);
@@ -907,48 +931,21 @@ export class HySELayout extends CoSELayout {
 
       }
 
-      repulsionTopLevel(){
-        for(let i = 0; i<this.dummyCompoundNodes.length; i++){
+      repulsionTopLevel() {
+        for (let i = 0; i < this.dummyCompoundNodes.length; i++) {
           this.repulsionForUndirected(this.dummyCompoundNodes[i].child);
-          for(let j = 0; j<this.dummyCompoundNodes.length; j++){
-            if(i == j){
+          for (let j = 0; j < this.dummyCompoundNodes.length; j++) {
+            if (i == j) {
               continue;
             }
-            this.fdCalculateRepulsionForces(this.dummyCompoundNodes[i],this.dummyCompoundNodes[j]);
+            this.fdCalculateRepulsionForces(this.dummyCompoundNodes[i], this.dummyCompoundNodes[j]);
           }
         }
-        for(let i = 0; i<this.dummyCompoundNodes.length; i++){
-          for(let j= 0; j<this.directedNodes.length; j++){
-            this.fdCalculateRepulsionForces(this.directedNodes[j],this.dummyCompoundNodes[i]);
-          }
-        }
-        this.calcRepulsionForDirectedCompounds();
-      }
-
-      calcRepulsionForDirectedCompounds(isRootGraph = false) {
-        const directedCompounds = this.directedNodes.filter(n => n.child);
-        for (let i = 0; i < directedCompounds.length; i++) {
-          const comp = directedCompounds[i];
-          const oldCompRep = comp.nodeRepulsion; 
-          if (isRootGraph) { 
-            comp.nodeRepulsion = this.nodeRepulsion;
-          }
-          for (let j = 0; j < this.directedNodes.length; j++) {
-            const other = this.directedNodes[j];
-            if (comp === other) continue;
-            if (this.shareRank(comp, other)) {
-              const oldOtherRep = other.nodeRepulsion; 
-              if (isRootGraph) { 
-                other.nodeRepulsion = this.nodeRepulsion;
-              } 
-              this.calcRepulsionForce(comp, other);
-              if (isRootGraph) { 
-                other.nodeRepulsion = oldOtherRep; 
-              }
-            }
-          }
-          if (isRootGraph) { 
-            comp.nodeRepulsion = oldCompRep;
+    
+        const topLevelDirectedNodes = this.directedNodes.filter(node => !node.parentId);
+        for (let i = 0; i < this.dummyCompoundNodes.length; i++) {
+          for (let j = 0; j < topLevelDirectedNodes.length; j++) {
+            this.fdCalculateRepulsionForces(topLevelDirectedNodes[j], this.dummyCompoundNodes[i]);
           }
         }
       }
@@ -1059,8 +1056,6 @@ export class HySELayout extends CoSELayout {
     
       // overrides layout-base.js method
       calcRepulsionForce(nodeA, nodeB) {
-        if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) { return; }
-
         let rectA = nodeA.getRect();
         let rectB = nodeB.getRect();
         let repulsionForceX;
@@ -1068,8 +1063,12 @@ export class HySELayout extends CoSELayout {
         const c2 = rectB.getCenterX();
         const distX = Math.abs(c1 - c2) - (rectA.width / 2 + rectB.width / 2);
     
+        const noOfChildrenA = nodeA.noOfChildren || 1;
+        const noOfChildrenB = nodeB.noOfChildren || 1;
+    
         if (distX <= 0) { // two nodes overlap
-          repulsionForceX = 2 * distX;
+          const childrenConstant = (noOfChildrenA * noOfChildrenB) / (noOfChildrenA + noOfChildrenB);
+          repulsionForceX = childrenConstant * 2 * distX;
         } else { // no overlap
           let distanceX = -distX;
           if (this.uniformLeafNodeSizes) { // simply base repulsion on distance of node centers
@@ -1084,31 +1083,28 @@ export class HySELayout extends CoSELayout {
             distanceX = layoutBase.IMath.sign(distanceX) * layoutBase.FDLayoutConstants.MIN_REPULSION_DIST;
           }
     
-          // Here we use half of the nodes' repulsion values for backward compatibility
-          repulsionForceX = -(nodeA.nodeRepulsion/2 + nodeB.nodeRepulsion/2) / (distanceX * distanceX);
+          // Here we use half of the nodes' repulsion values for backward compatibility and scale by child counts
+          repulsionForceX = -(nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * noOfChildrenA * noOfChildrenB / (distanceX * distanceX);
         }
         if (c1 < c2) {
           repulsionForceX = -repulsionForceX;
         }
-
-        if(nodeA.isDirected == 1 && nodeB.isDirected == 1){
-        // Apply forces on the two nodes
-        nodeA.repulsionForceX -= repulsionForceX;
-        nodeB.repulsionForceX += repulsionForceX;
-        }
-        else if(nodeA.isDirected == 1 && nodeB.isDirected != 1){
+    
+        if (nodeA.isDirected == 1 && nodeB.isDirected == 1) {
+          // Apply forces on the two nodes
+          nodeA.repulsionForceX -= repulsionForceX;
           nodeB.repulsionForceX += repulsionForceX;
         }
-        else if(nodeA.isDirected != 1 && nodeB.isDirected == 1){
+        else if (nodeA.isDirected == 1 && nodeB.isDirected != 1) {
+          nodeB.repulsionForceX += repulsionForceX;
+        }
+        else if (nodeA.isDirected != 1 && nodeB.isDirected == 1) {
           nodeA.repulsionForceX -= repulsionForceX;
         }
-
       }
 
       
       fdCalculateRepulsionForces(nodeA, nodeB, childConst = true) {
-        if (this.isAncestor(nodeA, nodeB) || this.isAncestor(nodeB, nodeA)) { return; }
-
         var rectA = nodeA.getRect();
         var rectB = nodeB.getRect();
         var overlapAmount = new Array(2);
@@ -1285,148 +1281,109 @@ export class HySELayout extends CoSELayout {
           highIdx--;
         }
       }
-
-      getNodesInColumn(colId: string): HySENode[] {
-        const nodes = this.graphManager.allNodes as HySENode[];
-        return nodes.filter(n => {
-          if (n.isDirected !== 1) return false;
-          const parentId = n.parentId;
-          return (parentId === colId) || (!parentId && n.id === colId);
-        });
-      }
-
-      getColumnForceX(colId: string): number {
-        const colNodes = this.getNodesInColumn(colId);
-        let totalForce = 0;
-        for (let i = 0; i < colNodes.length; i++) {
-          const id = colNodes[i].id;
-          if (this.id2TotalForceX[id] !== undefined) {
-            totalForce += this.id2TotalForceX[id];
-          }
-        }
-        return totalForce;
-      }
     
       /** swap adjacent nodes to reduce crossings if there is a strong force
        */
       swapAdjacentsIfNeed() {
         const layers = this.orderedLayers;
-        const pairs: { type: string, pairId: string, swapForce: number, layerId: number, n1?: string, n2?: string, order1?: number, order2?: number, col1?: string, col2?: string }[] = [];
+        const pairs: { pairId: string, swapForce: number, layerId: number, n1: string, n2: string, order1: number, order2: number, connectedEdgeCount: number }[] = [];
+        const processedPairs = new Set<string>();
+    
         for (let i = 0; i < layers.length; i++) {
+          const layerId = i;
           for (let j = 0; j < layers[i].length - 1; j++) {
-            const node1 = layers[i][j];
-            const node2 = layers[i][j + 1];
+            let n1 = layers[i][j];
+            let n2 = layers[i][j + 1];
     
-            const col1 = node1.parentId ? node1.parentId : node1.id;
-            const col2 = node2.parentId ? node2.parentId : node2.id;
+            if (n1.parentId != n2.parentId) {
+              const siblings = this.findSiblingAncestors(n1, n2);
+              if (siblings) {
+                n1 = siblings[0];
+                n2 = siblings[1];
+              }
+            }
     
-            if (col1 === col2) {
-              const n1 = node1.id;
-              const n2 = node2.id;
-              const pairId = [n1, n2].sort().join('|');
-              if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
-                continue;
-              }
-              const swapForce = Math.abs(this.id2TotalForceX[n1] - this.id2TotalForceX[n2]);
-              if (swapForce > this.swapForceLimit) {
-                pairs.push({ type: 'local', pairId, swapForce, layerId: i, n1, n2, order1: j, order2: j + 1 });
-              }
-            } else {
-              const pairId = [col1, col2].sort().join('|');
-              if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
-                continue;
-              }
-              const force1 = this.getColumnForceX(col1);
-              const force2 = this.getColumnForceX(col2);
-              const swapForce = force1 - force2;
-              if (swapForce > this.swapForceLimit) {
-                pairs.push({ type: 'column', pairId, swapForce: Math.abs(swapForce), layerId: i, col1, col2 });
-              }
+            const pairId = [n1.id, n2.id].sort().join('|');
+            if (processedPairs.has(pairId)) continue;
+            processedPairs.add(pairId);
+    
+            // check if swapped too recently
+            if (this.swappedPairs[pairId] && (this.totalIterations - this.swappedPairs[pairId]) < this.minPairSwapPeriod) {
+              continue;
+            }
+            const connectedEdgeCount = n1.edges.length + n2.edges.length;
+            const swapForce = Math.abs(this.id2TotalForceX[n1.id] - this.id2TotalForceX[n2.id]);
+            if (swapForce > this.swapForceLimit) {
+              pairs.push({ pairId, swapForce, layerId, n1: n1.id, n2: n2.id, order1: j, order2: j + 1, connectedEdgeCount })
             }
           }
         }
-        if(pairs.length > 0){
+        if (pairs.length > 0) {
           this.forceUpdateGrid = true;
         }
-        pairs.sort((a, b) => b.swapForce - a.swapForce); // start swapping from the most willingly
-        
-        const connectedSwap: Record<string, boolean> = {};
-        
-
+        pairs.sort((a, b) => { return b.swapForce - a.swapForce; }); // start swapping from the most willingly
+    
+        const connectedSwap = {};
+    
         for (let i = 0; i < pairs.length; i++) {
           const p = pairs[i];
-          if (p.type === 'local') {
-            const n1 = p.n1!;
-            const n2 = p.n2!;
-            const order1 = p.order1!;
-            const order2 = p.order2!;
-    
-            if (connectedSwap[n1] || connectedSwap[n2]) {
-              continue;
-            }
-            let xDistance = Math.abs(this.id2LNode[n1].getRect().getCenterX() - this.id2LNode[n2].getRect().getCenterX());
-            this.totalDisplacement += xDistance;
-            this.id2LNode[n1].swapPositionWith(this.id2LNode[n2]);
-            this.swapOnOrderedLayers(p.layerId, order1, order2);
-            this.swappedPairs[p.pairId] = this.totalIterations;
-            this.highlightPair(p.pairId, this.colorSwappedPair);
-    
-            const e1 = this.id2LNode[n1].edges;
-            const e2 = this.id2LNode[n2].edges;
-            for (let idx = 0; idx < e1.length; idx++) {
-              connectedSwap[e1[idx].source.id] = true;
-              connectedSwap[e1[idx].target.id] = true;
-            }
-            for (let idx = 0; idx < e2.length; idx++) {
-              connectedSwap[e2[idx].source.id] = true;
-              connectedSwap[e2[idx].target.id] = true;
-            }
-          } else {
-            const col1 = p.col1!;
-            const col2 = p.col2!;
-            if (connectedSwap[col1] || connectedSwap[col2]) {
-              continue;
-            }
-    
-            let swappedAny = false;
-            for (let k = 0; k < layers.length; k++) {
-              const nodes1 = layers[k].filter(node => (node.parentId === col1) || (!node.parentId && node.id === col1));
-              const nodes2 = layers[k].filter(node => (node.parentId === col2) || (!node.parentId && node.id === col2));
-    
-              if (nodes1.length > 0 && nodes2.length > 0) {
-                const idxs = [...nodes1, ...nodes2].map(n => layers[k].indexOf(n));
-                const sortedIdxs = idxs.sort((a, b) => a - b);
-    
-                const avgOrder1 = nodes1.reduce((sum, n) => sum + n.order, 0) / nodes1.length;
-                const avgOrder2 = nodes2.reduce((sum, n) => sum + n.order, 0) / nodes2.length;
-    
-                const newSegment = avgOrder1 < avgOrder2 ? [...nodes2, ...nodes1] : [...nodes1, ...nodes2];
-    
-                const center1 = nodes1.reduce((sum, n) => sum + n.getRect().getCenterX(), 0) / nodes1.length;
-                const center2 = nodes2.reduce((sum, n) => sum + n.getRect().getCenterX(), 0) / nodes2.length;
-                const dx = center2 - center1;
-    
-                nodes1.forEach(n => n.moveBy(dx, 0));
-                nodes2.forEach(n => n.moveBy(-dx, 0));
-    
-                for (let m = 0; m < sortedIdxs.length; m++) {
-                  layers[k][sortedIdxs[m]] = newSegment[m];
-                }
-    
-                for (let j = 0; j < layers[k].length; j++) {
-                  layers[k][j].order = j;
-                }
-                this.totalDisplacement += Math.abs(dx);
-                swappedAny = true;
-              }
-            }
-            if (swappedAny) {
-              this.swappedPairs[p.pairId] = this.totalIterations;
-              this.highlightPair(p.pairId, this.colorSwappedPair);
-              connectedSwap[col1] = true;
-              connectedSwap[col2] = true;
-            }
+          const pairId = p.pairId;
+          // don't let swapping the related elements
+          if (connectedSwap[p.n1] || connectedSwap[p.n2]) {
+            continue;
           }
+    
+          this.banned2SwapPairs[pairId] = false;
+          this.highlightPair(pairId, true);
+    
+          const s1 = this.id2LNode[p.n1];
+          const s2 = this.id2LNode[p.n2];
+    
+          // Calculate total displacement metrics (approximate using sibling centers)
+          let xDistance = Math.abs(s1.getRect().getCenterX() - s2.getRect().getCenterX());
+          this.totalDisplacement += xDistance;
+    
+          if (s1.child || s2.child) {
+            // At least one is a compound node: swap all descendants on shared ranks
+            const s1Leaves = this.getLeafDescendants(s1);
+            const s2Leaves = this.getLeafDescendants(s2);
+            const s1Ranks = new Set(s1Leaves.map(n => n.layerIdx));
+            const s2Ranks = new Set(s2Leaves.map(n => n.layerIdx));
+            const sharedRanks = [...s1Ranks].filter(rank => s2Ranks.has(rank));
+    
+            sharedRanks.forEach(rank => {
+              const C1 = s1Leaves.filter(n => n.layerIdx === rank).sort((a, b) => a.order - b.order);
+              const C2 = s2Leaves.filter(n => n.layerIdx === rank).sort((a, b) => a.order - b.order);
+              this.swapNodeBlocks(rank, C1, C2);
+            });
+          } else {
+            // Both are simple nodes: proceed with standard swap
+            s1.swapPositionWith(s2);
+            this.swapOnOrderedLayers(p.layerId, s1.order, s2.order);
+          }
+    
+          this.swappedPairs[pairId] = this.totalIterations;
+          this.banned2SwapPairs[pairId] = true;
+          this.highlightPair(pairId, this.colorSwappedPair);
+    
+          // Lock all descendants of the swapped nodes and their connected neighbors
+          const allS1Leaves = this.getLeafDescendants(s1);
+          const allS2Leaves = this.getLeafDescendants(s2);
+    
+          allS1Leaves.forEach(n => {
+            connectedSwap[n.id] = true;
+            n.edges.forEach(e => {
+              connectedSwap[e.source.id] = true;
+              connectedSwap[e.target.id] = true;
+            });
+          });
+          allS2Leaves.forEach(n => {
+            connectedSwap[n.id] = true;
+            n.edges.forEach(e => {
+              connectedSwap[e.source.id] = true;
+              connectedSwap[e.target.id] = true;
+            });
+          });
         }
       }
     
@@ -1456,15 +1413,29 @@ export class HySELayout extends CoSELayout {
       /** calculate repulsions only among the nodes of the same level
        */
       calcRepulsionForces() {
+        const processedPairs = new Set<string>();
+    
+        const getPairId = (n1: HySENode, n2: HySENode): string => {
+          const id1 = (n1.id as any) instanceof Object ? (n1.id as any).id() : n1.id;
+          const id2 = (n2.id as any) instanceof Object ? (n2.id as any).id() : n2.id;
+          return [id1, id2].sort().join('|');
+        };
+    
+    
         if (this.totalIterations < this.fullyCalcRep4Ticks * this.maxIterations) {
           for (let i = 0; i < this.orderedLayers.length; i++) {
             const currLayer = this.orderedLayers[i];
             for (let j = 0; j < currLayer.length; j++) {
               for (let k = j + 1; k < currLayer.length; k++) {
-                const n1 = currLayer[j];
-                const n2 = currLayer[k];
-                
-                this.calcRepulsionForce(currLayer[j], currLayer[k]);
+                const siblings = this.findSiblingAncestors(currLayer[j], currLayer[k]);
+                if (siblings) {
+                  const [s1, s2] = siblings;
+                  const pairId = getPairId(s1, s2);
+                  if (!processedPairs.has(pairId)) {
+                    processedPairs.add(pairId);
+                    this.calcRepulsionForce(s1, s2);
+                  }
+                }
               }
             }
           }
@@ -1472,19 +1443,30 @@ export class HySELayout extends CoSELayout {
           for (let i = 0; i < this.orderedLayers.length; i++) {
             const currLayer = this.orderedLayers[i];
             for (let j = 0; j < currLayer.length - 1; j++) {
-                let n1 = currLayer[j];
-                let n2 = currLayer[j + 1];
-                // if (n1.isChild || n2.isChild) {
-                //     continue;
-                // }
-              this.calcRepulsionForce(currLayer[j], currLayer[j + 1]);
+              const siblings = this.findSiblingAncestors(currLayer[j], currLayer[j + 1]);
+              if (siblings) {
+                const [s1, s2] = siblings;
+                const pairId = getPairId(s1, s2);
+                if (!processedPairs.has(pairId)) {
+                  processedPairs.add(pairId);
+                  this.calcRepulsionForce(s1, s2);
+                }
+              }
               for (let skip = 2; skip <= this.nodeRepulsionCalculationWidth; skip++) {
                 if (j < currLayer.length - skip) {
-                    let n3 = currLayer[j + skip];
-                    if (n3.isChild) {
-                        continue;
+                  let n3 = currLayer[j + skip];
+                  if (n3.isChild) {
+                    continue;
+                  }
+                  const skipSiblings = this.findSiblingAncestors(currLayer[j], n3);
+                  if (skipSiblings) {
+                    const [s1, s2] = skipSiblings;
+                    const pairId = getPairId(s1, s2);
+                    if (!processedPairs.has(pairId)) {
+                      processedPairs.add(pairId);
+                      this.calcRepulsionForce(s1, s2);
                     }
-                  this.calcRepulsionForce(currLayer[j], currLayer[j + skip]);
+                  }
                 }
               }
             }
@@ -1494,48 +1476,81 @@ export class HySELayout extends CoSELayout {
 
       calcRepulsionForcesInRootGraph() {
         this.graphManager.rootGraph.nodes.forEach(node => {
-          node.nodeRepulsion = this.nodeRepulsion/300;
+          node.nodeRepulsion = this.nodeRepulsion / 300;
         });
-
+    
+        const processedPairs = new Set<string>();
+        const processedTopLevelNodes = new Set<string>();
+    
+        const getPairId = (n1: HySENode, n2: HySENode): string => {
+          return [n1.id, n2.id].sort().join('|');
+        };
+    
         for (let i = 0; i < this.orderedLayers.length; i++) {
           const currLayer = this.orderedLayers[i];
           for (let j = 0; j < currLayer.length; j++) {
             for (let k = j + 1; k < currLayer.length; k++) {
-              currLayer[j].nodeRepulsion = this.nodeRepulsion;
-              currLayer[k].nodeRepulsion = this.nodeRepulsion;
-              this.calcRepulsionForce(currLayer[j], currLayer[k]);
+              // Enforce sibling-only repulsion
+              const siblings = this.findSiblingAncestors(currLayer[j], currLayer[k]);
+              if (siblings) {
+                const [s1, s2] = siblings;
+                const pairId = getPairId(s1, s2);
+                if (!processedPairs.has(pairId)) {
+                  processedPairs.add(pairId);
+                  s1.nodeRepulsion = this.nodeRepulsion;
+                  s2.nodeRepulsion = this.nodeRepulsion;
+                  this.calcRepulsionForce(s1, s2);
+                }
+              }
             }
+    
             let n1 = currLayer[j];
-            n1.nodeRepulsion = this.nodeRepulsion/300;
-            for(let a = 0;a<this.topCompoundNodes.length;a++){
-              let n2 = this.topCompoundNodes[a];
-              this.fdCalculateRepulsionForces(n1, n2);
+    
+            // Find the top-level ancestor (leaf or compound)
+            let topAncestor = n1;
+            while (topAncestor.owner && topAncestor.owner.parent && topAncestor.owner.parent.id) {
+              topAncestor = topAncestor.owner.parent;
             }
-            for(let a = 0;a<this.bottomCompoundNodes.length;a++){
-              let n2 = this.bottomCompoundNodes[a];
-              this.fdCalculateRepulsionForces(n1, n2);
-            }
-            for(let a = 0;a<this.leftCompoundNodes.length;a++){
-              let n2 = this.leftCompoundNodes[a];
-              this.fdCalculateRepulsionForces(n1, n2);
-            }
-            for(let a = 0;a<this.rightCompoundNodes.length;a++){
-              let n2 = this.rightCompoundNodes[a];
-              this.fdCalculateRepulsionForces(n1, n2);
+    
+            // Only calculate repulsion against dummy compounds once per top-level ancestor
+            if (!processedTopLevelNodes.has(topAncestor.id)) {
+              processedTopLevelNodes.add(topAncestor.id);
+    
+              topAncestor.nodeRepulsion = this.nodeRepulsion / 300;
+    
+              for (let a = 0; a < this.topCompoundNodes.length; a++) {
+                let n2 = this.topCompoundNodes[a];
+                this.fdCalculateRepulsionForces(topAncestor, n2);
+              }
+              for (let a = 0; a < this.bottomCompoundNodes.length; a++) {
+                let n2 = this.bottomCompoundNodes[a];
+                this.fdCalculateRepulsionForces(topAncestor, n2);
+              }
+              for (let a = 0; a < this.leftCompoundNodes.length; a++) {
+                let n2 = this.leftCompoundNodes[a];
+                this.fdCalculateRepulsionForces(topAncestor, n2);
+              }
+              for (let a = 0; a < this.rightCompoundNodes.length; a++) {
+                let n2 = this.rightCompoundNodes[a];
+                this.fdCalculateRepulsionForces(topAncestor, n2);
+              }
             }
           }
         }
-        this.calcRepulsionForDirectedCompounds(true);
       }
 
 
     
       moveNodes() {
         const nodes = this.graphManager.allNodes as HySENode[];
+    
         for (let i = 0; i < nodes.length; i++) {
           nodes[i].calculateDisplacement();
+        }
+    
+        for (let i = 0; i < nodes.length; i++) {
           nodes[i].move();
-          if(nodes[i].isDirected == 1){
+          if (nodes[i].isDirected == 1 && nodes[i].layerIdx != -1) {
             this.maintainLayers(nodes[i]);
           }
           nodes[i].resetForcesAndDisplacement();
@@ -1546,6 +1561,7 @@ export class HySELayout extends CoSELayout {
       expandNodes() {
         const t1 = new Date().getTime();
         const nodes = this.graphManager.allNodes.filter(x=>x.isDirected == 1) as HySENode[];
+
         let ranks:number[] = [];
         let rankElements = {};
         let orders:number[] = [];
@@ -1686,8 +1702,6 @@ export class HySELayout extends CoSELayout {
        * @param  {HySENode} node
        */
       private maintainLayers(node: HySENode) {
-        if (node.layerIdx === -1) { return; }
-
         let nextIdx = node.displacementX > 0 ? node.order + 1 : node.order - 1;
         let next = this.orderedLayers[node.layerIdx][nextIdx];
         if (node.displacementX > 0) {
@@ -1711,7 +1725,7 @@ export class HySELayout extends CoSELayout {
         const mapperFn = typeof this.layering[0][0] === 'string' ? x => this.id2LNode[x] : x => this.id2LNode[x.id()] ;
         this.orderedLayers = [];
         for (let i = 0; i < this.layering.length; i++) {
-          const currLayer = this.layering[i].map(mapperFn).filter(x => x !== undefined).sort((a, b) => a.rect.x - b.rect.x);
+          const currLayer = this.layering[i].map(mapperFn).sort((a, b) => a.rect.x - b.rect.x);
           for (let j = 0; j < currLayer.length; j++) {
             currLayer[j].layerIdx = i;
             currLayer[j].order = j;
@@ -1735,45 +1749,94 @@ export class HySELayout extends CoSELayout {
         this.orderedLayers[layerIdx][j].order = j;
       }
 
-      // Checks if nodeA is an ancestor of nodeB.
-      isAncestor(ancestor: HySENode, node: HySENode): boolean {
-        if (!ancestor || !node) return false;
-        let curr = node;
-        while (curr) {
-          if (curr.parentId === ancestor.id || (curr.owner && curr.owner.parent === ancestor)) {
-            return true;
-          }
-          curr = curr.owner ? curr.owner.parent : null;
+      /** Identify the highest ancestors of two nodes that are sibling nodes (share the same parent graph level)
+      */
+      private findSiblingAncestors(n1: HySENode, n2: HySENode): [HySENode, HySENode] | null {
+        if (n1 === n2) return null;
+
+        const chain1: HySENode[] = [];
+        let curr1: HySENode | null = n1;
+        while (curr1) {
+          chain1.push(curr1);
+          curr1 = curr1.owner ? curr1.owner.parent : null;
         }
-        return false;
+
+        const chain2: HySENode[] = [];
+        let curr2: HySENode | null = n2;
+        while (curr2) {
+          chain2.push(curr2);
+          curr2 = curr2.owner ? curr2.owner.parent : null;
+        }
+
+        let i = chain1.length - 1;
+        let j = chain2.length - 1;
+
+        // Walk backwards from the root parent level to find the point of divergence
+        while (i >= 0 && j >= 0 && chain1[i] === chain2[j]) {
+          i--;
+          j--;
+        }
+
+        if (i >= 0 && j >= 0) {
+          return [chain1[i], chain2[j]];
+        }
+
+        return null;
       }
 
-      // Recursively retrieve all ranks occupied by a node or its children.
-      getRanks(node: HySENode): Set<number> {
-        const ranks = new Set<number>();
-        const dfs = (n: HySENode) => {
+      /** Recursively gets all leaf descendants of a node */
+      private getLeafDescendants(node: HySENode): HySENode[] {
+        const leaves: HySENode[] = [];
+        const recurse = (n: HySENode) => {
           if (!n.child) {
-            if (n.rank !== undefined && n.rank !== -1) {
-              ranks.add(n.rank);
-            }
+            leaves.push(n);
           } else {
-            n.child.nodes.forEach(dfs);
+            n.child.nodes.forEach(recurse);
           }
         };
-        dfs(node);
-        return ranks;
+        recurse(node);
+        return leaves;
       }
 
-      // Checks if two nodes share any ranks
-      shareRank(nodeA: HySENode, nodeB: HySENode): boolean {
-        const ranksA = this.getRanks(nodeA);
-        const ranksB = this.getRanks(nodeB);
-        for (let r of ranksA) {
-          if (ranksB.has(r)) {
-            return true;
-          }
+      /** Swaps two blocks of nodes in orderedLayers and shifts their physical coordinates */
+      private swapNodeBlocks(r: number, C1: HySENode[], C2: HySENode[]) {
+        if (C1.length === 0 || C2.length === 0) return;
+        // Swap in orderedLayers[r]
+        const startIdx = Math.min(...C1.map(node => node.order), ...C2.map(node => node.order));
+        const endIdx = Math.max(...C1.map(node => node.order), ...C2.map(node => node.order));
+        const subSegment = this.orderedLayers[r].slice(startIdx, endIdx + 1);
+        const c1Set = new Set(C1.map(n => n.id));
+        const c2Set = new Set(C2.map(n => n.id));
+        const middle = subSegment.filter(n => !c1Set.has(n.id) && !c2Set.has(n.id));
+        const newSubSegment = [...C2, ...middle, ...C1];
+        this.orderedLayers[r].splice(startIdx, newSubSegment.length, ...newSubSegment);
+        // Update order values for the entire layer
+        for (let idx = 0; idx < this.orderedLayers[r].length; idx++) {
+          this.orderedLayers[r][idx].order = idx;
         }
-        return false;
+        // Swap physical coordinates (maintain internal spacing and gaps)
+        const minX1 = Math.min(...C1.map(n => n.rect.x));
+        const maxX1 = Math.max(...C1.map(n => n.rect.x + n.rect.width));
+        const minX2 = Math.min(...C2.map(n => n.rect.x));
+        const maxX2 = Math.max(...C2.map(n => n.rect.x + n.rect.width));
+        let leftC = C1, rightC = C2;
+        let leftMinX = minX1, leftMaxX = maxX1;
+        let rightMinX = minX2, rightMaxX = maxX2;
+        if (minX2 < minX1) {
+          leftC = C2; rightC = C1;
+          leftMinX = minX2; leftMaxX = maxX2;
+          rightMinX = minX1; rightMaxX = maxX1;
+        }
+        const leftWidth = leftMaxX - leftMinX;
+        const rightWidth = rightMaxX - rightMinX;
+        const gap = rightMinX - leftMaxX;
+        leftC.forEach(node => {
+          node.rect.x += (rightWidth + gap);
+          node.resetForcesAndDisplacement();
+        });
+        rightC.forEach(node => {
+          node.rect.x -= (leftWidth + gap);
+          node.resetForcesAndDisplacement();
+        });
       }
-
-}
+}   

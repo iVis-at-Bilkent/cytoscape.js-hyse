@@ -220,43 +220,7 @@ export class ForceDirectedLayout {
 
   private randomizeOrderInLayers(layering: any[][]) {
     for (let i = 0; i < layering.length; i++) {
-      const groups: { [parentId: string]: any[] } = {};
-      const independents: any[] = [];
-
-      for (const node of layering[i]) {
-        const isDirected = node.data("isDirected") == 1;
-        const parentId = node.data("parent");
-        if (isDirected && parentId) {
-          if (!groups[parentId]) {
-            groups[parentId] = [];
-          }
-          groups[parentId].push(node);
-        } else {
-          independents.push(node);
-        }
-      }
-
-      const allGroupsList: any[][] = [];
-      for (const parentId in groups) {
-        const group = groups[parentId];
-        group.sort(() => Math.random() - 0.5);
-        allGroupsList.push(group);
-      }
-
-      for (const node of independents) {
-        allGroupsList.push([node]);
-      }
-
-      allGroupsList.sort(() => Math.random() - 0.5);
-
-      const result: any[] = [];
-      for (const group of allGroupsList) {
-        for (const node of group) {
-          result.push(node);
-        }
-      }
-
-      layering[i] = result;
+      layering[i].sort(() => Math.random() - 0.5);
     }
   }
 

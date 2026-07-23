@@ -49,12 +49,22 @@ export function asNonCompoundGraph(g) {
     }
   });
   _.forEach(g.edges(), function (e) {
-    var sourceLabel = g.node(e.v);
-    var targetLabel = g.node(e.w);
-    var source = (sourceLabel && sourceLabel.borderBottom) ? sourceLabel.borderBottom : e.v;
-    var target = (targetLabel && targetLabel.borderTop) ? targetLabel.borderTop : e.w;
-    var edgeLabel = g.edge(e);
-    simplified.setEdge({ v: source, w: target, name: e.name }, edgeLabel);
+    var v = e.v;
+    var w = e.w;
+    var vLabel = g.node(v);
+    var wLabel = g.node(w);
+
+    // Map compound nodes to their border dummy nodes
+    if (g.children(v).length && vLabel.borderBottom) {
+      v = vLabel.borderBottom;
+    }
+    if (g.children(w).length && wLabel.borderTop) {
+      w = wLabel.borderTop;
+    }
+
+    if (simplified.hasNode(v) && simplified.hasNode(w)) {
+      simplified.setEdge(v, w, g.edge(e), e.name);
+    }
   });
   return simplified;
 }
