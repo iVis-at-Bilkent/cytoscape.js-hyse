@@ -50,6 +50,10 @@ export class HySELayout extends CoSELayout {
     idealEdgeLength: number = 50;
     forceUpdateGrid: boolean = false;
     colorSwappedPair: boolean = true;
+    compoundGravityStrength: number = 1.0; 
+    compoundGravityRangeFactor: number = 1.5; 
+    globalGravityStrength: number = 0.4; 
+    globalGravityRangeFactor: number = 3.8;
     constructor(layering, cy) {
         //console.trace();
         super();
@@ -720,7 +724,7 @@ export class HySELayout extends CoSELayout {
           //this.repulsionForUndirected(this.graphManager.getRoot());
           this.repulsionTopLevel();
         }
-        
+        this.calcGravitationalForces();
         this.swapAndFlip();
         this.moveNodes();
         
@@ -1195,7 +1199,59 @@ export class HySELayout extends CoSELayout {
         }
 
       }
+
+      /** Apply gravitational forces
+       */
+      calcGravitationalForces(skipUndirected: boolean = false) {
+        let node: HySENode;
+        let allNodes = this.graphManager.allNodes as HySENode[];
+        
+        for (let i = 0; i < allNodes.length; i++) {
+          node = allNodes[i];
+          if (skipUndirected && node.isDirected != 1) continue;
+          this.calcGravitationalForce(node);
+        }
+      }
+
+      /** Calculate and apply gravitational force for a node toward its owner graph's center
+       */
+      calcGravitationalForce(node: HySENode) {
+        const ownerGraph = node.getOwner();
+        if (!ownerGraph) return;
     
+        const ownerCenterX = (ownerGraph.getRight() + ownerGraph.getLeft()) / 2;
+        const ownerCenterY = (ownerGraph.getTop() + ownerGraph.getBottom()) / 2;
+    
+        const distanceX = node.getCenterX() - ownerCenterX;
+        const distanceY = node.getCenterY() - ownerCenterY;
+    
+        const absDistanceX = Math.abs(distanceX) + node.getWidth() / 2;
+        const absDistanceY = Math.abs(distanceY) + node.getHeight() / 2;
+    
+    
+        if (ownerGraph == this.graphManager.getRoot()) {
+          const estimatedSize = ownerGraph.getEstimatedSize() * this.globalGravityRangeFactor;
+    
+          if (node.isDirected === 1 && absDistanceX > estimatedSize) {
+            node.gravitationForceX = -this.globalGravityStrength * distanceX;
+            node.gravitationForceY = 0;
+          } else if (node.isDirected != 1 && (absDistanceX > estimatedSize || absDistanceY > estimatedSize)) {
+            node.gravitationForceX = -this.globalGravityStrength * distanceX;
+            node.gravitationForceY = -this.globalGravityStrength * distanceY;
+          }
+        } else {
+          const estimatedSize = ownerGraph.getEstimatedSize() * this.compoundGravityRangeFactor;
+    
+          if (node.isDirected === 1 && absDistanceX > estimatedSize) {
+            node.gravitationForceX = -this.globalGravityStrength * distanceX * this.compoundGravityStrength;
+            node.gravitationForceY = 0;
+          } else if (node.isDirected != 1 && (absDistanceX > estimatedSize || absDistanceY > estimatedSize)) {
+            node.gravitationForceX = -this.globalGravityStrength * distanceX * this.compoundGravityStrength;
+            node.gravitationForceY = -this.globalGravityStrength * distanceY * this.compoundGravityStrength;
+          }
+        }
+      }
+
       /** swap and flip the nodes to reduce crossing numbers
        */
       swapAndFlip() {

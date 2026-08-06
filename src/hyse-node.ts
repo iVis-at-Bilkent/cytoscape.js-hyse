@@ -30,9 +30,9 @@ export class HySENode extends CoSENode  {
     if(this.isDirected == 1){
       coolingCoefficient = layout.directedCoolingFactor * 0.7;
     }
-    this.displacementX += (coolingCoefficient * (this.springForceX + this.repulsionForceX)/this.noOfChildren);
+    this.displacementX += (coolingCoefficient * (this.springForceX + this.repulsionForceX + this.gravitationForceX)/this.noOfChildren);
     if(this.isDirected!==1){
-      this.displacementY += (coolingCoefficient * (this.springForceY + this.repulsionForceY)/this.noOfChildren);
+      this.displacementY += (coolingCoefficient * (this.springForceY + this.repulsionForceY + this.gravitationForceY)/this.noOfChildren);
     }
     
     if (Math.abs(this.displacementX) > coolingCoefficient * layout.maxNodeDisplacement) {
