@@ -1359,7 +1359,7 @@ export class HySELayout extends CoSELayout {
               }
             }
     
-            const pairId = [n1.id, n2.id].sort().join('|');
+            const pairId = n1.id < n2.id ? n1.id + '|' + n2.id : n2.id + '|' + n1.id;
             if (processedPairs.has(pairId)) continue;
             processedPairs.add(pairId);
     
@@ -1470,14 +1470,7 @@ export class HySELayout extends CoSELayout {
        */
       calcRepulsionForces() {
         const processedPairs = new Set<string>();
-    
-        const getPairId = (n1: HySENode, n2: HySENode): string => {
-          const id1 = (n1.id as any) instanceof Object ? (n1.id as any).id() : n1.id;
-          const id2 = (n2.id as any) instanceof Object ? (n2.id as any).id() : n2.id;
-          return [id1, id2].sort().join('|');
-        };
-    
-    
+
         if (this.totalIterations < this.fullyCalcRep4Ticks * this.maxIterations) {
           for (let i = 0; i < this.orderedLayers.length; i++) {
             const currLayer = this.orderedLayers[i];
@@ -1485,8 +1478,9 @@ export class HySELayout extends CoSELayout {
               for (let k = j + 1; k < currLayer.length; k++) {
                 const siblings = this.findSiblingAncestors(currLayer[j], currLayer[k]);
                 if (siblings) {
-                  const [s1, s2] = siblings;
-                  const pairId = getPairId(s1, s2);
+                  const s1 = siblings[0];
+                  const s2 = siblings[1];
+                  const pairId = s1.id < s2.id ? s1.id + '|' + s2.id : s2.id + '|' + s1.id;
                   if (!processedPairs.has(pairId)) {
                     processedPairs.add(pairId);
                     this.calcRepulsionForce(s1, s2);
@@ -1501,8 +1495,9 @@ export class HySELayout extends CoSELayout {
             for (let j = 0; j < currLayer.length - 1; j++) {
               const siblings = this.findSiblingAncestors(currLayer[j], currLayer[j + 1]);
               if (siblings) {
-                const [s1, s2] = siblings;
-                const pairId = getPairId(s1, s2);
+                const s1 = siblings[0];
+                const s2 = siblings[1];
+                const pairId = s1.id < s2.id ? s1.id + '|' + s2.id : s2.id + '|' + s1.id;
                 if (!processedPairs.has(pairId)) {
                   processedPairs.add(pairId);
                   this.calcRepulsionForce(s1, s2);
@@ -1516,8 +1511,9 @@ export class HySELayout extends CoSELayout {
                   }
                   const skipSiblings = this.findSiblingAncestors(currLayer[j], n3);
                   if (skipSiblings) {
-                    const [s1, s2] = skipSiblings;
-                    const pairId = getPairId(s1, s2);
+                    const s1 = skipSiblings[0];
+                    const s2 = skipSiblings[1];
+                    const pairId = s1.id < s2.id ? s1.id + '|' + s2.id : s2.id + '|' + s1.id;
                     if (!processedPairs.has(pairId)) {
                       processedPairs.add(pairId);
                       this.calcRepulsionForce(s1, s2);
@@ -1538,10 +1534,6 @@ export class HySELayout extends CoSELayout {
         const processedPairs = new Set<string>();
         const processedTopLevelNodes = new Set<string>();
     
-        const getPairId = (n1: HySENode, n2: HySENode): string => {
-          return [n1.id, n2.id].sort().join('|');
-        };
-    
         for (let i = 0; i < this.orderedLayers.length; i++) {
           const currLayer = this.orderedLayers[i];
           for (let j = 0; j < currLayer.length; j++) {
@@ -1549,8 +1541,9 @@ export class HySELayout extends CoSELayout {
               // Enforce sibling-only repulsion
               const siblings = this.findSiblingAncestors(currLayer[j], currLayer[k]);
               if (siblings) {
-                const [s1, s2] = siblings;
-                const pairId = getPairId(s1, s2);
+                const s1 = siblings[0];
+                const s2 = siblings[1];
+                const pairId = s1.id < s2.id ? s1.id + '|' + s2.id : s2.id + '|' + s1.id;
                 if (!processedPairs.has(pairId)) {
                   processedPairs.add(pairId);
                   s1.nodeRepulsion = this.nodeRepulsion;
